@@ -5,24 +5,35 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.special import lambertw
 
-def vote(n=10, h=4.0, k=2, a=0.5, rewireTo="random"):
+def vote(n=10, avgDeg=4.0, k=2, a=0.5, rewireTo="random"):
     """simulate voting model with k opinions, alpha = a
        and rewiring scheme of rewireTo (with default parameters
        2, 0.5 and 'random', respectively)""" 
-    #create random vector uniformly distributed between [0,1) of size n
-    v = np.array(np.random.random_sample(n), ndmin=2)
-    vT = np.array(np.random.random_sample(n), ndmin=2).T
-#    vT = v.T
-    A = np.dot(vT,v)
-    #probability of edge in graph, threshold A with p
-    p = h/(n-1)
-#    print p, v, A
-    thresholdConst = np.real(np.exp(lambertw((p-1)/np.exp(1),k=-1)+1))
-    threshold = np.vectorize(lambda x: np.ceil(x-thresholdConst))
-    A = threshold(A)
-    for i in range(np.shape(A)[0]):
-        A[i][i] = 0;
+    #p = probability of edge in grap
+    #v = current vertex in iteration (v in [1,n])
+    #w = number of "steps" till next edge, chosen from geometric
+    #distribution as in Physical Review E 71, 036113 (2005)
+    #A is adjacency matrix
+    p = avgDeg/(n-1)
+    v = 1
+    w = -1
+    A = np.zeros((n,n))
+    while v < n:
+        r = np.random.random_sample(1)
+        w = w + 1 + int(np.floor(np.log(1-r)/np.log(1-p)))
+        while (w >= v) & (v < n):
+            w = w - v
+            v = v + 1
+        if v < n:
+            A[v-1][w-1] = 1
+    
     return A, p
+            
+
+
+
+
+
 
 def checkDegrees(A, p):
     """ensures A is properly initialized, in regards to average
