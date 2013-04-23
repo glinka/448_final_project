@@ -9,7 +9,7 @@ def vote(n=10, avgDeg=4.0, u=(0.5,0.5), a=0.5, rewireTo="random"):
     """simulate voting model with k opinions, alpha = a
        and rewiring scheme of rewireTo (with default parameters
        2, 0.5 and 'random', respectively)""" 
-    #p = probability of edge in grap
+    #p = probability of edge in graph
     #v = current vertex in iteration (v in [1,n])
     #w = number of "steps" till next edge, chosen from geometric
     #distribution as in Physical Review E 71, 036113 (2005)
@@ -24,7 +24,9 @@ def vote(n=10, avgDeg=4.0, u=(0.5,0.5), a=0.5, rewireTo="random"):
     A = np.zeros((n,n))
     Opns = np.zeros((n,1))
     while v <= n:
-        #r determines where the next vertex is added
+        #rv1 determines where the next edge is added
+        #rv2 determines opinion of each vertex, based on 
+        #input probabilities
         #o determines the opinion of that vertex
         #w calculates the number of vertices to skip
         #based on r and p
@@ -48,9 +50,54 @@ def vote(n=10, avgDeg=4.0, u=(0.5,0.5), a=0.5, rewireTo="random"):
     for i in range(n):
         currentOpinion = Opns[i]
         for j in range(i+1,n):
-            if currentOpinion + Opns[j] != 2*currentOpinion:
+            if (A[i][j] != 0) & (Opns[j] != currentOpinion):
                 conflicts = conflicts + 1
-    print conflicts
+    print A, Opns, conflicts
+    maxIter = 100000
+    iters = 0
+    if rewireTo == 'random':
+        while (conflicts > 0) & (iters < maxIter):
+            #!! could also choose edge, may reduce compuation time !!
+            #!! implement fn: conflictCalc(A)?? !!
+            chosenVertex = int(np.floor(n*np.random.random_sample(1)))
+            actionToPerform = np.random.random_sample(1)
+            #discard vertices until deg(v) != 0
+            while sum(A[chosenVertex][:]) == 0:
+                chosenVertex = int(np.floor(n*np.random.random_sample(1)))
+            #generate list of adjacent vertices, V
+            V = []
+            for j in range(n):
+                if A[chosenVertex][j] != 0:
+                    V.append(j)
+            V = np.array(V)
+            numberAdj = V.size
+            neighbor = V[int(np.floor(numberAdj*np.random.random_sample(1)))]
+            conflictCounter = 0
+            if actionToPerform > a:
+                if Opns[chosenVertex] != Opns[neighbor]:
+                    Opns[chosenVertex] = Opns[neighbor]
+                    for j in range(n):
+                        if (A[chosenVertex][j] != 0) & (Opns[j] != Opns[chosenVertex]):
+                            conflictCounter = conflictCounter + 1
+                        elif (A[chosenVertex][j] != 0):
+                            conflictCounter = conflictCounter - 1
+                conflicts = conflicts + conflictCounter
+            else:
+                if Opns[chosenVertex] != Opns[neighbor]:
+                    conflictCounter = -1
+                A[chosenVertex][neighbor] = 0
+                A[neighbor][chosenVertex] = 0
+                neighbor = int(np.floor(n*np.random.random_sample(1)))
+                #check the added edge will not be a loop or in parallel with a previously existing one
+                while (A[chosenVertex][neighbor] != 0) | (neighbor == chosenVertex):
+                    neighbor = int(np.floor(n*np.random.random_sample(1)))
+                A[chosenVertex][neighbor] = 1
+                A[neighbor][chosenVertex] = 1
+                if Opns[chosenVertex] != Opns[neighbor]:
+                    conflictCounter = conflictCounter + 1
+                conflicts = conflicts + conflictCounter
+            iters = iters + 1
+            print conflicts
     return A, Opns, p
             
 
