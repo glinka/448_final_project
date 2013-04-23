@@ -3,9 +3,8 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.special import lambertw
 
-def vote(n=10, avgDeg=4.0, u=(0.5,0.5), a=0.5, rewireTo="random"):
+def vote(n=1000, avgDeg=4.0, u=(0.4,0.6), a=0.8, rewireTo="random", maxIter=10000, timeInterval=10):
     """simulate voting model with k opinions, alpha = a
        and rewiring scheme of rewireTo (with default parameters
        2, 0.5 and 'random', respectively)""" 
@@ -52,16 +51,21 @@ def vote(n=10, avgDeg=4.0, u=(0.5,0.5), a=0.5, rewireTo="random"):
         for j in range(i+1,n):
             if (A[i][j] != 0) & (Opns[j] != currentOpinion):
                 conflicts = conflicts + 1
-    print A, Opns, conflicts
-    maxIter = 100000
+    #print A, Opns, conflicts
     iters = 0
+    N10timeCourse = np.zeros(int(maxIter/timeInterval))
+    N1timeCourse = np.zeros(int(maxIter/timeInterval))
+    stepTimeCourse = np.zeros(int(maxIter/timeInterval))
+    step = 0
     if rewireTo == 'random':
         while (conflicts > 0) & (iters < maxIter):
-            #!! could also choose edge, may reduce compuation time !!
-            #!! implement fn: conflictCalc(A)?? !!
+            #!!! could also choose edge, may reduce compuation time !!!
             chosenVertex = int(np.floor(n*np.random.random_sample(1)))
-            actionToPerform = np.random.random_sample(1)
             #discard vertices until deg(v) != 0
+            #could potentially improve in two ways:
+            #1. keep track of vertex degrees in separate array (easy)
+            #2. somehow pop out vertices that have degree zero, or at least
+            #remove them as they are found in the below iteration (?)
             while sum(A[chosenVertex][:]) == 0:
                 chosenVertex = int(np.floor(n*np.random.random_sample(1)))
             #generate list of adjacent vertices, V
@@ -69,40 +73,90 @@ def vote(n=10, avgDeg=4.0, u=(0.5,0.5), a=0.5, rewireTo="random"):
             for j in range(n):
                 if A[chosenVertex][j] != 0:
                     V.append(j)
-            V = np.array(V)
-            numberAdj = V.size
-            neighbor = V[int(np.floor(numberAdj*np.random.random_sample(1)))]
-            conflictCounter = 0
-            if actionToPerform > a:
-                if Opns[chosenVertex] != Opns[neighbor]:
+            #V = np.array(V)
+            numberAdj = len(V) #V.size
+            #!!! Previous implementations allowed the relocation of the edge
+            #even when Opns[v1] = Opns[v2]; however, this resulted in significantly
+            #different system dynamics than those described in the paper, in which
+            #no actions of any kind are taken if Opns[v1] = Opns[v2] !!!
+            neighbor = V.pop(int(np.floor(numberAdj*np.random.random_sample(1))))
+            numberAdj = numberAdj - 1
+            while (numberAdj > 0) & (Opns[chosenVertex] == Opns[neighbor]):
+                neighbor = V.pop(int(np.floor(numberAdj*np.random.random_sample(1))))
+                numberAdj = numberAdj - 1
+            if Opns[chosenVertex] != Opns[neighbor]:
+                actionToPerform = np.random.random_sample(1)
+                conflictCounter = 0
+                if actionToPerform > a:
+                    #force chosenVertex to agree with neighbor
                     Opns[chosenVertex] = Opns[neighbor]
+                    #update conflicts
                     for j in range(n):
                         if (A[chosenVertex][j] != 0) & (Opns[j] != Opns[chosenVertex]):
                             conflictCounter = conflictCounter + 1
                         elif (A[chosenVertex][j] != 0):
                             conflictCounter = conflictCounter - 1
-                conflicts = conflicts + conflictCounter
-            else:
-                if Opns[chosenVertex] != Opns[neighbor]:
-                    conflictCounter = -1
-                A[chosenVertex][neighbor] = 0
-                A[neighbor][chosenVertex] = 0
-                neighbor = int(np.floor(n*np.random.random_sample(1)))
-                #check the added edge will not be a loop or in parallel with a previously existing one
-                while (A[chosenVertex][neighbor] != 0) | (neighbor == chosenVertex):
-                    neighbor = int(np.floor(n*np.random.random_sample(1)))
-                A[chosenVertex][neighbor] = 1
-                A[neighbor][chosenVertex] = 1
-                if Opns[chosenVertex] != Opns[neighbor]:
-                    conflictCounter = conflictCounter + 1
-                conflicts = conflicts + conflictCounter
+                    conflicts = conflicts + conflictCounter
+                else:
+                    #log changes in conflicts, remove edge and add new edge,
+                    #non-parallel, non-loop, to chosenVertex
+                    if Opns[chosenVertex] != Opns[neighbor]:
+                        conflictCounter = -1
+                    A[chosenVertex][neighbor] = 0
+                    A[neighbor][chosenVertex] = 0
+                    newNeighbor = int(np.floor(n*np.random.random_sample(1)))
+                    #check the added edge will not be a loop or in parallel with a previously existing one
+                    #this loop will require many iterations to exit if deg(v) ~ O(n), potential slowdown
+                    while (A[chosenVertex][newNeighbor] != 0) | (newNeighbor == chosenVertex):
+                        newNeighbor = int(np.floor(n*np.random.random_sample(1)))
+                    A[chosenVertex][newNeighbor] = 1
+                    A[newNeighbor][chosenVertex] = 1
+                    if Opns[chosenVertex] != Opns[newNeighbor]:
+                        conflictCounter = conflictCounter + 1
+                    conflicts = conflicts + conflictCounter
+            if iters % timeInterval == 0:
+                step = iters/timeInterval
+                graphStats = calcGraphStatistics(A, Opns, len(u))
+                N1timeCourse[step] = graphStats[1][0]
+                N10timeCourse[step] = graphStats[2]
+                stepTimeCourse[step] = step + 1
             iters = iters + 1
-            print conflicts
+            #print conflicts == calcConflict(A, Opns)
+            #plot results
+    plt.figure(1)
+    plt.subplot(211)
+    plt.plot(N1timeCourse[:step],N10timeCourse[:step],'g-')
+    plt.subplot(212)
+    plt.plot(stepTimeCourse[:step],N10timeCourse[:step])
+    plt.show()
     return A, Opns, p
-            
 
+#!!! consider making truly general for n opinions
+def calcGraphStatistics(A, Opns, numOpns):
+    totalEdges = 0
+    opnFractions = np.zeros(numOpns)
+    discordantEdges = 0
+    n = A.shape[0]
+    for i in range(n):
+        currentOpn = int(Opns[i])
+        opnFractions[currentOpn - 1] = opnFractions[currentOpn - 1] + 1
+        for j in range(i+1,n):
+            totalEdges = totalEdges + A[i][j]
+            if (A[i][j] != 0) & (Opns[j] != currentOpn):
+                discordantEdges = discordantEdges + 1
+    opnFractions = [(1.0*opnFractions[i])/n for i in range(numOpns)]
+    discordantEdges = discordantEdges*1.0/totalEdges
+    return (totalEdges, opnFractions, discordantEdges)
 
-
+def calcConflict(A, Opns):
+    conflicts = 0
+    n = A.shape[0]
+    for i in range(n):
+        currentOpn = Opns[i]
+        for j in range(i+1,n):
+            if (A[i][j] != 0) & (Opns[j] != currentOpn):
+                conflicts = conflicts + 1
+    return conflicts
 
 
 
