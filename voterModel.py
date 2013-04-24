@@ -3,8 +3,9 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import pickle
 
-def vote(n=10000, avgDeg=4.0, u=(0.5,0.5), a=0.5, rewireTo="random", maxIter=100000000000, timeInterval=1000):
+def vote(n=10000, avgDeg=4.0, u=(0.5,0.5), a=0.5, rewireTo="random", maxIter=100000000, timeInterval=100, fileName='graphStatsOut.txt'):
     """simulate voting model with k opinions, alpha = a
        and rewiring scheme of rewireTo (with default parameters
        2, 0.5 and 'random', respectively)""" 
@@ -144,64 +145,73 @@ def vote(n=10000, avgDeg=4.0, u=(0.5,0.5), a=0.5, rewireTo="random", maxIter=100
                 stepTimeCourse[step] = step + 1
             iters = iters + 1
             #print conflicts == calcConflict(A, Opns)
-
+    f = open(fileName, 'w')
+    pickle.dump(N1timeCourse[:step], f)
+    pickle.dump(N10timeCourse[:step], f)
+    pickle.dump(stepTimeCourse[:step], f)
+    f.close()
     #plot results
-    plt.figure(1)
-    plt.subplot(211)
-    plt.plot(N1timeCourse[:step],N10timeCourse[:step],'g-')
-    plt.subplot(212)
-    plt.plot(stepTimeCourse[:step],N10timeCourse[:step])
-    plt.show()
+#    plt.figure(1)
+#    plt.subplot(211)
+#    plt.plot(N1timeCourse[:step],N10timeCourse[:step],'g-')
+#    plt.subplot(212)
+#    plt.plot(stepTimeCourse[:step],N10timeCourse[:step])
+#    plt.show()
 #    return A, Opns, p
 
+if __name__=='__main__':
+    import sys
+    vote(n=int(sys.argv[1]),a=float(sys.argv[2]))
+
+
 #!!! consider making truly general for n opinions
-def calcGraphStatistics(A, Opns, numOpns):
-    totalEdges = 0
-    opnFractions = np.zeros(numOpns)
-    discordantEdges = 0
-    n = A.shape[0]
-    for i in range(n):
-        currentOpn = int(Opns[i])
-        opnFractions[currentOpn - 1] = opnFractions[currentOpn - 1] + 1
-        for j in range(i+1,n):
-            totalEdges = totalEdges + A[i][j]
-            if (A[i][j] != 0) & (Opns[j] != currentOpn):
-                discordantEdges = discordantEdges + 1
-    opnFractions = [(1.0*opnFractions[i])/n for i in range(numOpns)]
-    discordantEdges = discordantEdges*1.0/totalEdges
-    return (totalEdges, opnFractions, discordantEdges)
+#def calcGraphStatistics(A, Opns, numOpns):
+#    totalEdges = 0
+#    opnFractions = np.zeros(numOpns)
+#    discordantEdges = 0
+#    n = A.shape[0]
+#    for i in range(n):
+#        currentOpn = int(Opns[i])
+#        opnFractions[currentOpn - 1] = opnFractions[currentOpn - 1] + 1
+#        for j in range(i+1,n):
+#            totalEdges = totalEdges + A[i][j]
+#            if (A[i][j] != 0) & (Opns[j] != currentOpn):
+#                discordantEdges = discordantEdges + 1
+#    opnFractions = [(1.0*opnFractions[i])/n for i in range(numOpns)]
+#    discordantEdges = discordantEdges*1.0/totalEdges
+#    return (totalEdges, opnFractions, discordantEdges)
+#
+#def calcConflict(A, Opns):
+#    conflicts = 0
+#    n = A.shape[0]
+#    for i in range(n):
+#        currentOpn = Opns[i]
+#        for j in range(i+1,n):
+#            if (A[i][j] != 0) & (Opns[j] != currentOpn):
+#                conflicts = conflicts + 1
+#    return conflicts
+#
 
-def calcConflict(A, Opns):
-    conflicts = 0
-    n = A.shape[0]
-    for i in range(n):
-        currentOpn = Opns[i]
-        for j in range(i+1,n):
-            if (A[i][j] != 0) & (Opns[j] != currentOpn):
-                conflicts = conflicts + 1
-    return conflicts
 
-
-
-def checkDegrees(A, p):
-    """ensures A is properly initialized, in regards to average
-    degree of each vertex"""
-    dim = np.shape(A)[0]
-    degrees = np.zeros(dim)
-    avg = 0.0
-    for i in range(dim):
-        for j in range(dim):
-            degrees[i] = degrees[i] + A[i][j]
-        avg = avg + degrees[i]
-    avg = avg / dim
-    fig = plt.figure()
-    ax1 = fig.add_subplot(211)
-    n, bins, patches = ax1.hist(degrees, bins=dim/2)
-    model = np.random.binomial(dim, p, np.ceil(dim**2*p/2))
-    ax2 = fig.add_subplot(212)
-    n, bins, patches = ax2.hist(model, bins=dim/2)
-    plt.show()
-    return avg, degrees
+#def checkDegrees(A, p):
+#    """ensures A is properly initialized, in regards to average
+#    degree of each vertex"""
+#    dim = np.shape(A)[0]
+#    degrees = np.zeros(dim)
+#    avg = 0.0
+#    for i in range(dim):
+#        for j in range(dim):
+#            degrees[i] = degrees[i] + A[i][j]
+#        avg = avg + degrees[i]
+#    avg = avg / dim
+#    fig = plt.figure()
+#    ax1 = fig.add_subplot(211)
+#    n, bins, patches = ax1.hist(degrees, bins=dim/2)
+#    model = np.random.binomial(dim, p, np.ceil(dim**2*p/2))
+#    ax2 = fig.add_subplot(212)
+#    n, bins, patches = ax2.hist(model, bins=dim/2)
+#    plt.show()
+#    return avg, degrees
 
 
     
