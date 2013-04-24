@@ -4,7 +4,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def vote(n=1000, avgDeg=4.0, u=(0.4,0.6), a=0.8, rewireTo="random", maxIter=10000, timeInterval=10):
+def vote(n=10000, avgDeg=4.0, u=(0.5,0.5), a=0.5, rewireTo="random", maxIter=100000000000, timeInterval=1000):
     """simulate voting model with k opinions, alpha = a
        and rewiring scheme of rewireTo (with default parameters
        2, 0.5 and 'random', respectively)""" 
@@ -44,6 +44,22 @@ def vote(n=1000, avgDeg=4.0, u=(0.4,0.6), a=0.8, rewireTo="random", maxIter=1000
         if v < n:
             A[v-1][w-1] = 1
             A[w-1][v-1] = 1
+    
+    #calculate number of edges, a constant throughout the simulation
+    #and the initial distribution of opin
+    totalEdges = 0
+    opnCounts = np.zeros(len(u))
+    for i in range(n):
+        currentOpn = int(Opns[i])
+        opnCounts[currentOpn - 1] = opnCounts[currentOpn - 1] + 1
+        for j in range(i+1,n):
+            totalEdges = totalEdges + A[i][j]
+            #!!! the following are equivalent to conflicts in the case of 2 opinions
+            #ought to implement statistics generally !!!
+#            if (A[i][j] != 0) & (Opns[j] != currentOpn):
+#                discordantEdges = discordantEdges + 1
+#    discordantEdges = discordantEdges*1.0/totalEdges
+
     #calculate number of disagreeing vertices
     conflicts = 0
     for i in range(n):
@@ -51,6 +67,7 @@ def vote(n=1000, avgDeg=4.0, u=(0.4,0.6), a=0.8, rewireTo="random", maxIter=1000
         for j in range(i+1,n):
             if (A[i][j] != 0) & (Opns[j] != currentOpinion):
                 conflicts = conflicts + 1
+
     #print A, Opns, conflicts
     iters = 0
     N10timeCourse = np.zeros(int(maxIter/timeInterval))
@@ -69,6 +86,8 @@ def vote(n=1000, avgDeg=4.0, u=(0.4,0.6), a=0.8, rewireTo="random", maxIter=1000
             while sum(A[chosenVertex][:]) == 0:
                 chosenVertex = int(np.floor(n*np.random.random_sample(1)))
             #generate list of adjacent vertices, V
+            #!!! inefficient, simply generate the random number first
+            #then count up to the required vertex, would avg n/2 calculations !!!
             V = []
             for j in range(n):
                 if A[chosenVertex][j] != 0:
@@ -88,9 +107,12 @@ def vote(n=1000, avgDeg=4.0, u=(0.4,0.6), a=0.8, rewireTo="random", maxIter=1000
                 actionToPerform = np.random.random_sample(1)
                 conflictCounter = 0
                 if actionToPerform > a:
+                    #update graph stats before switching opinions
+                    opnCounts[int(Opns[chosenVertex]) - 1] = opnCounts[int(Opns[chosenVertex]) - 1] - 1
+                    opnCounts[int(Opns[neighbor]) - 1] = opnCounts[int(Opns[neighbor]) - 1] + 1                    
                     #force chosenVertex to agree with neighbor
                     Opns[chosenVertex] = Opns[neighbor]
-                    #update conflicts
+                    #update conflicts (post-switching)
                     for j in range(n):
                         if (A[chosenVertex][j] != 0) & (Opns[j] != Opns[chosenVertex]):
                             conflictCounter = conflictCounter + 1
@@ -116,20 +138,21 @@ def vote(n=1000, avgDeg=4.0, u=(0.4,0.6), a=0.8, rewireTo="random", maxIter=1000
                     conflicts = conflicts + conflictCounter
             if iters % timeInterval == 0:
                 step = iters/timeInterval
-                graphStats = calcGraphStatistics(A, Opns, len(u))
-                N1timeCourse[step] = graphStats[1][0]
-                N10timeCourse[step] = graphStats[2]
+#                graphStats = calcGraphStatistics(A, Opns, len(u))
+                N1timeCourse[step] = opnCounts[0]*1.0/n
+                N10timeCourse[step] = conflicts*1.0/totalEdges
                 stepTimeCourse[step] = step + 1
             iters = iters + 1
             #print conflicts == calcConflict(A, Opns)
-            #plot results
+
+    #plot results
     plt.figure(1)
     plt.subplot(211)
     plt.plot(N1timeCourse[:step],N10timeCourse[:step],'g-')
     plt.subplot(212)
     plt.plot(stepTimeCourse[:step],N10timeCourse[:step])
     plt.show()
-    return A, Opns, p
+#    return A, Opns, p
 
 #!!! consider making truly general for n opinions
 def calcGraphStatistics(A, Opns, numOpns):
