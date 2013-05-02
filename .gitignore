@@ -1,0 +1,4 @@
+#ignore .pyc files:
+*.pyc
+#ignore stat.py as I have no idea what it is
+stats.py
