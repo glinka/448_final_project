@@ -23,14 +23,14 @@ int main(int argc, char *argv[]) {
     int i, j;
     double kInitDist[k];
     //Populate array of initial distributions
-    for(i = 0; j < k; i++) {
-	k[i] = atof(argv[i+2]);
+    for(i = 0; i < k; i++) {
+	kInitDist[i] = atof(argv[i+2]);
     }
     double a = atof(argv[k+2]);
     double rewireTo = atoi(argv[k+3]);
-    int maxIter = atoi(arv[k+4]);
+    int maxIter = atoi(argv[k+4]);
     int collectionInterval = atoi(argv[k+5]);
     char fileName[128];
     strcpy(fileName, argv[argc]);
-    cout << fileName << "\n";
+    out << fileName << "\n";
 }
