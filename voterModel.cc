@@ -5,6 +5,7 @@
 #include <iostream>
 #include <random>
 #include <Eigen/Sparse>
+#include <chrono>
 using namespace Eigen;
 using namespace std;
 
@@ -47,15 +48,21 @@ int main(int argc, char *argv[]) {
     double p = avgDeg/(n-1);
     int v = 1;
     int w = -1;
-    default_random_engine generator;
-    uniform_real_distribution<double> distr(0.0, 1.0);
+    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+    mt19937 mt1(seed);
+    double normalization = (double) mt1.max();
+    cout << mt1() << "\n";
+    double rv1, rv2, partialSum;
+    int indexCounter;
+    //    default_random_engine generator;
+    //    uniform_real_distribution<double> distr(0.0, 1.0);
     while(v <= n) {
-	double rv1 = distr(generator);
-	w += (int) 1 + floor(log(1-rv1)/log(1-p));
+	rv1 = mt1()/normalization;
+	w = (int) w + 1 + floor(log(1-rv1)/log(1-p));
 	while((w >= v) && (v <= n)) {
-	    double rv2 = distr(generator);
-	    double partialSum = 0.0;
-	    int indexCounter = 0;
+	  rv2 = mt1()/normalization;
+	    partialSum = 0.0;
+	    indexCounter = 0;
 	    while(partialSum < rv2) {
 		partialSum += initDist[indexCounter];
 		indexCounter++;
@@ -96,30 +103,29 @@ int main(int argc, char *argv[]) {
     int step = 0;
     if(rewireTo == "random") {
       while((conflicts > 0) && (iters < maxIter)) {
-	chosenVertex = (int) floor(n*distr(generator));
+	int chosenVertex = (int) floor(n*(mt1()/normalization));
 	while(A.block(chosenVertex,0,n,1).sum() == 0) {
-	  chosenVertex = (int) floor(n*distr(generator));
+	  chosenVertex = (int) floor(n*(mt1()/normalization));
 	}
 	MatrixXi v = MatrixXi::Zero(n,1);
-	//	int *v = new int[A.block(chosenVertex,0,n,1).sum()];
 	i = 0;
 	for(j = 0; j < n; j++) {
 	  if(A(chosenVertex,j) != 0) {
-	    v(i) = j;
+	    v(i,0) = j;
 	    i++;
 	  }
 	}
 	//too fancy (i--)?
-	int neighborIndex = (int) floor((i--)*distr(generator));
+	int neighborIndex = (int) floor((i--)*(mt1()/normalization));
 	int neighbor = v(neighborIndex,0);
-	v(neighborIndex) = v(i);
-	while((i > 0) && (Opns(chosenVertex) != Opns(neighbor))) {
-	  neighborIndex = (int) floor((i--)*distr(generator));
+	v(neighborIndex,0) = v(i,0);
+	while((i > 0) && (Opns(chosenVertex,0) != Opns(neighbor,0))) {
+	  neighborIndex = (int) floor((i--)*(mt1()/normalization));
 	  neighbor = v(neighborIndex);
 	  v(neighborIndex,0) = v(i);
 	}
-	if(Opns(chosenVertex) != Opns(neighbor)) {
-	  double actionToPerform = distr(generator);
+	if(Opns(chosenVertex,0) != Opns(neighbor,0)) {
+	  double actionToPerform = (mt1()/normalization);
 	  int conflictCounter = 0;
 	  if(actionToPerform > a) {
 	    opnCounts(Opns(chosenVertex,0) - 1)--;
@@ -130,30 +136,30 @@ int main(int argc, char *argv[]) {
 		conflictCounter++;
 	      }
 	      else if(A(chosenVertex,j) != 0) {
-		conflictsCounter--;
+		conflictCounter--;
 	      }
 	    }
 	  }
 	  else {
 	    if(Opns(chosenVertex,0) != Opns(neighbor,0)) {
-	      conflictsCounter--;
+	      conflictCounter--;
 	    }
 	    A(chosenVertex,neighbor) = 0;
 	    A(neighbor,chosenVertex) = 0;
-	    int newNeighbor = (int) floor(n*distr(generator));
+	    int newNeighbor = (int) floor(n*(mt1()/normalization));
 	    while((A(chosenVertex,newNeighbor) != 0) || (newNeighbor == chosenVertex)) {
-	      newNeighbor = (int) floor(n*distr(generator));
+	      newNeighbor = (int) floor(n*(mt1()/normalization));
 	    }
 	    A(chosenVertex,newNeighbor) = 1;
 	    A(newNeighbor,chosenVertex) = 1;
 	    if(Opns(chosenVertex,0) != Opns(newNeighbor,0)) {
 	      conflictCounter++;
 	    }
-	    conflicts += conflicCounter;
+	    conflicts += conflictCounter;
 	  }
 	}
 	if(iters % collectionInterval == 0) {
-	  step = iters/timeInterval;
+	  step = iters/collectionInterval;
 	  N1timeCourse(step,0) = opnCounts(0,0);
 	  N10timeCourse(step,0) = conflicts;
 	  stepTimeCourse(step,0) = step + 1;
