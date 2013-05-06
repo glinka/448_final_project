@@ -94,4 +94,71 @@ int main(int argc, char *argv[]) {
     MatrixXi N1timeCourse = MatrixXi::Zero((int) maxIter/collectionInterval, 0);
     MatrixXi stepTimeCourse = MatrixXi::Zero((int) maxIter/collectionInterval, 0);
     int step = 0;
+    if(rewireTo == "random") {
+      while((conflicts > 0) && (iters < maxIter)) {
+	chosenVertex = (int) floor(n*distr(generator));
+	while(A.block(chosenVertex,0,n,1).sum() == 0) {
+	  chosenVertex = (int) floor(n*distr(generator));
+	}
+	MatrixXi v = MatrixXi::Zero(n,1);
+	//	int *v = new int[A.block(chosenVertex,0,n,1).sum()];
+	i = 0;
+	for(j = 0; j < n; j++) {
+	  if(A(chosenVertex,j) != 0) {
+	    v(i) = j;
+	    i++;
+	  }
+	}
+	//too fancy (i--)?
+	int neighborIndex = (int) floor((i--)*distr(generator));
+	int neighbor = v(neighborIndex,0);
+	v(neighborIndex) = v(i);
+	while((i > 0) && (Opns(chosenVertex) != Opns(neighbor))) {
+	  neighborIndex = (int) floor((i--)*distr(generator));
+	  neighbor = v(neighborIndex);
+	  v(neighborIndex,0) = v(i);
+	}
+	if(Opns(chosenVertex) != Opns(neighbor)) {
+	  double actionToPerform = distr(generator);
+	  int conflictCounter = 0;
+	  if(actionToPerform > a) {
+	    opnCounts(Opns(chosenVertex,0) - 1)--;
+	    opnCounts(Opns(neighbor,0) - 1)++;
+	    Opns(chosenVertex,0) = Opns(neighbor,0);
+	    for(j = 0; j < n; j++) {
+	      if((A(chosenVertex,j) != 0) && (Opns(j,0) != Opns(chosenVertex,0))) {
+		conflictCounter++;
+	      }
+	      else if(A(chosenVertex,j) != 0) {
+		conflictsCounter--;
+	      }
+	    }
+	  }
+	  else {
+	    if(Opns(chosenVertex,0) != Opns(neighbor,0)) {
+	      conflictsCounter--;
+	    }
+	    A(chosenVertex,neighbor) = 0;
+	    A(neighbor,chosenVertex) = 0;
+	    int newNeighbor = (int) floor(n*distr(generator));
+	    while((A(chosenVertex,newNeighbor) != 0) || (newNeighbor == chosenVertex)) {
+	      newNeighbor = (int) floor(n*distr(generator));
+	    }
+	    A(chosenVertex,newNeighbor) = 1;
+	    A(newNeighbor,chosenVertex) = 1;
+	    if(Opns(chosenVertex,0) != Opns(newNeighbor,0)) {
+	      conflictCounter++;
+	    }
+	    conflicts += conflicCounter;
+	  }
+	}
+	if(iters % collectionInterval == 0) {
+	  step = iters/timeInterval;
+	  N1timeCourse(step,0) = opnCounts(0,0);
+	  N10timeCourse(step,0) = conflicts;
+	  stepTimeCourse(step,0) = step + 1;
+	}
+	iters++;
+      }
+    }
 }
