@@ -21,6 +21,8 @@ int main(int argc, char *argv[]) {
        [8] : graph data collected every [6] number of iterations
        [9] : output filename
     */
+    //constant to allow proper casting/rounding of floating point floor function
+    const double ROUND_CONST = 0.1;
     int n = atoi(argv[1]);
     double avgDeg = atof(argv[2]);
     int k = atoi(argv[3]);
@@ -58,7 +60,7 @@ int main(int argc, char *argv[]) {
     //    uniform_real_distribution<double> distr(0.0, 1.0);
     while(v <= n) {
 	rv1 = mt1()/normalization;
-	w = (int) w + 1 + floor(log(1-rv1)/log(1-p));
+	w = (int) w + 1 + floor(log(1-rv1)/log(1-p)) + ROUND_CONST;
 	while((w >= v) && (v <= n)) {
 	  rv2 = mt1()/normalization;
 	    partialSum = 0.0;
@@ -103,9 +105,9 @@ int main(int argc, char *argv[]) {
     int step = 0;
     if(rewireTo == "random") {
       while((conflicts > 0) && (iters < maxIter)) {
-	int chosenVertex = (int) floor(n*(mt1()/normalization));
+	  int chosenVertex = (int) floor(n*(mt1()/normalization)) + ROUND_CONST;
 	while(A.block(chosenVertex,0,n,1).sum() == 0) {
-	  chosenVertex = (int) floor(n*(mt1()/normalization));
+	    chosenVertex = (int) floor(n*(mt1()/normalization)) + ROUND_CONST;
 	}
 	MatrixXi v = MatrixXi::Zero(n,1);
 	i = 0;
@@ -116,11 +118,11 @@ int main(int argc, char *argv[]) {
 	  }
 	}
 	//too fancy (i--)?
-	int neighborIndex = (int) floor((i--)*(mt1()/normalization));
+	int neighborIndex = (int) floor((i--)*(mt1()/normalization)) + ROUND_CONST;
 	int neighbor = v(neighborIndex,0);
 	v(neighborIndex,0) = v(i,0);
 	while((i > 0) && (Opns(chosenVertex,0) != Opns(neighbor,0))) {
-	  neighborIndex = (int) floor((i--)*(mt1()/normalization));
+	    neighborIndex = (int) floor((i--)*(mt1()/normalization)) + ROUND_CONST;
 	  neighbor = v(neighborIndex);
 	  v(neighborIndex,0) = v(i);
 	}
@@ -146,9 +148,9 @@ int main(int argc, char *argv[]) {
 	    }
 	    A(chosenVertex,neighbor) = 0;
 	    A(neighbor,chosenVertex) = 0;
-	    int newNeighbor = (int) floor(n*(mt1()/normalization));
+	    int newNeighbor = (int) floor(n*(mt1()/normalization)) + ROUND_CONST;
 	    while((A(chosenVertex,newNeighbor) != 0) || (newNeighbor == chosenVertex)) {
-	      newNeighbor = (int) floor(n*(mt1()/normalization));
+		newNeighbor = (int) floor(n*(mt1()/normalization)) + ROUND_CONST;
 	    }
 	    A(chosenVertex,newNeighbor) = 1;
 	    A(newNeighbor,chosenVertex) = 1;
