@@ -14,3 +14,7 @@ clean:
 
 test:
 	voterModel 100 4 2 0.5 0.5 0.5 random 1000 10 voterStats
+
+debug:
+	gdb --args voterModel 100 4 2 0.5 0.5 0.5 random 1000 10 voterStats
+

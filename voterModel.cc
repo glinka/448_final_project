@@ -6,6 +6,7 @@
 #include <random>
 #include <Eigen/Sparse>
 #include <chrono>
+#include <iomanip>
 using namespace Eigen;
 using namespace std;
 
@@ -66,25 +67,24 @@ int main(int argc, char *argv[]) {
 	    partialSum = 0.0;
 	    indexCounter = 0;
 	    while(partialSum < rv2) {
-		partialSum += initDist[indexCounter];
+		partialSum = partialSum + initDist[indexCounter];
 		indexCounter++;
 	    }
 	    Opns(v-1,0) = indexCounter;
 	    w = w - v;
-	    v++;
+	    v = v + 1;
 	}
 	if(v < n) {
-	    A(v-1,w-1) = 1;
-	    A(w-1,v-1) = 1;
+	    A(v,w) = 1;
+	    A(w,v) = 1;
 	}
     }
     int totalEdges = 0;
     MatrixXi opnCounts = MatrixXi::Zero(k,1);
-
     int currentOpn;
     for(int i = 0; i < n; i++) {
 	currentOpn = Opns(i,0);
-	opnCounts(currentOpn-1,0) += 1;
+	opnCounts(currentOpn-1,0) = opnCounts(currentOpn-1,0) + 1;
 	for(j = i+1; j < n; j++) {
 	    totalEdges += A(i,j);
 	}
@@ -99,36 +99,38 @@ int main(int argc, char *argv[]) {
 	}
     }
     int iters = 0;
-    MatrixXi N10timeCourse = MatrixXi::Zero((int) maxIter/collectionInterval,0);
-    MatrixXi N1timeCourse = MatrixXi::Zero((int) maxIter/collectionInterval, 0);
-    MatrixXi stepTimeCourse = MatrixXi::Zero((int) maxIter/collectionInterval, 0);
+    MatrixXi N10timeCourse = MatrixXi::Zero((int) maxIter/collectionInterval, 1);
+    MatrixXi N1timeCourse = MatrixXi::Zero((int) maxIter/collectionInterval, 1);
+    MatrixXi stepTimeCourse = MatrixXi::Zero((int) maxIter/collectionInterval, 1);
     int step = 0;
+    int chosenVertex, neighborIndex, neighbor, conflictCounter, newNeighbor;
+    double actionToPerform;
     if(rewireTo == "random") {
       while((conflicts > 0) && (iters < maxIter)) {
-	  int chosenVertex = (int) floor(n*(mt1()/normalization)) + ROUND_CONST;
-	while(A.block(chosenVertex,0,n,1).sum() == 0) {
+	  chosenVertex = (int) floor(n*(mt1()/normalization)) + ROUND_CONST;
+	  while(A.block(chosenVertex,0,1,n).sum() == 0) {
 	    chosenVertex = (int) floor(n*(mt1()/normalization)) + ROUND_CONST;
 	}
-	MatrixXi v = MatrixXi::Zero(n,1);
+	MatrixXi V = MatrixXi::Zero(n,1);
 	i = 0;
 	for(j = 0; j < n; j++) {
 	  if(A(chosenVertex,j) != 0) {
-	    v(i,0) = j;
+	    V(i,0) = j;
 	    i++;
 	  }
 	}
 	//too fancy (i--)?
-	int neighborIndex = (int) floor((i--)*(mt1()/normalization)) + ROUND_CONST;
-	int neighbor = v(neighborIndex,0);
-	v(neighborIndex,0) = v(i,0);
+	neighborIndex = (int) floor((i--)*(mt1()/normalization)) + ROUND_CONST;
+	neighbor = V(neighborIndex,0);
+	V(neighborIndex,0) = V(i,0);
 	while((i > 0) && (Opns(chosenVertex,0) != Opns(neighbor,0))) {
 	    neighborIndex = (int) floor((i--)*(mt1()/normalization)) + ROUND_CONST;
-	  neighbor = v(neighborIndex);
-	  v(neighborIndex,0) = v(i);
+	    neighbor = V(neighborIndex,0);
+	    V(neighborIndex,0) = V(i,0);
 	}
 	if(Opns(chosenVertex,0) != Opns(neighbor,0)) {
-	  double actionToPerform = (mt1()/normalization);
-	  int conflictCounter = 0;
+	  actionToPerform = (mt1()/normalization);
+	  conflictCounter = 0;
 	  if(actionToPerform > a) {
 	    opnCounts(Opns(chosenVertex,0) - 1)--;
 	    opnCounts(Opns(neighbor,0) - 1)++;
@@ -148,7 +150,7 @@ int main(int argc, char *argv[]) {
 	    }
 	    A(chosenVertex,neighbor) = 0;
 	    A(neighbor,chosenVertex) = 0;
-	    int newNeighbor = (int) floor(n*(mt1()/normalization)) + ROUND_CONST;
+	    newNeighbor = (int) floor(n*(mt1()/normalization)) + ROUND_CONST;
 	    while((A(chosenVertex,newNeighbor) != 0) || (newNeighbor == chosenVertex)) {
 		newNeighbor = (int) floor(n*(mt1()/normalization)) + ROUND_CONST;
 	    }
@@ -169,4 +171,11 @@ int main(int argc, char *argv[]) {
 	iters++;
       }
     }
+    ostream graphStats;
+    graphStats.open(fileName);
+    graphStats << setiosflags(ios::left);
+    graphStats << setw(8) << "Step";
+    graphStats << setw(8) << "Step" << "\n";
+    for(i = 0; i < step; i++) {
+      
 }
