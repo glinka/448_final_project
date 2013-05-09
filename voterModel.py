@@ -39,12 +39,12 @@ def vote(n=10000, avgDeg=4.0, u=(0.5,0.5), a=0.5, rewireTo="random", maxIter=100
             while partialSum < rv2:
                 partialSum = partialSum + u[indexCounter]
                 indexCounter = indexCounter + 1
-            Opns[v-1][0] = indexCounter
+            Opns[v-1,0] = indexCounter
             w = w - v
             v = v + 1
         if v < n:
-            A[v-1][w-1] = 1
-            A[w-1][v-1] = 1
+            A[v-1,w-1] = 1
+            A[w-1,v-1] = 1
     
     #calculate number of edges, a constant throughout the simulation
     #and the initial distribution of opin
@@ -54,10 +54,10 @@ def vote(n=10000, avgDeg=4.0, u=(0.5,0.5), a=0.5, rewireTo="random", maxIter=100
         currentOpn = int(Opns[i])
         opnCounts[currentOpn - 1] = opnCounts[currentOpn - 1] + 1
         for j in range(i+1,n):
-            totalEdges = totalEdges + A[i][j]
+            totalEdges = totalEdges + A[i,j]
             #!!! the following are equivalent to conflicts in the case of 2 opinions
             #ought to implement statistics generally !!!
-#            if (A[i][j] != 0) & (Opns[j] != currentOpn):
+#            if (A[i,j] != 0) & (Opns[j] != currentOpn):
 #                discordantEdges = discordantEdges + 1
 #    discordantEdges = discordantEdges*1.0/totalEdges
 
@@ -66,7 +66,7 @@ def vote(n=10000, avgDeg=4.0, u=(0.5,0.5), a=0.5, rewireTo="random", maxIter=100
     for i in range(n):
         currentOpinion = Opns[i]
         for j in range(i+1,n):
-            if (A[i][j] != 0) & (Opns[j] != currentOpinion):
+            if (A[i,j] != 0) & (Opns[j] != currentOpinion):
                 conflicts = conflicts + 1
 
     #print A, Opns, conflicts
@@ -84,14 +84,14 @@ def vote(n=10000, avgDeg=4.0, u=(0.5,0.5), a=0.5, rewireTo="random", maxIter=100
             #1. keep track of vertex degrees in separate array (easy)
             #2. somehow pop out vertices that have degree zero, or at least
             #remove them as they are found in the below iteration (?)
-            while sum(A[chosenVertex][:]) == 0:
+            while sum(A[chosenVertex,:]) == 0:
                 chosenVertex = int(np.floor(n*np.random.random_sample(1)))
             #generate list of adjacent vertices, V
             #!!! inefficient, simply generate the random number first
             #then count up to the required vertex, would avg n/2 calculations !!!
             V = []
             for j in range(n):
-                if A[chosenVertex][j] != 0:
+                if A[chosenVertex,j] != 0:
                     V.append(j)
             #V = np.array(V)
             numberAdj = len(V) #V.size
@@ -115,9 +115,9 @@ def vote(n=10000, avgDeg=4.0, u=(0.5,0.5), a=0.5, rewireTo="random", maxIter=100
                     Opns[chosenVertex] = Opns[neighbor]
                     #update conflicts (post-switching)
                     for j in range(n):
-                        if (A[chosenVertex][j] != 0) & (Opns[j] != Opns[chosenVertex]):
+                        if (A[chosenVertex,j] != 0) & (Opns[j] != Opns[chosenVertex]):
                             conflictCounter = conflictCounter + 1
-                        elif (A[chosenVertex][j] != 0):
+                        elif (A[chosenVertex,j] != 0):
                             conflictCounter = conflictCounter - 1
                     conflicts = conflicts + conflictCounter
                 else:
@@ -125,15 +125,15 @@ def vote(n=10000, avgDeg=4.0, u=(0.5,0.5), a=0.5, rewireTo="random", maxIter=100
                     #non-parallel, non-loop, to chosenVertex
                     if Opns[chosenVertex] != Opns[neighbor]:
                         conflictCounter = -1
-                    A[chosenVertex][neighbor] = 0
-                    A[neighbor][chosenVertex] = 0
+                    A[chosenVertex,neighbor] = 0
+                    A[neighbor,chosenVertex] = 0
                     newNeighbor = int(np.floor(n*np.random.random_sample(1)))
                     #check the added edge will not be a loop or in parallel with a previously existing one
                     #this loop will require many iterations to exit if deg(v) ~ O(n), potential slowdown
-                    while (A[chosenVertex][newNeighbor] != 0) | (newNeighbor == chosenVertex):
+                    while (A[chosenVertex,newNeighbor] != 0) | (newNeighbor == chosenVertex):
                         newNeighbor = int(np.floor(n*np.random.random_sample(1)))
-                    A[chosenVertex][newNeighbor] = 1
-                    A[newNeighbor][chosenVertex] = 1
+                    A[chosenVertex,newNeighbor] = 1
+                    A[newNeighbor,chosenVertex] = 1
                     if Opns[chosenVertex] != Opns[newNeighbor]:
                         conflictCounter = conflictCounter + 1
                     conflicts = conflicts + conflictCounter
@@ -174,8 +174,8 @@ if __name__=='__main__':
 #        currentOpn = int(Opns[i])
 #        opnFractions[currentOpn - 1] = opnFractions[currentOpn - 1] + 1
 #        for j in range(i+1,n):
-#            totalEdges = totalEdges + A[i][j]
-#            if (A[i][j] != 0) & (Opns[j] != currentOpn):
+#            totalEdges = totalEdges + A[i,j]
+#            if (A[i,j] != 0) & (Opns[j] != currentOpn):
 #                discordantEdges = discordantEdges + 1
 #    opnFractions = [(1.0*opnFractions[i])/n for i in range(numOpns)]
 #    discordantEdges = discordantEdges*1.0/totalEdges
@@ -187,7 +187,7 @@ if __name__=='__main__':
 #    for i in range(n):
 #        currentOpn = Opns[i]
 #        for j in range(i+1,n):
-#            if (A[i][j] != 0) & (Opns[j] != currentOpn):
+#            if (A[i,j] != 0) & (Opns[j] != currentOpn):
 #                conflicts = conflicts + 1
 #    return conflicts
 #
@@ -201,7 +201,7 @@ if __name__=='__main__':
 #    avg = 0.0
 #    for i in range(dim):
 #        for j in range(dim):
-#            degrees[i] = degrees[i] + A[i][j]
+#            degrees[i] = degrees[i] + A[i,j]
 #        avg = avg + degrees[i]
 #    avg = avg / dim
 #    fig = plt.figure()

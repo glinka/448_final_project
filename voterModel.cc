@@ -3,6 +3,7 @@
 #include <math.h>
 #include <string>
 #include <iostream>
+#include <fstream>
 #include <random>
 #include <Eigen/Sparse>
 #include <chrono>
@@ -44,7 +45,6 @@ int main(int argc, char *argv[]) {
     int maxIter = atoi(argv[k+6]);
     int collectionInterval = atoi(argv[k+7]);
     string fileName = string(argv[k+8]);
-    cout << fileName << rewireTo << "\n";
     //init matrices
     MatrixXd A = MatrixXd::Zero(n,n);
     MatrixXi Opns = MatrixXi::Zero(n,1);
@@ -102,6 +102,7 @@ int main(int argc, char *argv[]) {
     MatrixXi N10timeCourse = MatrixXi::Zero((int) maxIter/collectionInterval, 1);
     MatrixXi N1timeCourse = MatrixXi::Zero((int) maxIter/collectionInterval, 1);
     MatrixXi stepTimeCourse = MatrixXi::Zero((int) maxIter/collectionInterval, 1);
+    MatrixXi V;
     int step = 0;
     int chosenVertex, neighborIndex, neighbor, conflictCounter, newNeighbor;
     double actionToPerform;
@@ -111,7 +112,7 @@ int main(int argc, char *argv[]) {
 	  while(A.block(chosenVertex,0,1,n).sum() == 0) {
 	    chosenVertex = (int) floor(n*(mt1()/normalization)) + ROUND_CONST;
 	}
-	MatrixXi V = MatrixXi::Zero(n,1);
+	V = MatrixXi::Zero(n,1);
 	i = 0;
 	for(j = 0; j < n; j++) {
 	  if(A(chosenVertex,j) != 0) {
@@ -120,11 +121,13 @@ int main(int argc, char *argv[]) {
 	  }
 	}
 	//too fancy (i--)?
-	neighborIndex = (int) floor((i--)*(mt1()/normalization)) + ROUND_CONST;
+	neighborIndex = (int) floor((i)*(mt1()/normalization)) + ROUND_CONST;
+	i--;
 	neighbor = V(neighborIndex,0);
 	V(neighborIndex,0) = V(i,0);
-	while((i > 0) && (Opns(chosenVertex,0) != Opns(neighbor,0))) {
-	    neighborIndex = (int) floor((i--)*(mt1()/normalization)) + ROUND_CONST;
+	while((i > 0) && (Opns(chosenVertex,0) == Opns(neighbor,0))) {
+	    neighborIndex = (int) floor((i)*(mt1()/normalization)) + ROUND_CONST;
+	    i--;
 	    neighbor = V(neighborIndex,0);
 	    V(neighborIndex,0) = V(i,0);
 	}
@@ -136,6 +139,7 @@ int main(int argc, char *argv[]) {
 	    opnCounts(Opns(neighbor,0) - 1)++;
 	    Opns(chosenVertex,0) = Opns(neighbor,0);
 	    for(j = 0; j < n; j++) {
+	      //does this work?
 	      if((A(chosenVertex,j) != 0) && (Opns(j,0) != Opns(chosenVertex,0))) {
 		conflictCounter++;
 	      }
@@ -143,6 +147,7 @@ int main(int argc, char *argv[]) {
 		conflictCounter--;
 	      }
 	    }
+	    conflicts += conflictCounter;
 	  }
 	  else {
 	    if(Opns(chosenVertex,0) != Opns(neighbor,0)) {
@@ -171,11 +176,29 @@ int main(int argc, char *argv[]) {
 	iters++;
       }
     }
-    ostream graphStats;
+    ofstream graphStats;
     graphStats.open(fileName);
-    graphStats << setiosflags(ios::left);
+    graphStats << setiosflags(ios::left) << setiosflags(ios::fixed);
+    /**
     graphStats << setw(8) << "Step";
-    graphStats << setw(8) << "Step" << "\n";
+    graphStats << setw(30) << "Number Opn1 Vertice";
+    graphStats << setw(30) << "Number Disagreements" << "\n";
     for(i = 0; i < step; i++) {
-      
+      graphStats << setw(8) << stepTimeCourse(i,0);
+      graphStats << setw(30) <<  N1timeCourse(i,0);
+      graphStats << setw(30) << N10timeCourse(i,0) << "\n";
+    }
+    graphStats << "Total Edges: " << totalEdges << "\n";
+    **/
+    //the above is human readable, but why?
+    //below is csv formatting for easy python importing
+    for(i = 0; i < step; i++) {
+      graphStats << stepTimeCourse(i,0) << ",";
+      graphStats << N1timeCourse(i,0) << ",";
+      graphStats << N10timeCourse(i,0) << "\n";
+    }
+    graphStats << "\n\n";
+    graphStats.close();
+    cout << conflicts << "\n";
+    return 0;
 }

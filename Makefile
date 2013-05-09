@@ -12,8 +12,14 @@ voterModel: $(toCompile)
 clean:
 	$(RM) *.o 
 
-test:
-	voterModel 100 4 2 0.5 0.5 0.5 random 1000 10 voterStats
+smallSlowTest:
+	voterModel 500 4 2 0.5 0.5 0.5 random 500000 10 voterStats
+
+smallFastTest:
+	voterModel 500 4 2 0.5 0.5 0.7 random 500000 10 voterStats
+
+bigTest:
+	voterModel 10000 4 2 0.5 0.5 0.5 random 1000000 1000 voterStats
 
 debug:
 	gdb --args voterModel 100 4 2 0.5 0.5 0.5 random 1000 10 voterStats
