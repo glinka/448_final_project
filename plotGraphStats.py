@@ -2,18 +2,19 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 
-def plotGraphStats(fileName="voterStats"):
+def plotGraphStats(fileName):
     """Import and plot data from c++ program's
     output"""
     pathToFile = os.path.realpath(fileName)
     graphStats = np.genfromtxt(pathToFile, delimiter = ',')
-    plt.figure(1)
-    plt.subplot(211)
-    plt.plot(graphStats[:,0],graphStats[:,2],'g-')
-    plt.subplot(212)
-    plt.plot(graphStats[:,1],graphStats[:,2],'b-')
+    f, (ax1, ax2) = plt.subplots(2,1)
+    ax1.plot(graphStats[:,0],graphStats[:,2],'g-')
+    ax1.set_title("1-0 Edges vs. Time")
+    #ax1.subplot(212)
+    ax2.plot(graphStats[:,1],graphStats[:,2],'b-')
+    ax2.set_title("1-0 Edges vs. Opn 1 Vertices")
     plt.show()
     
 if __name__=='__main__':
-    #import sys
-    plotGraphStats()
+    import sys
+    plotGraphStats(fileName=sys.argv[1])

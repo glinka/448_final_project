@@ -1,8 +1,11 @@
+#include <stdlib.h>
+#include <string>
+#include <sstream>
 #include "vote.h"
 
 using namespace std;
 
-int main(int argc, char *argc[]) {
+int main(int argc, char *argv[]) {
   /** 
       argc[1]: a/alpha
       argc[2]: k, number of opinions
@@ -23,17 +26,18 @@ int main(int argc, char *argc[]) {
   string rewireTo = "random";
   int maxIter = 100000;
   int collectionInterval = 50;
-  double a = atof(argc[1]);
-  int k = atoi(argc[2]);
+  double a = atof(argv[1]);
+  int k = atoi(argv[2]);
   double initDist[k];
   stringstream ss;
   ss << "graphStats_" << n << "_" << avgDeg << "_" << a;
   for(int i = 0; i < k; i++) {
-    initDist[i] = atof(argc[i+3]);
+    initDist[i] = atof(argv[i+3]);
     ss << "_" << initDist[i];
   }
   ss << ".csv";
   string fileName = ss.str();
-  vote(n, k, maxIter, collectionInterval, initDist, a, avgDeg, rewireTo, fileName);
+  votingModel model(n, k, maxIter, collectionInterval, a, avgDeg, initDist, rewireTo, fileName);
+  model.vote();
   return 0;
 }

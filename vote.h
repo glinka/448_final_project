@@ -1,17 +1,17 @@
 #ifndef VOTE_H
 #define VOTE_H
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
 #include <string>
-#include <iostream>
-#include <fstream>
-#include <random>
-#include <Eigen/Sparse>
-#include <chrono>
-#include <iomanip>
 
-int vote(const int n, const int k, const int maxIter, const int collectionInterval, double *initDist, const double a, const double avgDeg, const string rewireTo, const string fileName);
+class votingModel {
+ private:
+  const int n, k, maxIter, collectionInterval;
+  const double a, avgDeg;
+  double *initDist;
+  std::string rewireTo, fileName;
+ public:
+  int vote();
+  votingModel(int n, int k, int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, std::string rewireTo, std::string fileName);
+  ~votingModel(){};
+};
 
 #endif

@@ -8,3 +8,5 @@ stats.py
 #ignore executables and output csv files
 voterModelAlphaInitDist
 *.csv
+#ignore object files
+*.o

@@ -1,9 +1,21 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <random>
+#include <Eigen/Sparse>
+#include <chrono>
+#include <iomanip>
 #include "vote.h"
 
 using namespace Eigen;
 using namespace std;
-
-int vote(const int n, const int k, const int maxIter, const int collectionInterval, double *initDist, const double a, const double avgDeg, const string rewireTo, const string fileName) {
+  
+votingModel::votingModel(int n, int k, int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, string rewireTo, string fileName): n(n), k(k), maxIter(maxIter), collectionInterval(collectionInterval), a(a), avgDeg(avgDeg), initDist(initDist), rewireTo(rewireTo), fileName(fileName) {};
+  
+int votingModel::vote() {
     /* Arguments list:
        n: number of vertices
        avgDeg: lambda/avg vertex degree
@@ -26,11 +38,6 @@ int vote(const int n, const int k, const int maxIter, const int collectionInterv
 	cerr << "sum(u) != 1, improper initial distribution" << "\n";
 	return 1;
     }
-    double a = atof(argv[k+4]);
-    string rewireTo = string(argv[k+5]);
-    int maxIter = atoi(argv[k+6]);
-    int collectionInterval = atoi(argv[k+7]);
-    string fileName = string(argv[k+8]);
     //init matrices
     MatrixXd A = MatrixXd::Zero(n,n);
     MatrixXi Opns = MatrixXi::Zero(n,1);
@@ -185,6 +192,23 @@ int vote(const int n, const int k, const int maxIter, const int collectionInterv
     }
     graphStats << "\n\n";
     graphStats.close();
+    int firstUS = fileName.find_first_of("_");
+    string bifDiag = fileName;
+    bifDiag.erase(0,firstUS);
+    stringstream ss;
+    ss << "bifData" << bifDiag;
+    string bifTitle = ss.str();
     cout << conflicts << "\n";
+    ofstream bifData;
+    bifData.open(bifTitle, ios::app);
+    for(i = 0; i < k; i++) {
+      bifData << initDist[i] << ",";
+    }
+    if(iters == maxIter) {
+      bifData << "1" << "\n";
+    }
+    else {
+      bifData << "0" << "\n";
+    }
     return 0;
 }
