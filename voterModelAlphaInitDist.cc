@@ -27,11 +27,12 @@ int main(int argc, char *argc[]) {
   int k = atoi(argc[2]);
   double initDist[k];
   stringstream ss;
-  ss << "graphStats_" << n << "_" << avgDeg << "_" << a << "_";
+  ss << "graphStats_" << n << "_" << avgDeg << "_" << a;
   for(int i = 0; i < k; i++) {
     initDist[i] = atof(argc[i+3]);
     ss << "_" << initDist[i];
   }
+  ss << ".csv";
   string fileName = ss.str();
   vote(n, k, maxIter, collectionInterval, initDist, a, avgDeg, rewireTo, fileName);
   return 0;
