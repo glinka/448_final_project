@@ -18,6 +18,7 @@ votingModel::votingModel(int n, int k, int maxIter, int collectionInterval, doub
 int votingModel::vote() {
     /* Arguments list:
        n: number of vertices
+       k: number of opinions
        avgDeg: lambda/avg vertex degree
        initDist: initial distribution of opinions
        a: alpha, model parameter
@@ -192,15 +193,20 @@ int votingModel::vote() {
     }
     graphStats << "\n\n";
     graphStats.close();
-    int firstUS = fileName.find_first_of("_");
+    /**    int firstUS = fileName.find_first_of("_");
     string bifDiag = fileName;
+    int length = bifDiag.size();
+    //remove "a.initDists.csv" from fileName
+    bifDiag.erase(length-4*k-8);
     bifDiag.erase(0,firstUS);
+    **/
     stringstream ss;
-    ss << "bifData" << bifDiag;
+    ss << "bifData_" << n << "_" << avgDeg << ".csv";
     string bifTitle = ss.str();
     cout << conflicts << "\n";
     ofstream bifData;
     bifData.open(bifTitle, ios::app);
+    bifData << a << ",";
     for(i = 0; i < k; i++) {
       bifData << initDist[i] << ",";
     }
