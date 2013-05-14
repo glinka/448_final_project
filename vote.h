@@ -1,17 +1,22 @@
 #ifndef VOTE_H
 #define VOTE_H
 #include <string>
+#include <Eigen/Sparse>
 
 class votingModel {
  private:
-  const int n, k, maxIter, collectionInterval;
-  const double a, avgDeg;
-  double *initDist;
-  std::string rewireTo, fileName;
+    const double ROUND_CONST = 0.01;
+    const int n, k, maxIter, collectionInterval;
+    const double a, avgDeg;
+    double *initDist;
+    Eigen::MatrixXi A, Opns;
+    std::string rewireTo, fileName;
+    void initGraph();
+    int countConflicts();
  public:
-  int vote();
-  votingModel(int n, int k, int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, std::string rewireTo, std::string fileName);
-  ~votingModel(){};
+    int vote();
+    votingModel(int n, int k, int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, std::string rewireTo, std::string fileName);
+    ~votingModel(){};
 };
 
 #endif

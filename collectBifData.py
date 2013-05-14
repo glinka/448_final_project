@@ -22,7 +22,7 @@ bifDataFileName = "bifData_" + str(n) + "_" + str(4) + ".csv"
 pathToFile = os.path.realpath(bifDataFileName)
 print pathToFile
 bifData = np.genfromtxt(pathToFile, delimiter=",")
-bifData = filter(lambda x: x[k+1] == 0, bifData)
+bifData = filter(lambda x: x[2] == 0, bifData)
 bifData = np.asarray(bifData)
 plt.figure(1)
 plt.plot(bifData[:,0],bifData[:,1],'og')

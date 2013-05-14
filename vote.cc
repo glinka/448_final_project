@@ -13,7 +13,7 @@
 using namespace Eigen;
 using namespace std;
   
-votingModel::votingModel(int n, int k, int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, string rewireTo, string fileName): n(n), k(k), maxIter(maxIter), collectionInterval(collectionInterval), a(a), avgDeg(avgDeg), initDist(initDist), rewireTo(rewireTo), fileName(fileName) {};
+votingModel::votingModel(int n, int k, int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, string rewireTo, string fileName): n(n), A(MatrixXi::Zero(n,n)), Opns(MatrixXi::Zero(n,1)), k(k), maxIter(maxIter), collectionInterval(collectionInterval), a(a), avgDeg(avgDeg), initDist(initDist), rewireTo(rewireTo), fileName(fileName) {};
   
 int votingModel::vote() {
     /* Arguments list:
@@ -28,7 +28,6 @@ int votingModel::vote() {
        fileName: output filename
     */
     //constant to allow proper casting/rounding of floating point floor function
-    const double ROUND_CONST = 0.1;
     int i, j;
     double sum = 0;
     for(i = 0; i < k; i++) {
@@ -39,16 +38,173 @@ int votingModel::vote() {
 	cerr << "sum(u) != 1, improper initial distribution" << "\n";
 	return 1;
     }
+    initGraph();
+    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+    mt19937 mt1(seed);
+    double normalization = (double) mt1.max();
     //init matrices
-    MatrixXd A = MatrixXd::Zero(n,n);
-    MatrixXi Opns = MatrixXi::Zero(n,1);
+    int totalEdges = 0;
+    MatrixXi opnCounts = MatrixXi::Zero(k,1);
+    int currentOpn;
+    for(int i = 0; i < n; i++) {
+	currentOpn = Opns(i,0);
+	opnCounts(currentOpn-1,0) = opnCounts(currentOpn-1,0) + 1;
+	for(j = i+1; j < n; j++) {
+	    totalEdges += A(i,j);
+	}
+    }
+    int conflicts = 0;
+    for(i = 0; i < n; i++) {
+	currentOpn = Opns(i,0);
+	for(j = i+1; j < n; j++) {
+	    if((A(i,j) != 0) && (Opns(j,0) != currentOpn)) {
+		conflicts++;
+	    }
+	}
+    }
+    int iters = 0;
+    MatrixXi N10timeCourse = MatrixXi::Zero((int) maxIter/collectionInterval, 1);
+    MatrixXi minorityOpnTimeCourse = MatrixXi::Zero((int) maxIter/collectionInterval, 1);
+    MatrixXi stepTimeCourse = MatrixXi::Zero((int) maxIter/collectionInterval, 1);
+    MatrixXi V;
+    int step = 0;
+    int neighborTracker = 0;
+    int chosenVertex, neighborIndex, neighbor, conflictCounter, newNeighbor;
+    double actionToPerform;
+    if(rewireTo == "random") {
+      while((conflicts > 0) && (iters < maxIter)) {
+	  chosenVertex = (int) floor(n*(mt1()/normalization));
+	  while(A.block(chosenVertex,0,1,n).sum() == 0) {
+	      chosenVertex = (int) floor(n*(mt1()/normalization));
+	}
+	V = MatrixXi::Zero(n,1);
+	i = 0;
+	for(j = 0; j < n; j++) {
+	  if(A(chosenVertex,j) != 0) {
+	    V(i,0) = j;
+	    i++;
+	  }
+	}
+	neighborIndex = (int) floor((i)*(mt1()/normalization));
+	i--;
+	neighbor = V(neighborIndex,0);
+	V(neighborIndex,0) = V(i,0);
+	while((i > 0) && (Opns(chosenVertex,0) == Opns(neighbor,0))) {
+	    neighborIndex = (int) floor((i)*(mt1()/normalization));
+	    i--;
+	    neighbor = V(neighborIndex,0);
+	    V(neighborIndex,0) = V(i,0);
+	}
+	if(Opns(chosenVertex,0) != Opns(neighbor,0)) {
+	  actionToPerform = (mt1()/normalization);
+	  conflictCounter = 0;
+	  if(actionToPerform > a) {
+	      opnCounts(Opns(chosenVertex,0) - 1) = opnCounts(Opns(chosenVertex,0) - 1) - 1;
+	      opnCounts(Opns(neighbor,0) - 1) = opnCounts(Opns(neighbor,0) - 1) + 1;
+	      Opns(chosenVertex,0) = Opns(neighbor,0);
+	    for(j = 0; j < n; j++) {
+	      //does this work?
+	      if((A(chosenVertex,j) != 0) && (Opns(j,0) != Opns(chosenVertex,0))) {
+		conflictCounter++;
+	      }
+	      else if(A(chosenVertex,j) != 0) {
+		conflictCounter--;
+	      }
+	    }
+	    conflicts += conflictCounter;
+	  }
+	  else {
+	      conflictCounter--;
+	      A(chosenVertex,neighbor) = 0;
+	      A(neighbor,chosenVertex) = 0;
+	      newNeighbor = (int) (floor(n*(mt1()/normalization)) + ROUND_CONST);
+	      /**
+	      nNeighbors = A.block(chosenVertex,0,1,n).sum();
+	      newNeighborIndex = (int) (floor(nNeighbors*(mt1()/normalization)) + ROUND_CONST);
+	      neighborCount = 0;
+	      newNeighbor = 0;
+	      while(neighborCount < newNeighborIndex) {
+		  neighborCount += A(chosenVertex,j);
+		  newNeighbor++;
+	      }
+	      newNeighbor--;
+	      **/
+	      //for n = 100, avgDeg = 4, have, on avg, 95% chance of success
+	      while((A(chosenVertex,newNeighbor) != 0) || (newNeighbor == chosenVertex)) {
+		  newNeighbor = (int) floor(n*(mt1()/normalization)) + ROUND_CONST;
+		  neighborTracker++;
+	      }
+	      A(chosenVertex,newNeighbor) = 1;
+	      A(newNeighbor,chosenVertex) = 1;
+	      if(Opns(chosenVertex,0) != Opns(newNeighbor,0)) {
+		  conflictCounter++;
+	      }
+	      conflicts += conflictCounter;
+	  }
+	}
+	if(iters % collectionInterval == 0) {
+	    step = iters/collectionInterval;
+	    minorityOpnTimeCourse(step,0) = opnCounts(0,0)>opnCounts(1,0)?opnCounts(0,0):opnCounts(1,0);
+	    N10timeCourse(step,0) = conflicts;
+	    stepTimeCourse(step,0) = step + 1;
+	}
+	iters++;
+      }
+    }
+    ofstream graphStats;
+    graphStats.open(fileName);
+    graphStats << setiosflags(ios::left) << setiosflags(ios::fixed);
+    /**
+    graphStats << setw(8) << "Step";
+    graphStats << setw(30) << "Number Opn1 Vertice";
+    graphStats << setw(30) << "Number Disagreements" << "\n";
+    for(i = 0; i < step; i++) {
+      graphStats << setw(8) << stepTimeCourse(i,0);
+      graphStats << setw(30) <<  minorityOpnTimeCourse(i,0);
+      graphStats << setw(30) << N10timeCourse(i,0) << "\n";
+    }
+    graphStats << "Total Edges: " << totalEdges << "\n";
+    **/
+    //the above is human readable, but why?
+    //below is csv formatting for easy python importing
+    for(i = 0; i < step; i++) {
+      graphStats << stepTimeCourse(i,0) << ",";
+      graphStats << 1.0*minorityOpnTimeCourse(i,0)/n << ",";
+      graphStats << 1.0*N10timeCourse(i,0)/totalEdges << "\n";
+    }
+    graphStats << "\n\n";
+    graphStats.close();
+    /**    int firstUS = fileName.find_first_of("_");
+    string bifDiag = fileName;
+    int length = bifDiag.size();
+    //remove "a.initDists.csv" from fileName
+    bifDiag.erase(length-4*k-8);
+    bifDiag.erase(0,firstUS);
+    **/
+    stringstream ss;
+    ss << "bifData_" << n << "_" << avgDeg << ".csv";
+    string bifTitle = ss.str();
+    cout << conflicts;
+    ofstream bifData;
+    bifData.open(bifTitle, ios::app);
+    bifData << a << ",";
+    bifData << (opnCounts(0,0)<opnCounts(1,0)?(1.0*opnCounts(0,0)/n):(1.0*opnCounts(1,0)/n)) << ",";
+    if(iters == maxIter) {
+      bifData << "1" << "\n";
+    }
+    else {
+      bifData << "0" << "\n";
+    }
+    return 0;
+}
+
+void votingModel::initGraph() {
     double p = avgDeg/(n-1);
     int v = 1;
     int w = -1;
     unsigned seed = chrono::system_clock::now().time_since_epoch().count();
     mt19937 mt1(seed);
     double normalization = (double) mt1.max();
-    cout << mt1() << "\n";
     double rv1, rv2, partialSum;
     int indexCounter;
     //    default_random_engine generator;
@@ -73,148 +229,19 @@ int votingModel::vote() {
 	    A(w,v) = 1;
 	}
     }
-    int totalEdges = 0;
-    MatrixXi opnCounts = MatrixXi::Zero(k,1);
-    int currentOpn;
-    for(int i = 0; i < n; i++) {
-	currentOpn = Opns(i,0);
-	opnCounts(currentOpn-1,0) = opnCounts(currentOpn-1,0) + 1;
-	for(j = i+1; j < n; j++) {
-	    totalEdges += A(i,j);
-	}
-    }
+}
+    
+
+int votingModel::countConflicts() {
+    int currentOpn, i, j;
     int conflicts = 0;
     for(i = 0; i < n; i++) {
 	currentOpn = Opns(i,0);
-	for(j = i+1; j < n; j++) {
+	for(j = i + 1; j < n; j++) {
 	    if((A(i,j) != 0) && (Opns(j,0) != currentOpn)) {
 		conflicts++;
 	    }
 	}
     }
-    int iters = 0;
-    MatrixXi N10timeCourse = MatrixXi::Zero((int) maxIter/collectionInterval, 1);
-    MatrixXi N1timeCourse = MatrixXi::Zero((int) maxIter/collectionInterval, 1);
-    MatrixXi stepTimeCourse = MatrixXi::Zero((int) maxIter/collectionInterval, 1);
-    MatrixXi V;
-    int step = 0;
-    int chosenVertex, neighborIndex, neighbor, conflictCounter, newNeighbor;
-    double actionToPerform;
-    if(rewireTo == "random") {
-      while((conflicts > 0) && (iters < maxIter)) {
-	  chosenVertex = (int) floor(n*(mt1()/normalization)) + ROUND_CONST;
-	  while(A.block(chosenVertex,0,1,n).sum() == 0) {
-	    chosenVertex = (int) floor(n*(mt1()/normalization)) + ROUND_CONST;
-	}
-	V = MatrixXi::Zero(n,1);
-	i = 0;
-	for(j = 0; j < n; j++) {
-	  if(A(chosenVertex,j) != 0) {
-	    V(i,0) = j;
-	    i++;
-	  }
-	}
-	//too fancy (i--)?
-	neighborIndex = (int) floor((i)*(mt1()/normalization)) + ROUND_CONST;
-	i--;
-	neighbor = V(neighborIndex,0);
-	V(neighborIndex,0) = V(i,0);
-	while((i > 0) && (Opns(chosenVertex,0) == Opns(neighbor,0))) {
-	    neighborIndex = (int) floor((i)*(mt1()/normalization)) + ROUND_CONST;
-	    i--;
-	    neighbor = V(neighborIndex,0);
-	    V(neighborIndex,0) = V(i,0);
-	}
-	if(Opns(chosenVertex,0) != Opns(neighbor,0)) {
-	  actionToPerform = (mt1()/normalization);
-	  conflictCounter = 0;
-	  if(actionToPerform > a) {
-	    opnCounts(Opns(chosenVertex,0) - 1)--;
-	    opnCounts(Opns(neighbor,0) - 1)++;
-	    Opns(chosenVertex,0) = Opns(neighbor,0);
-	    for(j = 0; j < n; j++) {
-	      //does this work?
-	      if((A(chosenVertex,j) != 0) && (Opns(j,0) != Opns(chosenVertex,0))) {
-		conflictCounter++;
-	      }
-	      else if(A(chosenVertex,j) != 0) {
-		conflictCounter--;
-	      }
-	    }
-	    conflicts += conflictCounter;
-	  }
-	  else {
-	    if(Opns(chosenVertex,0) != Opns(neighbor,0)) {
-	      conflictCounter--;
-	    }
-	    A(chosenVertex,neighbor) = 0;
-	    A(neighbor,chosenVertex) = 0;
-	    newNeighbor = (int) floor(n*(mt1()/normalization)) + ROUND_CONST;
-	    while((A(chosenVertex,newNeighbor) != 0) || (newNeighbor == chosenVertex)) {
-		newNeighbor = (int) floor(n*(mt1()/normalization)) + ROUND_CONST;
-	    }
-	    A(chosenVertex,newNeighbor) = 1;
-	    A(newNeighbor,chosenVertex) = 1;
-	    if(Opns(chosenVertex,0) != Opns(newNeighbor,0)) {
-	      conflictCounter++;
-	    }
-	    conflicts += conflictCounter;
-	  }
-	}
-	if(iters % collectionInterval == 0) {
-	  step = iters/collectionInterval;
-	  N1timeCourse(step,0) = opnCounts(0,0);
-	  N10timeCourse(step,0) = conflicts;
-	  stepTimeCourse(step,0) = step + 1;
-	}
-	iters++;
-      }
-    }
-    ofstream graphStats;
-    graphStats.open(fileName);
-    graphStats << setiosflags(ios::left) << setiosflags(ios::fixed);
-    /**
-    graphStats << setw(8) << "Step";
-    graphStats << setw(30) << "Number Opn1 Vertice";
-    graphStats << setw(30) << "Number Disagreements" << "\n";
-    for(i = 0; i < step; i++) {
-      graphStats << setw(8) << stepTimeCourse(i,0);
-      graphStats << setw(30) <<  N1timeCourse(i,0);
-      graphStats << setw(30) << N10timeCourse(i,0) << "\n";
-    }
-    graphStats << "Total Edges: " << totalEdges << "\n";
-    **/
-    //the above is human readable, but why?
-    //below is csv formatting for easy python importing
-    for(i = 0; i < step; i++) {
-      graphStats << stepTimeCourse(i,0) << ",";
-      graphStats << N1timeCourse(i,0) << ",";
-      graphStats << N10timeCourse(i,0) << "\n";
-    }
-    graphStats << "\n\n";
-    graphStats.close();
-    /**    int firstUS = fileName.find_first_of("_");
-    string bifDiag = fileName;
-    int length = bifDiag.size();
-    //remove "a.initDists.csv" from fileName
-    bifDiag.erase(length-4*k-8);
-    bifDiag.erase(0,firstUS);
-    **/
-    stringstream ss;
-    ss << "bifData_" << n << "_" << avgDeg << ".csv";
-    string bifTitle = ss.str();
-    cout << conflicts << "\n";
-    ofstream bifData;
-    bifData.open(bifTitle, ios::app);
-    bifData << a << ",";
-    for(i = 0; i < k; i++) {
-      bifData << initDist[i] << ",";
-    }
-    if(iters == maxIter) {
-      bifData << "1" << "\n";
-    }
-    else {
-      bifData << "0" << "\n";
-    }
-    return 0;
+    return conflicts;
 }
