@@ -1,3 +1,0 @@
-#!/bin/bash
-
-mv ./graphStats_* ./graphStats/
