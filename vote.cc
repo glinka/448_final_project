@@ -13,7 +13,7 @@
 using namespace Eigen;
 using namespace std;
   
-votingModel::votingModel(int n, int k, int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, string rewireTo, string fileName): n(n), A(MatrixXi::Zero(n,n)), Opns(MatrixXi::Zero(n,1)), k(k), maxIter(maxIter), collectionInterval(collectionInterval), a(a), avgDeg(avgDeg), initDist(initDist), rewireTo(rewireTo), fileName(fileName) {};
+votingModel::votingModel(int n, int k, int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, string rewireTo, string fileName): ROUND_CONST(0.01), n(n), A(MatrixXi::Zero(n,n)), Opns(MatrixXi::Zero(n,1)), k(k), maxIter(maxIter), collectionInterval(collectionInterval), a(a), avgDeg(avgDeg), initDist(initDist), rewireTo(rewireTo), fileName(fileName) {};
   
 int votingModel::vote() {
     /* Arguments list:
@@ -27,11 +27,9 @@ int votingModel::vote() {
        collectionInterval: graph data collected every "collectionInterval" number of iterations
        fileName: output filename
     */
-    //constant to allow proper casting/rounding of floating point floor function
     int i, j;
     double sum = 0;
     for(i = 0; i < k; i++) {
-      //initDist[i] = atof(argv[i+4]);
 	sum += initDist[i];
     }
     if(sum != 1) {
@@ -53,6 +51,7 @@ int votingModel::vote() {
 	    totalEdges += A(i,j);
 	}
     }
+    //count initial number of conflicts
     int conflicts = 0;
     for(i = 0; i < n; i++) {
 	currentOpn = Opns(i,0);
@@ -67,8 +66,7 @@ int votingModel::vote() {
     MatrixXi minorityOpnTimeCourse = MatrixXi::Zero((int) maxIter/collectionInterval, 1);
     MatrixXi stepTimeCourse = MatrixXi::Zero((int) maxIter/collectionInterval, 1);
     MatrixXi V;
-    int step = 0;
-    int neighborTracker = 0;
+    int step, neighborTracker, chosenVertexTracker = 0;
     int chosenVertex, neighborIndex, neighbor, conflictCounter, newNeighbor;
     double actionToPerform;
     if(rewireTo == "random") {
@@ -76,34 +74,31 @@ int votingModel::vote() {
 	  chosenVertex = (int) floor(n*(mt1()/normalization));
 	  while(A.block(chosenVertex,0,1,n).sum() == 0) {
 	      chosenVertex = (int) floor(n*(mt1()/normalization));
+	      chosenVertexTracker++;
 	}
 	V = MatrixXi::Zero(n,1);
 	i = 0;
 	for(j = 0; j < n; j++) {
 	  if(A(chosenVertex,j) != 0) {
-	    V(i,0) = j;
-	    i++;
+	    V(i++,0) = j;
 	  }
 	}
-	neighborIndex = (int) floor((i)*(mt1()/normalization));
-	i--;
+	neighborIndex = (int) floor((i--)*(mt1()/normalization));
 	neighbor = V(neighborIndex,0);
 	V(neighborIndex,0) = V(i,0);
 	while((i > 0) && (Opns(chosenVertex,0) == Opns(neighbor,0))) {
-	    neighborIndex = (int) floor((i)*(mt1()/normalization));
-	    i--;
+	    neighborIndex = (int) floor((i--)*(mt1()/normalization));
 	    neighbor = V(neighborIndex,0);
 	    V(neighborIndex,0) = V(i,0);
 	}
 	if(Opns(chosenVertex,0) != Opns(neighbor,0)) {
-	  actionToPerform = (mt1()/normalization);
+	  actionToPerform = mt1()/normalization;
 	  conflictCounter = 0;
 	  if(actionToPerform > a) {
-	      opnCounts(Opns(chosenVertex,0) - 1) = opnCounts(Opns(chosenVertex,0) - 1) - 1;
-	      opnCounts(Opns(neighbor,0) - 1) = opnCounts(Opns(neighbor,0) - 1) + 1;
+	    opnCounts(Opns(chosenVertex,0) - 1,0) = opnCounts(Opns(chosenVertex,0) - 1,0) - 1;
+	    opnCounts(Opns(neighbor,0) - 1,0) = opnCounts(Opns(neighbor,0) - 1,0) + 1;
 	      Opns(chosenVertex,0) = Opns(neighbor,0);
 	    for(j = 0; j < n; j++) {
-	      //does this work?
 	      if((A(chosenVertex,j) != 0) && (Opns(j,0) != Opns(chosenVertex,0))) {
 		conflictCounter++;
 	      }
@@ -117,7 +112,7 @@ int votingModel::vote() {
 	      conflictCounter--;
 	      A(chosenVertex,neighbor) = 0;
 	      A(neighbor,chosenVertex) = 0;
-	      newNeighbor = (int) (floor(n*(mt1()/normalization)) + ROUND_CONST);
+	      newNeighbor = (int) floor(n*(mt1()/normalization));
 	      /**
 	      nNeighbors = A.block(chosenVertex,0,1,n).sum();
 	      newNeighborIndex = (int) (floor(nNeighbors*(mt1()/normalization)) + ROUND_CONST);
@@ -131,7 +126,7 @@ int votingModel::vote() {
 	      **/
 	      //for n = 100, avgDeg = 4, have, on avg, 95% chance of success
 	      while((A(chosenVertex,newNeighbor) != 0) || (newNeighbor == chosenVertex)) {
-		  newNeighbor = (int) floor(n*(mt1()/normalization)) + ROUND_CONST;
+		newNeighbor = (int) floor(n*(mt1()/normalization));
 		  neighborTracker++;
 	      }
 	      A(chosenVertex,newNeighbor) = 1;
@@ -144,7 +139,7 @@ int votingModel::vote() {
 	}
 	if(iters % collectionInterval == 0) {
 	    step = iters/collectionInterval;
-	    minorityOpnTimeCourse(step,0) = opnCounts(0,0)>opnCounts(1,0)?opnCounts(0,0):opnCounts(1,0);
+	    minorityOpnTimeCourse(step,0) = opnCounts(0,0);//<opnCounts(1,0)?opnCounts(0,0):opnCounts(1,0);
 	    N10timeCourse(step,0) = conflicts;
 	    stepTimeCourse(step,0) = step + 1;
 	}
@@ -184,7 +179,8 @@ int votingModel::vote() {
     stringstream ss;
     ss << "bifData_" << n << "_" << avgDeg << ".csv";
     string bifTitle = ss.str();
-    cout << conflicts;
+    cout << "new vertex loop count: " << chosenVertexTracker << endl;
+    cout << "conflicts: " << conflicts << endl;
     ofstream bifData;
     bifData.open(bifTitle, ios::app);
     bifData << a << ",";

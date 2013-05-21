@@ -5,7 +5,7 @@
 
 class votingModel {
  private:
-    const double ROUND_CONST = 0.01;
+    const double ROUND_CONST;
     const int n, k, maxIter, collectionInterval;
     const double a, avgDeg;
     double *initDist;

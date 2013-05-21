@@ -5,7 +5,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-for i in range(0,55,5):
+for i in range(5,55,5):
     i = i/100.0
     j = 1 - i
     for a in range(0,105,5):
@@ -15,7 +15,7 @@ for i in range(0,55,5):
         fileLoc = os.getcwd() + "/voterModelAlphaInitDist"
         print fileLoc
         n = 500
-        maxIter = 50000
+        maxIter = 1000000
         k = 2
         call([fileLoc, str(a), str(k), str(i), str(j), str(n), str(maxIter)])
 bifDataFileName = "bifData_" + str(n) + "_" + str(4) + ".csv"

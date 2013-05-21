@@ -2,7 +2,7 @@ toCompile = vote.o voterModelAlphaInitDist.o
 
 CXX = g++
 
-CXXFLAGS = -g -Wall -std=c++0x
+CXXFLAGS = -g -Wall -O2 -std=c++0x
 
 all: voterModelAlphaInitDist
 
