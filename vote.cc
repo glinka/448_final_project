@@ -79,19 +79,21 @@ int votingModel::vote() {
 	V = MatrixXi::Zero(n,1);
 	i = 0;
 	for(j = 0; j < n; j++) {
-	  if(A(chosenVertex,j) != 0) {
+	  if((A(chosenVertex,j) != 0) && (Opns(chosenVertex,0) != Opns(j,0))) {
 	    V(i++,0) = j;
 	  }
 	}
-	neighborIndex = (int) floor((i--)*(mt1()/normalization));
+	neighborIndex = (int) floor((i)*(mt1()/normalization));
 	neighbor = V(neighborIndex,0);
+	/**	
 	V(neighborIndex,0) = V(i,0);
 	while((i > 0) && (Opns(chosenVertex,0) == Opns(neighbor,0))) {
 	    neighborIndex = (int) floor((i--)*(mt1()/normalization));
 	    neighbor = V(neighborIndex,0);
 	    V(neighborIndex,0) = V(i,0);
 	}
-	if(Opns(chosenVertex,0) != Opns(neighbor,0)) {
+	**/
+	if(i > 0) {
 	  actionToPerform = mt1()/normalization;
 	  conflictCounter = 0;
 	  if(actionToPerform > a) {
@@ -195,36 +197,36 @@ int votingModel::vote() {
 }
 
 void votingModel::initGraph() {
-    double p = avgDeg/(n-1);
-    int v = 1;
-    int w = -1;
-    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
-    mt19937 mt1(seed);
-    double normalization = (double) mt1.max();
-    double rv1, rv2, partialSum;
-    int indexCounter;
-    //    default_random_engine generator;
-    //    uniform_real_distribution<double> distr(0.0, 1.0);
-    while(v <= n) {
-	rv1 = mt1()/normalization;
-	w = (int) w + 1 + floor(log(1-rv1)/log(1-p)) + ROUND_CONST;
-	while((w >= v) && (v <= n)) {
-	  rv2 = mt1()/normalization;
-	    partialSum = 0.0;
-	    indexCounter = 0;
-	    while(partialSum < rv2) {
-		partialSum = partialSum + initDist[indexCounter];
-		indexCounter++;
-	    }
-	    Opns(v-1,0) = indexCounter;
-	    w = w - v;
-	    v = v + 1;
-	}
-	if(v < n) {
-	    A(v,w) = 1;
-	    A(w,v) = 1;
-	}
+  double p = avgDeg/(n-1);
+  int v = 1;
+  int w = -1;
+  unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+  mt19937 mt1(seed);
+  double normalization = (double) mt1.max();
+  double rv1, rv2, partialSum;
+  int indexCounter;
+  //    default_random_engine generator;
+  //    uniform_real_distribution<double> distr(0.0, 1.0);
+  while(v <= n) {
+    rv1 = mt1()/normalization;
+    w = (int) (w + 1 + floor(log(1-rv1)/log(1-p)) + ROUND_CONST);
+    while((w >= v) && (v <= n)) {
+      rv2 = mt1()/normalization;
+      partialSum = 0.0;
+      indexCounter = 0;
+      while(partialSum < rv2) {
+	partialSum = partialSum + initDist[indexCounter];
+	indexCounter++;
+      }
+      Opns(v-1,0) = indexCounter;
+      w = w - v;
+      v = v + 1;
     }
+    if(v < n) {
+      A(v,w) = 1;
+      A(w,v) = 1;
+    }
+  }
 }
     
 
