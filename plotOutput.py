@@ -16,11 +16,11 @@ def plotGraphStats(fileName):
     l1Up = max(toPlot[:,1])*scaleUp
     l2Low = min(toPlot[:,2])*scaleDown
     l2Up = max(toPlot[:,2])*scaleUp
-    nSteps = 1000
+    nSteps = 10000
     if "graphStats" in fileName:
         f1 = plt.figure(1)
         ax2 = f1.add_subplot(212)
-        ax2.plot(toPlot[:,0],2000*toPlot[:,2],'g-')
+        ax2.plot(toPlot[:,0],toPlot[:,2],'g-')
         ax2.set_title("Number Conflicting Edges vs. Time")
         #ax2.set_ylim([l2Low, l2Up])
 	ax2.set_xlim([0,nSteps])

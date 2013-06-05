@@ -24,8 +24,8 @@ int main(int argc, char *argv[]) {
   int n = atoi(argv[argc-2]);
   int maxIter = atoi(argv[argc-1]);
   double avgDeg = 4;
-  string rewireTo = "random";
-  int collectionInterval = 2000;
+  string rewireTo = "same";
+  int collectionInterval = 1000;
   double a = atof(argv[1]);
   int k = atoi(argv[2]);
   double initDist[k];

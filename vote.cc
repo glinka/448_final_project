@@ -85,33 +85,29 @@ int votingModel::vote() {
 	}
 	neighborIndex = (int) floor((i)*(mt1()/normalization));
 	neighbor = V(neighborIndex,0);
-	/**	
-	V(neighborIndex,0) = V(i,0);
-	while((i > 0) && (Opns(chosenVertex,0) == Opns(neighbor,0))) {
-	    neighborIndex = (int) floor((i--)*(mt1()/normalization));
-	    neighbor = V(neighborIndex,0);
-	    V(neighborIndex,0) = V(i,0);
-	}
-	**/
 	if(i > 0) {
 	  actionToPerform = mt1()/normalization;
 	  conflictCounter = 0;
 	  if(actionToPerform > a) {
-	    opnCounts(Opns(chosenVertex,0) - 1,0) = opnCounts(Opns(chosenVertex,0) - 1,0) - 1;
-	    opnCounts(Opns(neighbor,0) - 1,0) = opnCounts(Opns(neighbor,0) - 1,0) + 1;
+	    if(Opns(chosenVertex,0) != Opns(neighbor,0)) {
+	      opnCounts(Opns(chosenVertex,0) - 1,0) = opnCounts(Opns(chosenVertex,0) - 1,0) - 1;
+	      opnCounts(Opns(neighbor,0) - 1,0) = opnCounts(Opns(neighbor,0) - 1,0) + 1;
 	      Opns(chosenVertex,0) = Opns(neighbor,0);
-	    for(j = 0; j < n; j++) {
-	      if((A(chosenVertex,j) != 0) && (Opns(j,0) != Opns(chosenVertex,0))) {
-		conflictCounter++;
+	      for(j = 0; j < n; j++) {
+		if((A(chosenVertex,j) != 0) && (Opns(j,0) != Opns(chosenVertex,0))) {
+		  conflictCounter++;
+		}
+		else if(A(chosenVertex,j) != 0) {
+		  conflictCounter--;
+		}
 	      }
-	      else if(A(chosenVertex,j) != 0) {
-		conflictCounter--;
-	      }
+	      conflicts += conflictCounter;
 	    }
-	    conflicts += conflictCounter;
 	  }
 	  else {
+	    if(Opns(chosenVertex,0) != Opns(neighbor,0)) {
 	      conflictCounter--;
+	    }
 	      A(chosenVertex,neighbor) = 0;
 	      A(neighbor,chosenVertex) = 0;
 	      newNeighbor = (int) floor(n*(mt1()/normalization));
@@ -129,19 +125,19 @@ int votingModel::vote() {
 	      //for n = 100, avgDeg = 4, have, on avg, 95% chance of success
 	      while((A(chosenVertex,newNeighbor) != 0) || (newNeighbor == chosenVertex)) {
 		newNeighbor = (int) floor(n*(mt1()/normalization));
-		  neighborTracker++;
+		neighborTracker++;
 	      }
 	      A(chosenVertex,newNeighbor) = 1;
 	      A(newNeighbor,chosenVertex) = 1;
 	      if(Opns(chosenVertex,0) != Opns(newNeighbor,0)) {
-		  conflictCounter++;
+		conflictCounter++;
 	      }
 	      conflicts += conflictCounter;
 	  }
 	}
 	if(iters % collectionInterval == 0) {
 	    step = iters/collectionInterval;
-	    minorityOpnTimeCourse(step,0) = opnCounts(0,0);//<opnCounts(1,0)?opnCounts(0,0):opnCounts(1,0);
+	    minorityOpnTimeCourse(step,0) = opnCounts(0,0)<opnCounts(1,0)?opnCounts(0,0):opnCounts(1,0);
 	    N10timeCourse(step,0) = conflicts;
 	    stepTimeCourse(step,0) = step + 1;
 	}
@@ -178,7 +174,7 @@ int votingModel::vote() {
 	  if(actionToPerform > a) {
 	    opnCounts(Opns(chosenVertex,0) - 1,0) = opnCounts(Opns(chosenVertex,0) - 1,0) - 1;
 	    opnCounts(Opns(neighbor,0) - 1,0) = opnCounts(Opns(neighbor,0) - 1,0) + 1;
-	      Opns(chosenVertex,0) = Opns(neighbor,0);
+	    Opns(chosenVertex,0) = Opns(neighbor,0);
 	    for(j = 0; j < n; j++) {
 	      if((A(chosenVertex,j) != 0) && (Opns(j,0) != Opns(chosenVertex,0))) {
 		conflictCounter++;
@@ -218,15 +214,17 @@ int votingModel::vote() {
 	      }
 	      A(chosenVertex,newNeighbor) = 1;
 	      A(newNeighbor,chosenVertex) = 1;
-	      if(Opns(chosenVertex,0) != Opns(newNeighbor,0)) {
-		  conflictCounter++;
-	      }
 	      conflicts += conflictCounter;
 	  }
 	}
 	if(iters % collectionInterval == 0) {
+	  /**
+	  if(conflicts != countConflicts()) {
+	    return 1;
+	  }
+	  **/
 	    step = iters/collectionInterval;
-	    minorityOpnTimeCourse(step,0) = opnCounts(0,0);//<opnCounts(1,0)?opnCounts(0,0):opnCounts(1,0);
+	    minorityOpnTimeCourse(step,0) = opnCounts(0,0)<opnCounts(1,0)?opnCounts(0,0):opnCounts(1,0);
 	    N10timeCourse(step,0) = conflicts;
 	    stepTimeCourse(step,0) = step + 1;
 	}
@@ -252,7 +250,7 @@ int votingModel::vote() {
     for(i = 0; i < step; i++) {
       graphStats << stepTimeCourse(i,0) << ",";
       graphStats << 1.0*minorityOpnTimeCourse(i,0)/n << ",";
-      graphStats << 1.0*N10timeCourse(i,0)/totalEdges << "\n";
+      graphStats << 1.0*N10timeCourse(i,0) << "\n";
     }
     graphStats << "\n\n";
     graphStats.close();
@@ -272,12 +270,13 @@ int votingModel::vote() {
     bifData.open(bifTitle, ios::app);
     bifData << a << ",";
     bifData << (opnCounts(0,0)<opnCounts(1,0)?(1.0*opnCounts(0,0)/n):(1.0*opnCounts(1,0)/n)) << ",";
-    if(iters == maxIter) {
+    if(conflicts != 0) {
       bifData << "1" << "\n";
     }
     else {
       bifData << "0" << "\n";
     }
+    bifData.close();
     return 0;
 }
 
