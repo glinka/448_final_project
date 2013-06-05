@@ -79,7 +79,7 @@ int votingModel::vote() {
 	V = MatrixXi::Zero(n,1);
 	i = 0;
 	for(j = 0; j < n; j++) {
-	  if((A(chosenVertex,j) != 0) && (Opns(chosenVertex,0) != Opns(j,0))) {
+	  if((A(chosenVertex,j) != 0)) {
 	    V(i++,0) = j;
 	  }
 	}
@@ -130,6 +130,91 @@ int votingModel::vote() {
 	      while((A(chosenVertex,newNeighbor) != 0) || (newNeighbor == chosenVertex)) {
 		newNeighbor = (int) floor(n*(mt1()/normalization));
 		  neighborTracker++;
+	      }
+	      A(chosenVertex,newNeighbor) = 1;
+	      A(newNeighbor,chosenVertex) = 1;
+	      if(Opns(chosenVertex,0) != Opns(newNeighbor,0)) {
+		  conflictCounter++;
+	      }
+	      conflicts += conflictCounter;
+	  }
+	}
+	if(iters % collectionInterval == 0) {
+	    step = iters/collectionInterval;
+	    minorityOpnTimeCourse(step,0) = opnCounts(0,0);//<opnCounts(1,0)?opnCounts(0,0):opnCounts(1,0);
+	    N10timeCourse(step,0) = conflicts;
+	    stepTimeCourse(step,0) = step + 1;
+	}
+	iters++;
+      }
+    }
+    else if(rewireTo == "same") {
+      while((conflicts > 0) && (iters < maxIter)) {
+	  chosenVertex = (int) floor(n*(mt1()/normalization));
+	  while(A.block(chosenVertex,0,1,n).sum() == 0) {
+	      chosenVertex = (int) floor(n*(mt1()/normalization));
+	      chosenVertexTracker++;
+	}
+	V = MatrixXi::Zero(n,1);
+	i = 0;
+	for(j = 0; j < n; j++) {
+	  if((A(chosenVertex,j) != 0) && (Opns(chosenVertex,0) != Opns(j,0))) {
+	    V(i++,0) = j;
+	  }
+	}
+	neighborIndex = (int) floor((i)*(mt1()/normalization));
+	neighbor = V(neighborIndex,0);
+	/**	
+	V(neighborIndex,0) = V(i,0);
+	while((i > 0) && (Opns(chosenVertex,0) == Opns(neighbor,0))) {
+	    neighborIndex = (int) floor((i--)*(mt1()/normalization));
+	    neighbor = V(neighborIndex,0);
+	    V(neighborIndex,0) = V(i,0);
+	}
+	**/
+	if(i > 0) {
+	  actionToPerform = mt1()/normalization;
+	  conflictCounter = 0;
+	  if(actionToPerform > a) {
+	    opnCounts(Opns(chosenVertex,0) - 1,0) = opnCounts(Opns(chosenVertex,0) - 1,0) - 1;
+	    opnCounts(Opns(neighbor,0) - 1,0) = opnCounts(Opns(neighbor,0) - 1,0) + 1;
+	      Opns(chosenVertex,0) = Opns(neighbor,0);
+	    for(j = 0; j < n; j++) {
+	      if((A(chosenVertex,j) != 0) && (Opns(j,0) != Opns(chosenVertex,0))) {
+		conflictCounter++;
+	      }
+	      else if(A(chosenVertex,j) != 0) {
+		conflictCounter--;
+	      }
+	    }
+	    conflicts += conflictCounter;
+	  }
+	  else {
+	      conflictCounter--;
+	      A(chosenVertex,neighbor) = 0;
+	      A(neighbor,chosenVertex) = 0;
+	      newNeighbor = (int) floor(n*(mt1()/normalization));
+	      /**
+	      nNeighbors = A.block(chosenVertex,0,1,n).sum();
+	      newNeighborIndex = (int) (floor(nNeighbors*(mt1()/normalization)) + ROUND_CONST);
+	      neighborCount = 0;
+	      newNeighbor = 0;
+	      while(neighborCount < newNeighborIndex) {
+		  neighborCount += A(chosenVertex,j);
+		  newNeighbor++;
+	      }
+	      newNeighbor--;
+	      **/
+	      //for n = 100, avgDeg = 4, have, on avg, 95% chance of success
+	      //in this, the "rewireTo == same" section, the probability of 
+	      //finding a neighbor at random decreases as we must ensure not only that
+	      //the edge isn't parallel/loop but also that the opinions match
+	      //could form list of matching opinion edges, but this would be
+	      //computationally expensive for large n, and would probably be slower
+	      //than current, random implementation
+	      while((Opns(chosenVertex,0) != Opns(newNeighbor,0)) || (A(chosenVertex,newNeighbor) != 0) || (newNeighbor == chosenVertex)) {
+		newNeighbor = (int) floor(n*(mt1()/normalization));
+		neighborTracker++;
 	      }
 	      A(chosenVertex,newNeighbor) = 1;
 	      A(newNeighbor,chosenVertex) = 1;
