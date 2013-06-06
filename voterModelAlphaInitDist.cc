@@ -21,10 +21,10 @@ int main(int argc, char *argv[]) {
       
       fileName is constructed as: fileName_n_avgDeg_a_initD[0]_initD[1]_...
   **/
-  int n = atoi(argv[argc-2]);
-  int maxIter = atoi(argv[argc-1]);
+  int n = atoi(argv[argc-3]);
+  int maxIter = atoi(argv[argc-2]);
   double avgDeg = 4;
-  string rewireTo = "same";
+  string rewireTo = argv[argc-1];
   int collectionInterval = 1000;
   double a = atof(argv[1]);
   int k = atoi(argv[2]);

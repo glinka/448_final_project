@@ -67,24 +67,50 @@ int votingModel::vote() {
     MatrixXi stepTimeCourse = MatrixXi::Zero((int) maxIter/collectionInterval, 1);
     MatrixXi V;
     int step, neighborTracker, chosenVertexTracker = 0;
-    int chosenVertex, neighborIndex, neighbor, conflictCounter, newNeighbor;
+    int chosenVertex, neighborIndex, nNeighbors,neighborNumber, neighbor, conflictCounter, newNeighbor;
     double actionToPerform;
     if(rewireTo == "random") {
       while((conflicts > 0) && (iters < maxIter)) {
 	  chosenVertex = (int) floor(n*(mt1()/normalization));
-	  while(A.block(chosenVertex,0,1,n).sum() == 0) {
+	  while((nNeighbors = A.block(chosenVertex,0,1,n).sum()) == 0) {
 	      chosenVertex = (int) floor(n*(mt1()/normalization));
 	      chosenVertexTracker++;
-	}
-	V = MatrixXi::Zero(n,1);
-	i = 0;
-	for(j = 0; j < n; j++) {
-	  if((A(chosenVertex,j) != 0)) {
-	    V(i++,0) = j;
 	  }
-	}
-	neighborIndex = (int) floor((i)*(mt1()/normalization));
-	neighbor = V(neighborIndex,0);
+	  /**
+	  V = MatrixXi::Zero(n,1);
+	  i = 0;
+	  for(j = 0; j < n; j++) {
+	    if((A(chosenVertex,j) != 0)) {
+	      V(i++,0) = j;
+	    }
+	  }
+	  neighborIndex = (int) floor((i)*(mt1()/normalization));
+	  neighbor = V(neighborIndex,0);
+	  **/
+	  //following avoids the allocation of an nx1 vector every step
+	  //nNeighbors = A.block(chosenVertex,0,1,n).sum();
+	  neighborNumber = ((int) floor(nNeighbors*mt1()/normalization)) + 1;
+	  i = 0;
+	  j = 0;
+	  while(i < neighborNumber) {
+	    if(A(chosenVertex,j) != 0) {
+	      i++;
+	    }
+	    j++;
+	  }
+	  neighbor = --j;	 
+	  /**
+	  neighborNumber = ((int) floor(n-opnCounts(Opns(chosenVertex,0) - 1,0))) + 1;
+	  i = 0;
+	  j = 0;
+	  while(i < neighborNumber) {
+	    if(Opns(chosenVertex,0) != Opns(j,0) && (chosenVertex != j)) {
+	      i++;
+	    }
+	    j++;
+	  }
+	  neighbor = j--;
+	  **/
 	if(i > 0) {
 	  actionToPerform = mt1()/normalization;
 	  conflictCounter = 0;
@@ -155,7 +181,8 @@ int votingModel::vote() {
 	i = 0;
 	for(j = 0; j < n; j++) {
 	  if((A(chosenVertex,j) != 0) && (Opns(chosenVertex,0) != Opns(j,0))) {
-	    V(i++,0) = j;
+	    V(i,0) = j;
+	    i++;
 	  }
 	}
 	neighborIndex = (int) floor((i)*(mt1()/normalization));
@@ -262,7 +289,7 @@ int votingModel::vote() {
     bifDiag.erase(0,firstUS);
     **/
     stringstream ss;
-    ss << "bifData_" << n << "_" << avgDeg << ".csv";
+    ss << "bifData_" << rewireTo << "_" << n << "_" << avgDeg << ".csv";
     string bifTitle = ss.str();
     cout << "new vertex loop count: " << chosenVertexTracker << endl;
     cout << "conflicts: " << conflicts << endl;
@@ -276,6 +303,7 @@ int votingModel::vote() {
     else {
       bifData << "0" << "\n";
     }
+    bifData << initDist[0];
     bifData.close();
     return 0;
 }

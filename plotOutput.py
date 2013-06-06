@@ -17,6 +17,8 @@ def plotGraphStats(fileName):
     l2Low = min(toPlot[:,2])*scaleDown
     l2Up = max(toPlot[:,2])*scaleUp
     nSteps = 10000
+    alpha = 0
+    plt.hold(True)
     if "graphStats" in fileName:
         f1 = plt.figure(1)
         ax2 = f1.add_subplot(212)
@@ -41,8 +43,20 @@ def plotGraphStats(fileName):
     elif "bifData" in fileName:
         toPlot = filter(lambda x: x[2] == 0, toPlot)
         toPlot = np.asarray(toPlot)
-        plt.figure(1)
-        plt.plot(toPlot[:,0],toPlot[:,1],'og')
+        n = toPlot.shape[0]
+        #f1 = plt.figure(num=1)
+        #ax = f1.add_subplot(111)
+        colorList = []
+        for i in range(n):
+            color = toPlot[i,3]
+            if not color in colorList:
+                plt.plot(toPlot[i,0], toPlot[i,1],'o',color=[1-2*color, np.cos(np.pi*color), 2*color], label="initial fraction= " + str(color))
+                colorList.append(color)
+            else:
+                plt.plot(toPlot[i,0], toPlot[i,1],'o',color=[1-2*color, np.cos(np.pi*color), 2*color])
+        plt.xlabel(r'$\alpha$', fontsize=20)
+        plt.ylabel("Final minority fraction")
+        plt.legend()
         plt.show()
     
 if __name__=='__main__':
