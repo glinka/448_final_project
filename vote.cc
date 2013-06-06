@@ -8,6 +8,7 @@
 #include <Eigen/Sparse>
 #include <chrono>
 #include <iomanip>
+#include <time.h>
 #include "vote.h"
 
 using namespace Eigen;
@@ -28,6 +29,8 @@ int votingModel::vote() {
        fileName: output filename
     */
     //constant to allow proper casting/rounding of floating point floor function
+    clock_t start, beginWrite, end;
+    start = clock();
     int i, j;
     double sum = 0;
     for(i = 0; i < k; i++) {
@@ -68,7 +71,7 @@ int votingModel::vote() {
     MatrixXi stepTimeCourse = MatrixXi::Zero((int) maxIter/collectionInterval, 1);
     MatrixXi V;
     int step = 0;
-    int neighborTracker = 0;
+    int alphaTracker, actionTracker = 0;
     int chosenVertex, neighborIndex, neighbor, conflictCounter, newNeighbor;
     double actionToPerform;
     if(rewireTo == "random") {
@@ -96,6 +99,7 @@ int votingModel::vote() {
 	    V(neighborIndex,0) = V(i,0);
 	}
 	if(Opns(chosenVertex,0) != Opns(neighbor,0)) {
+	    actionTracker++;
 	  actionToPerform = (mt1()/normalization);
 	  conflictCounter = 0;
 	  if(actionToPerform > a) {
@@ -103,7 +107,6 @@ int votingModel::vote() {
 	      opnCounts(Opns(neighbor,0) - 1) = opnCounts(Opns(neighbor,0) - 1) + 1;
 	      Opns(chosenVertex,0) = Opns(neighbor,0);
 	    for(j = 0; j < n; j++) {
-	      //does this work?
 	      if((A(chosenVertex,j) != 0) && (Opns(j,0) != Opns(chosenVertex,0))) {
 		conflictCounter++;
 	      }
@@ -114,25 +117,13 @@ int votingModel::vote() {
 	    conflicts += conflictCounter;
 	  }
 	  else {
+	      alphaTracker++;
 	      conflictCounter--;
 	      A(chosenVertex,neighbor) = 0;
 	      A(neighbor,chosenVertex) = 0;
 	      newNeighbor = (int) (floor(n*(mt1()/normalization)) + ROUND_CONST);
-	      /**
-	      nNeighbors = A.block(chosenVertex,0,1,n).sum();
-	      newNeighborIndex = (int) (floor(nNeighbors*(mt1()/normalization)) + ROUND_CONST);
-	      neighborCount = 0;
-	      newNeighbor = 0;
-	      while(neighborCount < newNeighborIndex) {
-		  neighborCount += A(chosenVertex,j);
-		  newNeighbor++;
-	      }
-	      newNeighbor--;
-	      **/
-	      //for n = 100, avgDeg = 4, have, on avg, 95% chance of success
 	      while((A(chosenVertex,newNeighbor) != 0) || (newNeighbor == chosenVertex)) {
 		  newNeighbor = (int) floor(n*(mt1()/normalization)) + ROUND_CONST;
-		  neighborTracker++;
 	      }
 	      A(chosenVertex,newNeighbor) = 1;
 	      A(newNeighbor,chosenVertex) = 1;
@@ -144,13 +135,16 @@ int votingModel::vote() {
 	}
 	if(iters % collectionInterval == 0) {
 	    step = iters/collectionInterval;
-	    minorityOpnTimeCourse(step,0) = opnCounts(0,0)>opnCounts(1,0)?opnCounts(0,0):opnCounts(1,0);
+	    minorityOpnTimeCourse(step,0) = opnCounts(0,0)<opnCounts(1,0)?opnCounts(0,0):opnCounts(1,0);
 	    N10timeCourse(step,0) = conflicts;
 	    stepTimeCourse(step,0) = step + 1;
 	}
 	iters++;
       }
     }
+    beginWrite = clock();
+    cout << "alpha: " << a << " simulation: " << (1.0*alphaTracker)/actionTracker << endl;
+    cout << "time to complete simulation: " << (double) (beginWrite - start)/CLOCKS_PER_SEC << endl;
     ofstream graphStats;
     graphStats.open(fileName);
     graphStats << setiosflags(ios::left) << setiosflags(ios::fixed);
@@ -174,17 +168,9 @@ int votingModel::vote() {
     }
     graphStats << "\n\n";
     graphStats.close();
-    /**    int firstUS = fileName.find_first_of("_");
-    string bifDiag = fileName;
-    int length = bifDiag.size();
-    //remove "a.initDists.csv" from fileName
-    bifDiag.erase(length-4*k-8);
-    bifDiag.erase(0,firstUS);
-    **/
     stringstream ss;
     ss << "bifData_" << n << "_" << avgDeg << ".csv";
     string bifTitle = ss.str();
-    cout << conflicts;
     ofstream bifData;
     bifData.open(bifTitle, ios::app);
     bifData << a << ",";
@@ -195,6 +181,10 @@ int votingModel::vote() {
     else {
       bifData << "0" << "\n";
     }
+    end = clock();
+    cout << "write time: " << (double) (end - beginWrite)/CLOCKS_PER_SEC << endl;
+    cout << "percent time writing: " << (double) (end - beginWrite)/(end - start) << endl;
+    cout << "total time: " << (double) (end - start)/CLOCKS_PER_SEC << endl;
     return 0;
 }
 
@@ -244,4 +234,30 @@ int votingModel::countConflicts() {
 	}
     }
     return conflicts;
+}
+
+int votingModel::graphConsistencyCheck() {
+    //check graph initialization
+    double avgDegCheck = 0;
+    double opnCheck = 0;
+    int i, j;
+    for(i = 0; i < n; i++) {
+	if(Opns(i,0) == 2) {
+	    opnCheck++;
+	}
+	if((A(i,i) != 0) || (Opns(i,0) <= 0)) {
+	    cout << i << endl;
+	    return 1;
+	}
+	for(j = i; j < n; j++) {
+	    if((A(i,j) != A(j,i)) || (A(i,j) > 1)) {
+		cout << i << j << endl;
+		return 1;
+	    }
+	    avgDegCheck += A(i,j);
+	}
+    }
+    cout << (2.0*avgDegCheck)/n << endl;
+    cout << (1.0*opnCheck)/n << endl;
+    return 0;
 }

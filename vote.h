@@ -13,6 +13,7 @@ class votingModel {
     std::string rewireTo, fileName;
     void initGraph();
     int countConflicts();
+    int graphConsistencyCheck();
  public:
     int vote();
     votingModel(int n, int k, int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, std::string rewireTo, std::string fileName);
