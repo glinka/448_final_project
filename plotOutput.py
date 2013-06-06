@@ -7,20 +7,36 @@ def plotGraphStats(fileName):
     output"""
     pathToFile = os.path.realpath(fileName)
     toPlot = np.genfromtxt(pathToFile, delimiter = ',')
+    scaleUp = 16.0/15.0
+    scaleDown = 14.0/15.0
+    #get graph limits
+    l0Low = min(toPlot[:,0])*scaleDown
+    l0Up = max(toPlot[:,0])*scaleUp
+    l1Low = min(toPlot[:,1])*scaleDown
+    l1Up = max(toPlot[:,1])*scaleUp
+    l2Low = min(toPlot[:,2])*scaleDown
+    l2Up = max(toPlot[:,2])*scaleUp
+    nSteps = 1000
     if "graphStats" in fileName:
         f1 = plt.figure(1)
-        ax1 = f1.add_subplot(211)
-        ax1.plot(toPlot[:,0],toPlot[:,2],'g-')
-        ax1.set_title("Fraction Conflicting Edges vs. Time")
         ax2 = f1.add_subplot(212)
-        ax2.plot(toPlot[:,0], toPlot[:,1],'c-')
-        ax2.set_title("Minority Fraction vs Time")
+        ax2.plot(toPlot[:,0],2000*toPlot[:,2],'g-')
+        ax2.set_title("Number Conflicting Edges vs. Time")
+        #ax2.set_ylim([l2Low, l2Up])
+	ax2.set_xlim([0,nSteps])
+        ax1 = f1.add_subplot(211)
+        ax1.plot(toPlot[:,0], toPlot[:,1],'c-')
+        ax1.set_title("Minority Fraction vs Time")
+	ax1.set_ylim([l1Low,l1Up])
+	ax1.set_xlim([0,nSteps])
         f2 = plt.figure(2)
         ax = f2.add_subplot(111)
         #plt.plot(toPlot[:,1],toPlot[:,2],'b-')
         #ax.subplot(212)
         ax.plot(toPlot[:,1],toPlot[:,2],'b-')
-        ax.set_title("1-0 Edges vs. Opn 1 Vertices")
+        ax.set_title("Fraction Conflicting Edges vs. Fraction Ones")
+        ax.set_xlim([l1Low, l1Up])
+        ax.set_ylim([l2Low, l2Up])
         plt.show()
     elif "bifData" in fileName:
         toPlot = filter(lambda x: x[2] == 0, toPlot)
