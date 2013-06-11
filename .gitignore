@@ -1,0 +1,10 @@
+#ignore .pyc files:
+*.pyc
+#ignore stat.py as I have no idea what it is
+stats.py
+#ignore files with "~" ending
+*~
+\#*\#
+#ignore executables and output csv files
+voterModelAlphaInitDist
+*.csv
