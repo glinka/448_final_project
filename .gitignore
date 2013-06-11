@@ -7,4 +7,10 @@ stats.py
 \#*\#
 #ignore executables and output csv files
 voterModelAlphaInitDist
+getOuttaHere
+reportData/
 *.csv
+#ignore object files
+*.o
+#ignore jpgs
+*.jpg
