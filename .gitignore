@@ -12,3 +12,5 @@ reportData/
 *.csv
 #ignore object files
 *.o
+#ignore jpgs
+*.jpg
