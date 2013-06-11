@@ -1,12 +1,15 @@
-toCompile = voterModel.cc
+toCompile = vote.o voterModelAlphaInitDist.o
 
 CXX = g++
 
-CXXFLAGS = -g -Wall -std=c++0x
+CXXFLAGS = -g -Wall -O2 -std=c++0x
 
-all: voterModel
+all: voterModelAlphaInitDist
 
-voterModel: $(toCompile)
+%.o: %.c
+	$(CXX) $(CXXFLAGS) -c $<
+
+voterModelAlphaInitDist: voterModelAlphaInitDist.o vote.o
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 clean:

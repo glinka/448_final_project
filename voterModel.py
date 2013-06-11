@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pickle
 
-def vote(n=10000, avgDeg=4.0, u=(0.5,0.5), a=0.5, rewireTo="random", maxIter=100000000, timeInterval=100, fileName='graphStatsOut.txt'):
+def vote(n=1000, avgDeg=4.0, u=(0.5,0.5), a=0.5, rewireTo="random", maxIter=10000, timeInterval=2000, fileName='graphStatsOut.txt'):
     """simulate voting model with k opinions, alpha = a
        and rewiring scheme of rewireTo (with default parameters
        2, 0.5 and 'random', respectively)""" 
