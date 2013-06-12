@@ -13,4 +13,3 @@ reportData/
 #ignore object files
 *.o
 #ignore jpgs
-*.jpg
