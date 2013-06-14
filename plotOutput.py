@@ -35,12 +35,12 @@ def plotGraphStats(fileNames):
             f1 = plt.figure(i)
             #i = i + 1
             ax2 = f1.add_subplot(211, ylabel="Number conflicting edges")
-            ax2.plot(toPlot[:,0],toPlot[:,2],'g-')
+            ax2.plot(toPlot[:,0],toPlot[:,2], '-', color="#47D147")
             #ax2.set_title("Number Conflicting Edges vs. Time")
             ax2.set_ylim([l2Low, l2Up])
             ax2.set_xlim([0,nSteps])
             ax1 = f1.add_subplot(212, sharex=ax2, ylabel="Minority fraction", xlabel="Time")
-            ax1.plot(toPlot[:,0], toPlot[:,1],'c-')
+            ax1.plot(toPlot[:,0], toPlot[:,1], '-', color="#70AAFF")
             #ax1.set_title("Minority Fraction vs Time")
             ax1.set_ylim([l1Low,l1Up])
             plt.setp(ax2.get_xticklabels(), visible=False)
@@ -121,6 +121,12 @@ def plotGraphStats(fileNames):
 if __name__=='__main__':
     import sys
     fileNames = []
-    for i in sys.argv[1:]:
-        fileNames.append(i)
-    plotGraphStats(fileNames)
+    # if sys.stdin.isatty():
+    #     fileNames = sys.stdin.read()
+    #     print sys.stdin.read()
+    #     print "here"
+    # else:
+    #     for i in sys.argv[1:]:
+    #         fileNames.append(i)
+    #print sys.stdin.read()[5:]
+    plotGraphStats(sys.argv[1:])
