@@ -13,3 +13,15 @@ reportData/
 #ignore object files
 *.o
 #ignore jpgs
+#jk
+#latex garbage
+*.aux
+*.bbl
+*.blg
+*.log
+#latex script
+*genPDF
+#v5 folders
+v5randomIeqJ/*
+v5randomIneqJ/*
+v5same/*
