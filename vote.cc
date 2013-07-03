@@ -16,7 +16,7 @@ using namespace std;
 votingModel::votingModel(int n, int k, int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, string rewireTo, string fileName): ROUND_CONST(0.01), n(n), A(MatrixXi::Zero(n,n)), Opns(MatrixXi::Zero(n,1)), k(k), maxIter(maxIter), collectionInterval(collectionInterval), a(a), avgDeg(avgDeg), initDist(initDist), rewireTo(rewireTo), fileName(fileName) {};
   
 int votingModel::vote() {
-    /* Arguments list:
+    /* 
        n: number of vertices
        k: number of opinions
        avgDeg: lambda/avg vertex degree
@@ -29,6 +29,7 @@ int votingModel::vote() {
     */
     int i, j;
     double sum = 0;
+    //check that initial distribution has been properly specified
     for(i = 0; i < k; i++) {
 	sum += initDist[i];
     }
@@ -36,14 +37,16 @@ int votingModel::vote() {
 	cerr << "sum(u) != 1, improper initial distribution" << "\n";
 	return 1;
     }
+    //init graph and uniform random number generator (mersenne twister)
     initGraph();
     unsigned seed = chrono::system_clock::now().time_since_epoch().count();
     mt19937 mt1(seed);
     double normalization = (double) mt1.max();
     //init matrices
     int totalEdges = 0;
-    MatrixXi opnCounts = MatrixXi::Zero(k,1);
     int currentOpn;
+    MatrixXi opnCounts = MatrixXi::Zero(k,1);
+    //counts initial numbers of each opinion
     for(int i = 0; i < n; i++) {
 	currentOpn = Opns(i,0);
 	opnCounts(currentOpn-1,0) = opnCounts(currentOpn-1,0) + 1;
@@ -52,6 +55,10 @@ int votingModel::vote() {
 	}
     }
     //count initial number of conflicts
+    /**
+       Initially the code calculated the number of conflicts from scratch at each step (i.e from
+       the adjacency matrix and opinion vector), but this was prohibitively expensive
+    **/
     int conflicts = 0;
     for(i = 0; i < n; i++) {
 	currentOpn = Opns(i,0);
@@ -61,13 +68,23 @@ int votingModel::vote() {
 	    }
 	}
     }
+    /**
+       iters: number of steps the simulation has executed
+       N10timeCourse: stores the number of discordant edges
+       minorityOpnTimeCourse: stores the number of vertices holding the minority opinion
+       V: during each step, stores the index of potential neighbors to chosenVertex (only used in rewire-to-same)
+       ***********
+       chosenVertex: randomly chosen vertex, could be the source of discrepancies given I actually do not chose an
+       edge, but rather a vertex, which result in a different distribution of selected vertices
+       ***********
+
+    **/
     int iters = 0;
     MatrixXi N10timeCourse = MatrixXi::Zero((int) maxIter/collectionInterval, 1);
     MatrixXi minorityOpnTimeCourse = MatrixXi::Zero((int) maxIter/collectionInterval, 1);
     MatrixXi stepTimeCourse = MatrixXi::Zero((int) maxIter/collectionInterval, 1);
     MatrixXi V;
-    int step, neighborTracker, chosenVertexTracker = 0;
-    int chosenVertex, neighborIndex, nNeighbors,neighborNumber, neighbor, conflictCounter, newNeighbor;
+    int chosenVertex, neighborIndex, nNeighbors, neighborNumber, neighbor, conflictCounter, newNeighbor, step;
     double actionToPerform;
     if(rewireTo == "random") {
       while((conflicts > 0) && (iters < maxIter)) {
@@ -76,19 +93,6 @@ int votingModel::vote() {
 	      chosenVertex = (int) floor(n*(mt1()/normalization));
 	      chosenVertexTracker++;
 	  }
-	  /**
-	  V = MatrixXi::Zero(n,1);
-	  i = 0;
-	  for(j = 0; j < n; j++) {
-	    if((A(chosenVertex,j) != 0)) {
-	      V(i++,0) = j;
-	    }
-	  }
-	  neighborIndex = (int) floor((i)*(mt1()/normalization));
-	  neighbor = V(neighborIndex,0);
-	  **/
-	  //following avoids the allocation of an nx1 vector every step
-	  //nNeighbors = A.block(chosenVertex,0,1,n).sum();
 	  neighborNumber = ((int) floor(nNeighbors*mt1()/normalization)) + 1;
 	  i = 0;
 	  j = 0;
