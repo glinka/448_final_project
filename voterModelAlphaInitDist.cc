@@ -6,26 +6,6 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
-  /** 
-      argc[1]: a/alpha
-      argc[2]: k, number of opinions
-      argc[3 to k+3]: initial distributions of 'k' opinions
-      
-      Constructs voter-model with variable alpha/init distr.
-      with the following hard-coded parameters:
-      n = 1000
-      avgDeg = 4
-      rewireTo = random
-      maxIter = 100000
-      collectionInterval = 50
-      
-      fileName is constructed as: fileName_n_avgDeg_a_initD[0]_initD[1]_...
-  **/
-  int n = atoi(argv[argc-3]);
-  int maxIter = atoi(argv[argc-2]);
-  double avgDeg = 4;
-  string rewireTo = argv[argc-1];
-  int collectionInterval = 1000;
   double a = atof(argv[1]);
   int k = atoi(argv[2]);
   double initDist[k];
@@ -35,6 +15,11 @@ int main(int argc, char *argv[]) {
     initDist[i] = atof(argv[i+3]);
     ss << "_" << initDist[i];
   }
+  int n = atoi(argv[argc-3]);
+  int maxIter = atoi(argv[argc-2]);
+  string rewireTo = argv[argc-1];
+  double avgDeg = 4;
+  int collectionInterval = 1000;
   ss << ".csv";
   string fileName = ss.str();
   votingModel model(n, k, maxIter, collectionInterval, a, avgDeg, initDist, rewireTo, fileName);

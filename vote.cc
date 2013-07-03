@@ -14,7 +14,10 @@ using namespace Eigen;
 using namespace std;
   
 votingModel::votingModel(int n, int k, int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, string rewireTo, string fileName): ROUND_CONST(0.01), n(n), A(MatrixXi::Zero(n,n)), Opns(MatrixXi::Zero(n,1)), k(k), maxIter(maxIter), collectionInterval(collectionInterval), a(a), avgDeg(avgDeg), initDist(initDist), rewireTo(rewireTo), fileName(fileName) {};
-  
+
+/**
+   initializes and runs voting model to frozen state or maxIter
+ **/  
 int votingModel::vote() {
     /* 
        n: number of vertices
@@ -41,7 +44,8 @@ int votingModel::vote() {
     initGraph();
     unsigned seed = chrono::system_clock::now().time_since_epoch().count();
     mt19937 mt1(seed);
-    double normalization = (double) mt1.max();
+    //adding one to ensure the distribution lies in [0,1)
+    double normalization = (double) (mt1.max()+1);
     //init matrices
     int totalEdges = 0;
     int currentOpn;
@@ -74,25 +78,33 @@ int votingModel::vote() {
        minorityOpnTimeCourse: stores the number of vertices holding the minority opinion
        V: during each step, stores the index of potential neighbors to chosenVertex (only used in rewire-to-same)
        ***********
-       chosenVertex: randomly chosen vertex, could be the source of discrepancies given I actually do not chose an
+       chosenVertex: randomly chosen vertex, could be the source of discrepancies given I actually do not choose an
        edge, but rather a vertex, which result in a different distribution of selected vertices
        ***********
-
+       neighborIndex: temporary array index of the chosenVertex's neighbor in V
+       nNeighbors: deg(chosenVertex)
+       neighborNumber: similar function to neighborIndex, specifies chosenVertex's neighbor
+       neighbor: index of chosenVertex's neighbor
+       conflictCounter: tracks changes number of conflicts in system at each step
+       newNeighbor: index of new neighbor of chosenVertex (if rewiring)
+       collectionStep: number of times data has been collected
+       actionToPerform: uniform random number on [0,1), determines what to do with the edge
     **/
     int iters = 0;
+    int chosenVertex, neighborIndex, nNeighbors, neighborNumber, neighbor, conflictCounter, newNeighbor, collectionStep;
+    double actionToPerform;
     MatrixXi N10timeCourse = MatrixXi::Zero((int) maxIter/collectionInterval, 1);
     MatrixXi minorityOpnTimeCourse = MatrixXi::Zero((int) maxIter/collectionInterval, 1);
     MatrixXi stepTimeCourse = MatrixXi::Zero((int) maxIter/collectionInterval, 1);
     MatrixXi V;
-    int chosenVertex, neighborIndex, nNeighbors, neighborNumber, neighbor, conflictCounter, newNeighbor, step;
-    double actionToPerform;
     if(rewireTo == "random") {
       while((conflicts > 0) && (iters < maxIter)) {
+	  //chose vertex at random, ensure it's degree is nonzero
 	  chosenVertex = (int) floor(n*(mt1()/normalization));
 	  while((nNeighbors = A.block(chosenVertex,0,1,n).sum()) == 0) {
 	      chosenVertex = (int) floor(n*(mt1()/normalization));
-	      chosenVertexTracker++;
 	  }
+	  //choose random neighbor, regardless of opinion
 	  neighborNumber = ((int) floor(nNeighbors*mt1()/normalization)) + 1;
 	  i = 0;
 	  j = 0;
@@ -103,26 +115,19 @@ int votingModel::vote() {
 	    j++;
 	  }
 	  neighbor = --j;	 
-	  /**
-	  neighborNumber = ((int) floor(n-opnCounts(Opns(chosenVertex,0) - 1,0))) + 1;
-	  i = 0;
-	  j = 0;
-	  while(i < neighborNumber) {
-	    if(Opns(chosenVertex,0) != Opns(j,0) && (chosenVertex != j)) {
-	      i++;
-	    }
-	    j++;
-	  }
-	  neighbor = j--;
-	  **/
+	  //redundant check that chosenVertex has neighbors
 	if(i > 0) {
 	  actionToPerform = mt1()/normalization;
 	  conflictCounter = 0;
+	  //case one, simply change opinion of chosenVertex to match neighbor
 	  if(actionToPerform > a) {
+	      //do nothing if opinions already match
 	    if(Opns(chosenVertex,0) != Opns(neighbor,0)) {
+		//adjust opinions and opinion counts
 	      opnCounts(Opns(chosenVertex,0) - 1,0) = opnCounts(Opns(chosenVertex,0) - 1,0) - 1;
 	      opnCounts(Opns(neighbor,0) - 1,0) = opnCounts(Opns(neighbor,0) - 1,0) + 1;
 	      Opns(chosenVertex,0) = Opns(neighbor,0);
+	      //adjust conflicts
 	      for(j = 0; j < n; j++) {
 		if((A(chosenVertex,j) != 0) && (Opns(j,0) != Opns(chosenVertex,0))) {
 		  conflictCounter++;
@@ -134,28 +139,18 @@ int votingModel::vote() {
 	      conflicts += conflictCounter;
 	    }
 	  }
+	  //case two, rewire edge
 	  else {
 	    if(Opns(chosenVertex,0) != Opns(neighbor,0)) {
 	      conflictCounter--;
 	    }
+	    //disconnect edge and find new neighbor from all vertices, ensuring no loops or
+	    //parallel edges are formed
 	      A(chosenVertex,neighbor) = 0;
 	      A(neighbor,chosenVertex) = 0;
 	      newNeighbor = (int) floor(n*(mt1()/normalization));
-	      /**
-	      nNeighbors = A.block(chosenVertex,0,1,n).sum();
-	      newNeighborIndex = (int) (floor(nNeighbors*(mt1()/normalization)) + ROUND_CONST);
-	      neighborCount = 0;
-	      newNeighbor = 0;
-	      while(neighborCount < newNeighborIndex) {
-		  neighborCount += A(chosenVertex,j);
-		  newNeighbor++;
-	      }
-	      newNeighbor--;
-	      **/
-	      //for n = 100, avgDeg = 4, have, on avg, 95% chance of success
 	      while((A(chosenVertex,newNeighbor) != 0) || (newNeighbor == chosenVertex)) {
 		newNeighbor = (int) floor(n*(mt1()/normalization));
-		neighborTracker++;
 	      }
 	      A(chosenVertex,newNeighbor) = 1;
 	      A(newNeighbor,chosenVertex) = 1;
@@ -165,22 +160,24 @@ int votingModel::vote() {
 	      conflicts += conflictCounter;
 	  }
 	}
+	//collect data every collectionInterval steps
 	if(iters % collectionInterval == 0) {
-	    step = iters/collectionInterval;
-	    minorityOpnTimeCourse(step,0) = opnCounts(0,0)<opnCounts(1,0)?opnCounts(0,0):opnCounts(1,0);
-	    N10timeCourse(step,0) = conflicts;
-	    stepTimeCourse(step,0) = step + 1;
+	    collectionStep = iters/collectionInterval;
+	    minorityOpnTimeCourse(collectionStep,0) = opnCounts(0,0)<opnCounts(1,0)?opnCounts(0,0):opnCounts(1,0);
+	    N10timeCourse(collectionStep,0) = conflicts;
+	    stepTimeCourse(collectionStep,0) = collectionStep + 1;
 	}
 	iters++;
       }
     }
     else if(rewireTo == "same") {
       while((conflicts > 0) && (iters < maxIter)) {
+	  //find vertex with nonzero degree
 	  chosenVertex = (int) floor(n*(mt1()/normalization));
 	  while(A.block(chosenVertex,0,1,n).sum() == 0) {
 	      chosenVertex = (int) floor(n*(mt1()/normalization));
-	      chosenVertexTracker++;
 	}
+	  //assemble list of possible neighbors, storing their indices in V
 	V = MatrixXi::Zero(n,1);
 	i = 0;
 	for(j = 0; j < n; j++) {
@@ -199,10 +196,13 @@ int votingModel::vote() {
 	    V(neighborIndex,0) = V(i,0);
 	}
 	**/
+	//check that chosenVertex has a disagreeing neighbor, else do nothing
 	if(i > 0) {
 	  actionToPerform = mt1()/normalization;
 	  conflictCounter = 0;
+	  //case one, change chosenVertex's opinion to match that of neighbor
 	  if(actionToPerform > a) {
+	      //adjust conflicts and opinion-counts
 	    opnCounts(Opns(chosenVertex,0) - 1,0) = opnCounts(Opns(chosenVertex,0) - 1,0) - 1;
 	    opnCounts(Opns(neighbor,0) - 1,0) = opnCounts(Opns(neighbor,0) - 1,0) + 1;
 	    Opns(chosenVertex,0) = Opns(neighbor,0);
@@ -216,32 +216,23 @@ int votingModel::vote() {
 	    }
 	    conflicts += conflictCounter;
 	  }
+	  //case two, rewire edge
 	  else {
+	      //remove current edge and find new edge from those vertices that share chosenVertex's opini
 	      conflictCounter--;
 	      A(chosenVertex,neighbor) = 0;
 	      A(neighbor,chosenVertex) = 0;
 	      newNeighbor = (int) floor(n*(mt1()/normalization));
-	      /**
-	      nNeighbors = A.block(chosenVertex,0,1,n).sum();
-	      newNeighborIndex = (int) (floor(nNeighbors*(mt1()/normalization)) + ROUND_CONST);
-	      neighborCount = 0;
-	      newNeighbor = 0;
-	      while(neighborCount < newNeighborIndex) {
-		  neighborCount += A(chosenVertex,j);
-		  newNeighbor++;
-	      }
-	      newNeighbor--;
+	      /** notes to self:
+	       //in this, the "rewireTo == same" section, the probability of 
+	       //finding a neighbor at random decreases as we must ensure not only that
+	       //the edge isn't parallel/loop but also that the opinions match
+	       //could form list of matching opinion edges, but this would be
+	       //computationally expensive for large n, and would probably be slower
+	       //than current, random implementation
 	      **/
-	      //for n = 100, avgDeg = 4, have, on avg, 95% chance of success
-	      //in this, the "rewireTo == same" section, the probability of 
-	      //finding a neighbor at random decreases as we must ensure not only that
-	      //the edge isn't parallel/loop but also that the opinions match
-	      //could form list of matching opinion edges, but this would be
-	      //computationally expensive for large n, and would probably be slower
-	      //than current, random implementation
 	      while((Opns(chosenVertex,0) != Opns(newNeighbor,0)) || (A(chosenVertex,newNeighbor) != 0) || (newNeighbor == chosenVertex)) {
 		newNeighbor = (int) floor(n*(mt1()/normalization));
-		neighborTracker++;
 	      }
 	      A(chosenVertex,newNeighbor) = 1;
 	      A(newNeighbor,chosenVertex) = 1;
@@ -249,58 +240,33 @@ int votingModel::vote() {
 	  }
 	}
 	if(iters % collectionInterval == 0) {
-	  /**
-	  if(conflicts != countConflicts()) {
-	    return 1;
-	  }
-	  **/
-	    step = iters/collectionInterval;
-	    minorityOpnTimeCourse(step,0) = opnCounts(0,0)<opnCounts(1,0)?opnCounts(0,0):opnCounts(1,0);
-	    N10timeCourse(step,0) = conflicts;
-	    stepTimeCourse(step,0) = step + 1;
+	    collectionStep = iters/collectionInterval;
+	    minorityOpnTimeCourse(collectionStep,0) = opnCounts(0,0)<opnCounts(1,0)?opnCounts(0,0):opnCounts(1,0);
+	    N10timeCourse(collectionStep,0) = conflicts;
+	    stepTimeCourse(collectionStep,0) = collectionStep + 1;
 	}
 	iters++;
       }
     }
+    //output data into csv file, hardcoded for two opinions
     ofstream graphStats;
     graphStats.open(fileName);
     graphStats << setiosflags(ios::left) << setiosflags(ios::fixed);
-    /**
-    graphStats << setw(8) << "Step";
-    graphStats << setw(30) << "Number Opn1 Vertice";
-    graphStats << setw(30) << "Number Disagreements" << "\n";
-    for(i = 0; i < step; i++) {
-      graphStats << setw(8) << stepTimeCourse(i,0);
-      graphStats << setw(30) <<  minorityOpnTimeCourse(i,0);
-      graphStats << setw(30) << N10timeCourse(i,0) << "\n";
-    }
-    graphStats << "Total Edges: " << totalEdges << "\n";
-    **/
-    //the above is human readable, but why?
-    //below is csv formatting for easy python importing
-    for(i = 0; i < step; i++) {
+    for(i = 0; i < collectionStep; i++) {
       graphStats << stepTimeCourse(i,0) << ",";
       graphStats << 1.0*minorityOpnTimeCourse(i,0)/n << ",";
       graphStats << 1.0*N10timeCourse(i,0) << "\n";
     }
     graphStats << "\n\n";
     graphStats.close();
-    /**    int firstUS = fileName.find_first_of("_");
-    string bifDiag = fileName;
-    int length = bifDiag.size();
-    //remove "a.initDists.csv" from fileName
-    bifDiag.erase(length-4*k-8);
-    bifDiag.erase(0,firstUS);
-    **/
     stringstream ss;
     ss << "bifData_" << rewireTo << "_" << n << "_" << avgDeg << ".csv";
     string bifTitle = ss.str();
-    cout << "new vertex loop count: " << chosenVertexTracker << endl;
-    cout << "conflicts: " << conflicts << endl;
     ofstream bifData;
     bifData.open(bifTitle, ios::app);
     bifData << a << ",";
     bifData << (opnCounts(0,0)<opnCounts(1,0)?(1.0*opnCounts(0,0)/n):(1.0*opnCounts(1,0)/n)) << ",";
+    //flag to determine whether corresponding data represents frozen state or not
     if(conflicts != 0) {
       bifData << "1" << "\n";
     }
@@ -312,6 +278,14 @@ int votingModel::vote() {
     return 0;
 }
 
+/**
+   The following initializes a simple ER random graph based on the algorithm
+   presented in "Efficient generation of large random networks" by V. Batagelj
+   and U. Brandes. In parallel, each vertex is randomly assigned an opinion according
+   to the initial distribution specified by the user.
+       
+   The resulting graphs have been tested to ensure the algorithm's performance.
+**/
 void votingModel::initGraph() {
   double p = avgDeg/(n-1);
   int v = 1;
@@ -321,8 +295,6 @@ void votingModel::initGraph() {
   double normalization = (double) mt1.max();
   double rv1, rv2, partialSum;
   int indexCounter;
-  //    default_random_engine generator;
-  //    uniform_real_distribution<double> distr(0.0, 1.0);
   while(v <= n) {
     rv1 = mt1()/normalization;
     w = (int) (w + 1 + floor(log(1-rv1)/log(1-p)) + ROUND_CONST);
@@ -345,7 +317,7 @@ void votingModel::initGraph() {
   }
 }
     
-
+//test function, showed that conflicts were correctly tracked throughout the simulation
 int votingModel::countConflicts() {
     int currentOpn, i, j;
     int conflicts = 0;
