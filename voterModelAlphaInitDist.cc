@@ -6,6 +6,9 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
+  double avgDeg = 4;
+  int collectionInterval = 1000;
+  int n = atoi(argv[argc-3]);
   double a = atof(argv[1]);
   int k = atoi(argv[2]);
   double initDist[k];
@@ -15,11 +18,8 @@ int main(int argc, char *argv[]) {
     initDist[i] = atof(argv[i+3]);
     ss << "_" << initDist[i];
   }
-  int n = atoi(argv[argc-3]);
   int maxIter = atoi(argv[argc-2]);
   string rewireTo = argv[argc-1];
-  double avgDeg = 4;
-  int collectionInterval = 1000;
   ss << ".csv";
   string fileName = ss.str();
   votingModel model(n, k, maxIter, collectionInterval, a, avgDeg, initDist, rewireTo, fileName);
