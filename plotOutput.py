@@ -33,33 +33,25 @@ def plotGraphStats(fileNames):
             l2Up = max(toPlot[:,2])*scaleUp
             nSteps = toPlot.shape[0]
             f1 = plt.figure(i)
-            #i = i + 1
             ax2 = f1.add_subplot(211, ylabel="Number conflicting edges")
             ax2.plot(toPlot[:,0],toPlot[:,2], '-', color="#47D147")
-            #ax2.set_title("Number Conflicting Edges vs. Time")
             ax2.set_ylim([l2Low, l2Up])
             ax2.set_xlim([0,nSteps])
             ax1 = f1.add_subplot(212, sharex=ax2, ylabel="Minority fraction", xlabel="Time")
             ax1.plot(toPlot[:,0], toPlot[:,1], '-', color="#70AAFF")
-            #ax1.set_title("Minority Fraction vs Time")
             ax1.set_ylim([l1Low,l1Up])
             plt.setp(ax2.get_xticklabels(), visible=False)
-            #ax1.set_xlim([0,nSteps])
             plt.subplots_adjust(hspace=0)
             saveFilename = fileName[:-4] + "_fig1" + ".jpg"
             plt.savefig(saveFilename, edgecolor='k')
-            # f2 = plt.figure(i)
-            # ax = f2.add_subplot(111)
-            #plt.plot(toPlot[:,1],toPlot[:,2],'b-')
-            #ax.subplot(212)
             nDataAx.plot(toPlot[:,1],toPlot[:,2],'b-', label=r'$\alpha$' + " = " + str(alpha),  color=[1-alpha, np.cos(np.pi*alpha/2), alpha])
         elif "bifData" in fileName:
             i = i + 1
             fig = plt.figure(i)
             ax = fig.add_subplot(111)
-            #not filtering by completion of runs!
             alpha = 0
-            toPlot = filter(lambda x: ((x[2] == 0) & (x[1] != 0)), toPlot)
+            #filtering by completion of runs: x[2] == 0
+            toPlot = filter(lambda x: ((x[2] == 0) & (x[3] != 0)), toPlot)
             toPlot = np.asarray(toPlot)
             n = toPlot.shape[0]
             #ids is a 2d list, with the first holding
@@ -97,7 +89,6 @@ def plotGraphStats(fileNames):
                 if len(u0s) > len(u0f):
                     u0f = u0s
                 j = j + 1
-            print n
             for i in range(nu0):
                 u0 = u0f[i]/100.0
                 ax.plot(toPlot[i,:,0], toPlot[i,:,1], 'o', color=[1-2*u0, np.cos(np.pi*u0), 2*u0], label="initial fraction= " + str(u0))
@@ -111,9 +102,6 @@ def plotGraphStats(fileNames):
             plt.savefig(saveFilename, edgecolor='k')
     nDataAx.set_title("Number of conflicting edges vs. Minority fraction")
     nDataAx.legend(loc=4)
-    #nDataAx.set_xlim([l1Low, l1Up])
-    #nDataAx.set_ylim([l2Low, l2Up])
-    #saveFilename = fileName[:-4] + "_fig2" + ".jpg"
     saveFilename = "nData.jpg"
     plt.savefig(saveFilename, edgecolor='k')
     plt.show()
@@ -121,12 +109,4 @@ def plotGraphStats(fileNames):
 if __name__=='__main__':
     import sys
     fileNames = []
-    # if sys.stdin.isatty():
-    #     fileNames = sys.stdin.read()
-    #     print sys.stdin.read()
-    #     print "here"
-    # else:
-    #     for i in sys.argv[1:]:
-    #         fileNames.append(i)
-    #print sys.stdin.read()[5:]
     plotGraphStats(sys.argv[1:])

@@ -1,7 +1,6 @@
-#ifndef VOTE_H
-#define VOTE_H
+#ifndef VOTINGMODEL_H
+#define VOTINGMODEL_H
 #include <string>
-#include <Eigen/Sparse>
 
 class votingModel {
  private:
@@ -10,7 +9,8 @@ class votingModel {
     const double a, avgDeg;
     double *initDist;
     int *degs;
-    Eigen::MatrixXi A, Opns;
+    int *Opns;
+    int **A;
     std::string rewireTo, fileName;
     void initGraph();
     int consistencyCheck();
@@ -18,7 +18,12 @@ class votingModel {
     int vote();
     votingModel(int n, int k, int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, std::string rewireTo, std::string fileName);
     ~votingModel() {
+	for(int i = 0; i < n; i++) {
+	  delete[] A[i];
+	}
+	delete[] A;
 	delete[] degs;
+	delete[] Opns;
     };
 };
 
