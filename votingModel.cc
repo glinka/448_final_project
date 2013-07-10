@@ -173,9 +173,9 @@ int votingModel::vote() {
 	
 	
 	    //collect data every collectionInterval steps
-	    if(iters % collectionInterval == 0) {
+	    if((iters % collectionInterval == 0) || (conflicts==0)) {
 		collectionStep = iters/collectionInterval;
-		minorityOpnTimeCourse[collectionStep] = opnCounts[0]<opnCounts[1]?opnCounts[0]:opnCounts[1];
+		minorityOpnTimeCourse[collectionStep] = opnCounts[0];//<opnCounts[1]?opnCounts[0]:opnCounts[1];
 		N10timeCourse[collectionStep] = conflicts;
 		stepTimeCourse[collectionStep] = collectionStep + 1;
 	    }
@@ -263,7 +263,7 @@ int votingModel::vote() {
 	    }
 	    if(iters % collectionInterval == 0) {
 		collectionStep = iters/collectionInterval;
-		minorityOpnTimeCourse[collectionStep] = opnCounts[0]<opnCounts[1]?opnCounts[0]:opnCounts[1];
+		minorityOpnTimeCourse[collectionStep] = opnCounts[0];//<opnCounts[1]?opnCounts[0]:opnCounts[1];
 		N10timeCourse[collectionStep] = conflicts;
 		stepTimeCourse[collectionStep] = collectionStep + 1;
 	    }
