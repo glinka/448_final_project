@@ -11,6 +11,8 @@ class votingModel {
     int *degs;
     int *Opns;
     int **A;
+    //tracks the number of conflicting edges at each vertex
+    int *nConflicts;
     std::string rewireTo, fileName;
     void initGraph();
     int consistencyCheck();

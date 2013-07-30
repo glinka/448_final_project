@@ -7,6 +7,7 @@ stats.py
 \#*\#
 #ignore executables and output csv files
 voterModelAlphaInitDist
+vote
 getOuttaHere
 reportData/
 *.csv
@@ -14,6 +15,9 @@ reportData/
 *.o
 #ignore jpgs
 #don't ignore jpgs
+##ignore them
+*.png
+*.jpg
 #ignore v5 folders
 v5randomIeqJ/*
 v5randomIneqJ/*
@@ -23,3 +27,8 @@ v5same/*
 *.blg
 *.bbl
 *.log
+#ignore rando commands
+*.cmd
+#movies
+*.mkv
+*.avi

@@ -98,11 +98,11 @@ def plotGraphStats(fileNames):
             ax.legend(loc=3)
             ax.set_xlim([0,1])
             ax.set_ylim([0,0.5])
-            saveFilename = fileName[:-4] + ".jpg"
+            saveFilename = fileName[:-4] + ".png"
             plt.savefig(saveFilename, edgecolor='k')
     nDataAx.set_title("Number of conflicting edges vs. Minority fraction")
-    nDataAx.legend(loc=4)
-    saveFilename = "nData.jpg"
+    nDataAx.legend(loc=2)
+    saveFilename = "nData.png"
     plt.savefig(saveFilename, edgecolor='k')
     plt.show()
     

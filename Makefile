@@ -2,7 +2,7 @@ toCompile = votingModel.o vote.o
 
 CXX = g++
 
-CXXFLAGS = -g -Wall -std=c++0x -O2
+CXXFLAGS = -g -Wall -std=c++0x #-O2
 
 all: vote
 
