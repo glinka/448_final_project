@@ -8,15 +8,21 @@
 #include <chrono>
 #include <iomanip>
 #include "votingModel.h"
+#include "votingModelCPI.h"
+
 
 using namespace std;
   
-votingModel::votingModel(int n, int k, int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, string rewireTo, string fileName):ROUND_CONST(0.01), n(n), k(k), maxIter(maxIter), collectionInterval(collectionInterval), a(a), avgDeg(avgDeg), initDist(initDist), rewireTo(rewireTo), fileName(fileName) {};
+votingModel::votingModel(int n, int k, int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, string rewireTo, string fileName, bool project):project(project), ROUND_CONST(0.01), n(n), k(k), maxIter(maxIter), collectionInterval(collectionInterval), a(a), avgDeg(avgDeg), initDist(initDist), rewireTo(rewireTo), fileName(fileName), degs(NULL), Opns(NULL), A(NULL) {};
 
 /**
    initializes and runs voting model to frozen state or maxIter
 **/  
 int votingModel::vote() {
+  int waitingPeriod = 10000;
+  int projectionInterval = 1000;
+  double pI = 0.1;
+  votingModelCPI vmCPI(pI);
   /* 
      n: number of vertices
      k: number of opinions
@@ -39,7 +45,7 @@ int votingModel::vote() {
     return 1;
   }
   //init graph and uniform random number generator (mersenne twister)
-  initGraph();
+  initGraph(initDist, 0, true);
   unsigned seed = chrono::system_clock::now().time_since_epoch().count();
   mt19937 mt1(seed);
   //adding one to ensure the distribution lies in [0,1)
@@ -110,6 +116,7 @@ int votingModel::vote() {
   int N10timeCourse[nData];
   int minorityOpnTimeCourse[nData];
   int stepTimeCourse[nData];
+  int waitCounter = 0;
   for(i = 0; i < nData; i++) {
     N10timeCourse[i] = 0;
     minorityOpnTimeCourse[i] = 0;
@@ -222,6 +229,54 @@ int votingModel::vote() {
 	
 	
       //collect data every collectionInterval steps
+      if(project && (waitCounter > waitingPeriod) && (conflicts > 0)) {
+	if(iters % (projectionInterval/100) == 0) {
+	  vmCPI.collectData(opnCounts[0]<opnCounts[1]?(1.0*opnCounts[0])/n:(1.0*opnCounts[1])/n, conflicts);
+	}
+	if(iters % projectionInterval == 0 && iters > 0) {
+	  waitCounter = 0;
+	  cout << "projecting" << endl;
+	  vector<double> *line = vmCPI.project();
+	  double newDist[2] = {(*line)[0], 1-(*line)[0]};
+	  initGraph(newDist, (*line)[1], false);
+	  delete line;
+	  //reset previously calculated properties
+	  totalEdges = 0;
+	  for(i = 0; i < k; i++) {
+	    opnCounts[i] = 0;
+	  }
+	  //counts initial numbers of each opinion
+	  for(i = 0; i < n; i++) {
+	    currentOpn = Opns[i];
+	    opnCounts[currentOpn-1] = opnCounts[currentOpn-1] + 1;
+	    for(j = i+1; j < n; j++) {
+	      totalEdges += A[i][j];
+	    }
+	  }
+	  //count initial number of conflicts
+	  /**
+	     Initially the code calculated the number of conflicts from scratch at each step (i.e from
+	     the adjacency matrix and opinion vector), but this was prohibitively expensive
+	  **/
+	  conflicts = 0;
+	  nConflicts = new int[n];
+	  for(i = 0; i < n; i++) {
+	    nConflicts[i] = 0;
+	  }
+	  for(i = 0; i < n; i++) {
+	    currentOpn = Opns[i];
+	    for(j = i+1; j < n; j++) {
+	      if((A[i][j] != 0) && (Opns[j] != currentOpn)) {
+		conflicts++;
+		nConflicts[i]++;
+		nConflicts[j]++;
+	      }
+	    }
+	  }
+	  cout << conflicts << endl;
+	  cout << totalEdges << endl;
+	}
+      }
       if((iters % collectionInterval == 0) || (conflicts==0)) {
 	collectionStep = iters/collectionInterval;
 	minorityOpnTimeCourse[collectionStep] = opnCounts[0]<opnCounts[1]?opnCounts[0]:opnCounts[1];
@@ -229,6 +284,7 @@ int votingModel::vote() {
 	stepTimeCourse[collectionStep] = collectionStep + 1;
       }
       iters++;
+      waitCounter++;
     }
   }
 
@@ -310,7 +366,7 @@ Rewire-to-same continues to choose vertex at random instead of edge
 	  conflicts += conflictCounter;
 	}
       }
-      if(iters % collectionInterval == 0) {
+      if((iters % collectionInterval == 0) || (conflicts==0)) {
 	collectionStep = iters/collectionInterval;
 	minorityOpnTimeCourse[collectionStep] = opnCounts[0];//<opnCounts[1]?opnCounts[0]:opnCounts[1];
 	N10timeCourse[collectionStep] = conflicts;
@@ -357,47 +413,116 @@ Rewire-to-same continues to choose vertex at random instead of edge
        
    The resulting graphs have been tested to ensure the algorithm's performance.
 **/
-void votingModel::initGraph() {
-  double p = avgDeg/(n-1);
-  int v = 1;
-  int w = -1;
-  unsigned seed = chrono::system_clock::now().time_since_epoch().count();
-  mt19937 mt1(seed);
-  double normalization = (double) mt1.max();
-  double rv1, rv2, partialSum;
-  int indexCounter, i, j;
-  //allocate and init arrays to zero
-  degs = new int[n];
-  Opns = new int[n];
-  A = new int*[n];
-  for(i = 0; i < n; i++) {
-    degs[i] = 0;
-    Opns[i] = 0;
-    A[i] = new int[n];
-    for(j = 0; j < n; j++) {
-      A[i][j] = 0;
+void votingModel::initGraph(double *dist, int conflicts, bool firstInitialization) {
+  if(firstInitialization) {
+    double p = avgDeg/(n-1);
+    int v = 1;
+    int w = -1;
+    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+    mt19937 mt1(seed);
+    double normalization = (double) mt1.max();
+    double rv1, rv2, partialSum;
+    int indexCounter, i, j;
+    //allocate and init arrays to zero
+    degs = new int[n];
+    Opns = new int[n];
+    A = new int*[n];
+    for(i = 0; i < n; i++) {
+      degs[i] = 0;
+      Opns[i] = 0;
+      A[i] = new int[n];
+      for(j = 0; j < n; j++) {
+	A[i][j] = 0;
+      }
+    }
+    while(v <= n) {
+      rv1 = mt1()/normalization;
+      w = (int) (w + 1 + floor(log(1-rv1)/log(1-p)) + ROUND_CONST);
+      while((w >= v) && (v <= n)) {
+	rv2 = mt1()/normalization;
+	partialSum = 0.0;
+	indexCounter = 0;
+	while(partialSum < rv2) {
+	  partialSum = partialSum + dist[indexCounter];
+	  indexCounter++;
+	}
+	Opns[v-1] = indexCounter;
+	w = w - v;
+	v = v + 1;
+      }
+      if(v < n) {
+	A[v][w] = 1;
+	A[w][v] = 1;
+	degs[v] = degs[v] + 1;
+	degs[w] = degs[w] + 1;
+      }
     }
   }
-  while(v <= n) {
-    rv1 = mt1()/normalization;
-    w = (int) (w + 1 + floor(log(1-rv1)/log(1-p)) + ROUND_CONST);
-    while((w >= v) && (v <= n)) {
-      rv2 = mt1()/normalization;
-      partialSum = 0.0;
-      indexCounter = 0;
-      while(partialSum < rv2) {
-	partialSum = partialSum + initDist[indexCounter];
-	indexCounter++;
+  else {
+    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+    mt19937 mt1(seed);
+    double normalization = (double) mt1.max();
+    int i, j;
+    for(i = 0; i < n; i++) {
+      degs[i] = 0;
+      Opns[i] = 0;
+      A[i] = new int[n];
+      for(j = 0; j < n; j++) {
+	A[i][j] = 0;
       }
-      Opns[v-1] = indexCounter;
-      w = w - v;
-      v = v + 1;
     }
-    if(v < n) {
-      A[v][w] = 1;
-      A[w][v] = 1;
-      degs[v] = degs[v] + 1;
-      degs[w] = degs[w] + 1;
+    int nEdges = avgDeg*n/2;
+    int nOnes = (int) (dist[0]*n);
+    int nTwos = n - nOnes;
+    for(i = 0; i < n; i++) {
+      if(i < nOnes) {
+	Opns[i] = 1;
+      }
+      else {
+	Opns[i] = 2;
+      }
+    }
+    double pOnes = 1.0*nOnes/n;
+    double pTwos = 1.0 - pOnes;
+    double pConflict = 1.0*conflicts/nEdges;
+    int edgeCount;
+    int chosenVertex, neighbor;
+    for(edgeCount = 0; edgeCount < nEdges; edgeCount++) {
+      chosenVertex = n*mt1()/normalization;
+      if(chosenVertex > nOnes-1) {
+	//operate on twos
+	if(mt1()/normalization > pConflict) {
+	  //no conflict, two to two edge
+	  neighbor = nTwos*mt1()/normalization;
+	  A[chosenVertex][nOnes-1+neighbor] = 1;
+	  A[nOnes-1+neighbor][chosenVertex] = 1;
+	}
+	else {
+	  //conflict, two to one edge
+	  neighbor = nOnes*mt1()/normalization;
+	  A[chosenVertex][neighbor] = 1;
+	  A[neighbor][chosenVertex] = 1;
+	}
+      }
+      else {
+	if(mt1()/normalization > pConflict) {
+	  //no conflict, one to one edge
+	  neighbor = nOnes*mt1()/normalization;
+	  A[chosenVertex][neighbor] = 1;
+	  A[neighbor][chosenVertex] = 1;
+	}
+	else {
+	  //conflict, one to two edge
+	  neighbor = nTwos*mt1()/normalization;
+	  A[chosenVertex][nOnes-1+neighbor] = 1;
+	  A[nOnes-1+neighbor][chosenVertex] = 1;
+	}
+      }
+    }
+    for(i = 0; i < n; i++) {
+      for(j = 0; j < n; j++) {
+	degs[i] += A[i][j];
+      }
     }
   }
 }

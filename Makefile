@@ -1,4 +1,4 @@
-toCompile = votingModel.o vote.o
+toCompile = votingModelCPI.o votingModel.o vote.o
 
 CXX = g++
 
@@ -9,7 +9,7 @@ all: vote
 %.o: %.c
 	$(CXX) $(CXXFLAGS) -c $<
 
-vote: votingModel.o vote.o
+vote: votingModelCPI.o votingModel.o vote.o
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 clean:

@@ -42,7 +42,7 @@ def plotGraphStats(fileNames):
             ax1.set_ylim([l1Low,l1Up])
             plt.setp(ax2.get_xticklabels(), visible=False)
             plt.subplots_adjust(hspace=0)
-            saveFilename = fileName[:-4] + "_fig1" + ".jpg"
+            saveFilename = fileName[:-4] + "_fig1" + ".png"
             plt.savefig(saveFilename, edgecolor='k')
             nDataAx.plot(toPlot[:,1],toPlot[:,2],'b-', label=r'$\alpha$' + " = " + str(alpha),  color=[1-alpha, np.cos(np.pi*alpha/2), alpha])
         elif "bifData" in fileName:
