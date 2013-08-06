@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import matplotlib.pyplot as plt
+import mpl_toolkits.axes_grid.inset_locator as insetAxes
 
 def plotGraphStats(fileNames):
     """Import and plot data from c++ program's
@@ -8,18 +9,73 @@ def plotGraphStats(fileNames):
     nDataFig = plt.figure(len(fileNames)+1)
     nDataAx = nDataFig.add_subplot(111)
     nData = 0
+    haveGraphStats = False
+    plotIndividuals = False
     i = 0
     for fileName in fileNames:
         pathToFile = os.path.realpath(fileName)
         toPlot = np.genfromtxt(pathToFile, delimiter = ',')
-        if "graphStats" in fileName:
-            foundUnderScores = 0
-            alpha = 0
-            while foundUnderScores < 3:
-                alpha = fileName.find("_", alpha+1)
-                foundUnderScores = foundUnderScores + 1
-            alpha2 = fileName.find("_", alpha+1)
-            alpha = float(fileName[alpha+1:alpha2])
+        if "convergenceData" in fileName:
+            #runs per step
+            rps = 10
+            nSteps = toPlot.shape[0]/rps
+            fig = plt.figure();
+            ax = fig.add_subplot(111);
+            for i in range(nSteps):
+                if toPlot[i*rps, 1] == 0.482:
+                    toPlot[i*rps:(i+1)*rps, 1] = 0
+            xData = [sum(toPlot[i*rps:(i+1)*rps, 1])/rps for i in range(nSteps)]
+            yData = [sum(toPlot[i*rps:(i+1)*rps, 0])/rps for i in range(nSteps)]
+            xMax = 1.0*np.max(xData)
+            yMax = 1.0*np.max(yData)
+            xUpLim = xMax
+            yUpLim = 1000000
+            ax.scatter(xData, yData, c='r', s=36)
+            ax.set_xlabel('Projection interval')
+            ax.set_ylabel('Steps to consensus (log scale)')
+            ax.set_yscale('log')
+            ax.set_ylim((10000, yUpLim))
+            ax.set_xlim((0, xMax))
+            insets = []
+            #copy list to allow modifications
+            fileList = fileNames
+            fileList.remove(fileName)
+            for i in range(nSteps):
+                for f in fileList:
+                    #if have graphstats with same projection step, plot in subplot
+                    if "graphStats" and str(xData[i]) in f:
+                        pathToFile = os.path.realpath(f)
+                        toPlotInset = np.genfromtxt(pathToFile, delimiter = ',')
+                        insets.append(insetAxes.inset_axes(ax, width="50%", height="50%", loc=3, bbox_to_anchor=(xData[i]/xMax, np.log10(yData[i])/np.log10(yUpLim), 0.4, 0.4), bbox_transform=ax.transAxes))
+                        insets[i].set_xticks([])
+                        insets[i].set_yticks([])
+                        insets[i].plot(toPlotInset[:,1], toPlotInset[:,2])
+                        break
+            plt.show(fig)
+        #don't do individual plotting right now
+        if ("graphStats" in fileName) & (plotIndividuals):
+            haveGraphStats = True
+            paramstr = fileName
+            us = paramstr.find("_")
+            paramstr = paramstr[us+1:]
+            params = {}
+            while us > 0:
+                us = paramstr.find("_")
+                us2 = paramstr.find("_", us+1)
+                params[paramstr[:us]] = float(paramstr[us+1:us2])
+                if "initDist" in paramstr[:us]:
+                    period = paramstr.find(".", us2+1)
+                    period2 = paramstr.find(".", period+1)
+                    params[paramstr[:us]] = [float(paramstr[us+1:us2]), float(paramstr[us2+1:period2])]
+                    us = -1
+                else:
+                    paramstr = paramstr[us2+1:]
+            for key in params:
+                if("initDist" not in key):
+                    if(params[key] % 1 == 0):
+                        params[key] = int(params[key])
+            print params
+            alpha = params['alpha']
             nData = nData + 1
             i = i + 1
             scaleUp = 16.0/15.0
@@ -100,11 +156,14 @@ def plotGraphStats(fileNames):
             ax.set_ylim([0,0.5])
             saveFilename = fileName[:-4] + ".png"
             plt.savefig(saveFilename, edgecolor='k')
-    nDataAx.set_title("Number of conflicting edges vs. Minority fraction")
-    nDataAx.legend(loc=2)
-    saveFilename = "nData.png"
-    plt.savefig(saveFilename, edgecolor='k')
-    plt.show()
+    if haveGraphStats:
+        nDataAx.set_title("Number of conflicting edges vs. Minority fraction")
+        nDataAx.legend(loc=2)
+        saveFilename = "nData.png"
+        plt.savefig(saveFilename, edgecolor='k')
+        plt.show()
+    else:
+        plt.close(nDataFig)
     
 if __name__=='__main__':
     import sys

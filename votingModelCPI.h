@@ -10,6 +10,9 @@ class votingModelCPI {
  public:
   std::vector<double> *project();
   void collectData(const double data, const double interval);
+  double getProjectionstep() {
+    return projectionInterval;
+  };
   votingModelCPI(double projectionInterval);
   ~votingModelCPI() {};
 };

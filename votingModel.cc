@@ -13,7 +13,8 @@
 
 using namespace std;
   
-votingModel::votingModel(int n, int k, int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, string rewireTo, string fileName, bool project):project(project), ROUND_CONST(0.01), n(n), k(k), maxIter(maxIter), collectionInterval(collectionInterval), a(a), avgDeg(avgDeg), initDist(initDist), rewireTo(rewireTo), fileName(fileName), degs(NULL), Opns(NULL), A(NULL) {};
+votingModel::votingModel(int n, int k, int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, string rewireTo, string fileName, bool project, votingModelCPI *CPI):project(project), ROUND_CONST(0.01), n(n), k(k), maxIter(maxIter), collectionInterval(collectionInterval), a(a), avgDeg(avgDeg), initDist(initDist), degs(NULL), Opns(NULL), A(NULL), rewireTo(rewireTo), fileName(fileName), vmCPI(CPI) {
+};
 
 /**
    initializes and runs voting model to frozen state or maxIter
@@ -21,8 +22,6 @@ votingModel::votingModel(int n, int k, int maxIter, int collectionInterval, doub
 int votingModel::vote() {
   int waitingPeriod = 10000;
   int projectionInterval = 1000;
-  double pI = 0.1;
-  votingModelCPI vmCPI(pI);
   /* 
      n: number of vertices
      k: number of opinions
@@ -231,12 +230,11 @@ int votingModel::vote() {
       //collect data every collectionInterval steps
       if(project && (waitCounter > waitingPeriod) && (conflicts > 0)) {
 	if(iters % (projectionInterval/100) == 0) {
-	  vmCPI.collectData(opnCounts[0]<opnCounts[1]?(1.0*opnCounts[0])/n:(1.0*opnCounts[1])/n, conflicts);
+	  vmCPI->collectData(opnCounts[0]<opnCounts[1]?(1.0*opnCounts[0])/n:(1.0*opnCounts[1])/n, conflicts);
 	}
 	if(iters % projectionInterval == 0 && iters > 0) {
 	  waitCounter = 0;
-	  cout << "projecting" << endl;
-	  vector<double> *line = vmCPI.project();
+	  vector<double> *line = vmCPI->project();
 	  double newDist[2] = {(*line)[0], 1-(*line)[0]};
 	  initGraph(newDist, (*line)[1], false);
 	  delete line;
@@ -259,7 +257,6 @@ int votingModel::vote() {
 	     the adjacency matrix and opinion vector), but this was prohibitively expensive
 	  **/
 	  conflicts = 0;
-	  nConflicts = new int[n];
 	  for(i = 0; i < n; i++) {
 	    nConflicts[i] = 0;
 	  }
@@ -273,8 +270,6 @@ int votingModel::vote() {
 	      }
 	    }
 	  }
-	  cout << conflicts << endl;
-	  cout << totalEdges << endl;
 	}
       }
       if((iters % collectionInterval == 0) || (conflicts==0)) {
@@ -402,6 +397,14 @@ Rewire-to-same continues to choose vertex at random instead of edge
   }
   bifData << initDist[0] << "\n";
   bifData.close();
+  ss.str("");
+  ss << "convergenceData_" << a << "_" << n << "_" << initDist[0] << ".csv";
+  string cnvTitle = ss.str();
+  ofstream convData;
+  convData.open(cnvTitle, ios::app);
+  convData << iters << "," << vmCPI->getProjectionstep();
+  convData << "\n";
+  convData.close();
   return 0;
 }
 
@@ -466,7 +469,6 @@ void votingModel::initGraph(double *dist, int conflicts, bool firstInitializatio
     for(i = 0; i < n; i++) {
       degs[i] = 0;
       Opns[i] = 0;
-      A[i] = new int[n];
       for(j = 0; j < n; j++) {
 	A[i][j] = 0;
       }
@@ -482,8 +484,6 @@ void votingModel::initGraph(double *dist, int conflicts, bool firstInitializatio
 	Opns[i] = 2;
       }
     }
-    double pOnes = 1.0*nOnes/n;
-    double pTwos = 1.0 - pOnes;
     double pConflict = 1.0*conflicts/nEdges;
     int edgeCount;
     int chosenVertex, neighbor;

@@ -22,7 +22,7 @@ vector<double> *votingModelCPI::project() {
   double xmax = dataPts.back();
   double xOffset = (xmax - xmin)/2.0;
   double xnorm = 0;
-  int i;
+  unsigned int i;
   for(i = 0; i < dataPts.size(); i++) {
     dataPts[i] -= xOffset;
     intervals[i] -= yOffset;
@@ -38,14 +38,10 @@ vector<double> *votingModelCPI::project() {
   vector<double> *line = new vector<double>;
   double yNew;
   if(xNew > 0) {
-    cout << "successfull projection" << endl;
     yNew = a*xNew + b;
-    //yNew = a*(xNew) + b;
-    cout << yNew << endl;
     line->push_back(xNew);
   }
   else {
-    cout << xmin << endl;
     yNew = ymin;
     line->push_back(xmin);
   }
@@ -54,3 +50,4 @@ vector<double> *votingModelCPI::project() {
   intervals.clear();
   return line;
 }
+
