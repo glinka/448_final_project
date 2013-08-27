@@ -108,8 +108,8 @@ int votingModel::vote() {
      edgeCount: counter used to find randomly chosen edge
      actionToPerform: uniform random number on [0,1), determines what to do with the edge
   **/
-  int iters = 0;
-  int chosenVertex, chosenEdge, neighborIndex, neighbor, conflictCounter, newNeighbor, collectionStep, edgeCount;
+  int iters = 0, collectionStep = 0;
+  int chosenVertex, chosenEdge, neighborIndex, neighbor, conflictCounter, newNeighbor, edgeCount;
   double actionToPerform;
   int nData = ((int) maxIter/collectionInterval);
   int N10timeCourse[nData];
@@ -239,6 +239,7 @@ int votingModel::vote() {
 	if(iters % projectionInterval == 0 && iters > 0) {
 	  waitCounter = 0;
 	  vector<double> newPts = vmCPI->project();
+	  iters = newPts[2];
 	  double newDist[2] = {newPts[0], 1-newPts[0]};
 	  initGraph(newDist, newPts[1], false);
 	  //reset previously calculated properties
@@ -277,10 +278,10 @@ int votingModel::vote() {
       }
 
       if((iters % collectionInterval == 0) || (conflicts==0)) {
-	collectionStep = iters/collectionInterval;
 	minorityOpnTimeCourse[collectionStep] = opnCounts[0]<opnCounts[1]?opnCounts[0]:opnCounts[1];
 	N10timeCourse[collectionStep] = conflicts;
-	stepTimeCourse[collectionStep] = collectionStep + 1;
+	stepTimeCourse[collectionStep] = iters + 1;
+	collectionStep++;
       }
       iters++;
       waitCounter++;

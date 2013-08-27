@@ -10,7 +10,7 @@ def plotGraphStats(fileNames):
     nDataAx = nDataFig.add_subplot(111)
     nData = 0
     haveGraphStats = False
-    plotIndividuals = False
+    plotIndividuals = True
     i = 0
     for fileName in fileNames:
         pathToFile = os.path.realpath(fileName)

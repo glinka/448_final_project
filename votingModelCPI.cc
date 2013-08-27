@@ -25,9 +25,23 @@ vector<double> votingModelCPI::project() {
   double newTime = (_data[2]).back() + projectionInterval;
   double newMinorityFrac = minorityVsTime[0]*newTime + minorityVsTime[1];
   double newConflicts = conflictsVsTime[0]*newTime + conflictsVsTime[1];
+  double newInterval = projectionInterval;
+  while(newMinorityFrac < 0) {
+    newInterval/=2;
+    newTime -= newInterval;
+    newMinorityFrac = minorityVsTime[0]*newTime + minorityVsTime[1];
+  }
+  newConflicts = conflictsVsTime[0]*newTime + conflictsVsTime[1];
+  while(newConflicts < 0) {
+    newInterval/=2;
+    newTime -= newInterval;
+    newConflicts = conflictsVsTime[0]*newTime + conflictsVsTime[1];
+  }
+  newMinorityFrac = minorityVsTime[0]*newTime + minorityVsTime[1];
   vector<double> newData;
   newData.push_back(newMinorityFrac);
   newData.push_back(newConflicts);
+  newData.push_back(newTime);
   return newData;
 }
 
@@ -42,8 +56,8 @@ vector<double> votingModelCPI::fitLine(const vector<double> x, const vector<doub
     xSqSum += (x[i]*x[i]);
     xySum += (x[i]*y[i]);
   }
-  double a = (ySum*xSqSum - xSum*xySum)/(n*xSqSum - xSum*xSum);
-  double b = (n*xySum - xSum*ySum)/(n*xSqSum - xSum*xSum);
+  double a  = (n*xySum - xSum*ySum)/(n*xSqSum - xSum*xSum);
+  double b = (ySum*xSqSum - xSum*xySum)/(n*xSqSum - xSum*xSum);
   vector<double> ab;
   ab.push_back(a);
   ab.push_back(b);
