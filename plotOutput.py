@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gs
 import mpl_toolkits.axes_grid.inset_locator as insetAxes
 
 def plotGraphStats(fileNames):
@@ -20,7 +21,8 @@ def plotGraphStats(fileNames):
             rps = 10
             nSteps = toPlot.shape[0]/rps
             fig = plt.figure();
-            ax = fig.add_subplot(111);
+            hspan = 4
+            ax = plt.subplot2grid((nSteps,nSteps+hspan), (0,0), rowspan=nSteps, colspan=nSteps+hspan/2)
             for i in range(nSteps):
                 if toPlot[i*rps, 1] == 0.482:
                     toPlot[i*rps:(i+1)*rps, 1] = 0
@@ -30,27 +32,41 @@ def plotGraphStats(fileNames):
             yMax = 1.0*np.max(yData)
             xUpLim = xMax
             yUpLim = 1000000
-            ax.scatter(xData, yData, c='r', s=36)
-            ax.set_xlabel('Projection interval')
-            ax.set_ylabel('Steps to consensus (log scale)')
+            ax.scatter(xData, yData, c='c', s=36)
+            ax.set_xlabel('Projection step-size (jumps in minority fraction)')
+            ax.set_ylabel('Steps to consensus')
             ax.set_yscale('log')
             ax.set_ylim((10000, yUpLim))
             ax.set_xlim((0, xMax))
-            insets = []
+            #insets = []
+            subplots = []
             #copy list to allow modifications
             fileList = fileNames
             fileList.remove(fileName)
+            xshift = -0.08
+            yshift = -0.05
             for i in range(nSteps):
                 for f in fileList:
                     #if have graphstats with same projection step, plot in subplot
                     if "graphStats" and str(xData[i]) in f:
                         pathToFile = os.path.realpath(f)
-                        toPlotInset = np.genfromtxt(pathToFile, delimiter = ',')
-                        insets.append(insetAxes.inset_axes(ax, width="50%", height="50%", loc=3, bbox_to_anchor=(xData[i]/xMax, np.log10(yData[i])/np.log10(yUpLim), 0.4, 0.4), bbox_transform=ax.transAxes))
-                        insets[i].set_xticks([])
-                        insets[i].set_yticks([])
-                        insets[i].plot(toPlotInset[:,1], toPlotInset[:,2])
+                        toSubplot = np.genfromtxt(pathToFile, delimiter = ',')
+                        #insets.append(insetAxes.inset_axes(ax, width="50%", height="50%", loc=3, bbox_to_anchor=(xData[i]/xMax+xshift, yData[i]/yUpLim+yshift, 0.45, 0.45), bbox_transform=ax.transAxes))
+                        #insets[i].set_xticks([])
+                        #insets[i].set_yticks([])
+                        subplots.append(plt.subplot2grid((nSteps, nSteps+hspan), (i, nSteps+hspan/2), colspan=hspan/2))
+                        subplots[i].set_xticks([])
+                        subplots[i].set_yticks([])
+                        subplots[i].set_xlim((0,0.5))
+                        #insets[i].plot(toSubplot[:,1], toSubplot[:,2])
+                        subplots[i].plot(toSubplot[:,1], toSubplot[:,2], c='g')
                         break
+#            fig.set_figheight(5)
+ #           fig.set_figwidth(5)
+#            fig.tight_layout(pad=6)
+            subplots[nSteps-1].set_xticks([i/4.0 for i in range(3)])
+            subplots[0].set_title("Conflicts vs. Minority fraction", size=12)
+            plt.savefig(fileName[:-4] + ".png")
             plt.show(fig)
         #don't do individual plotting right now
         if ("graphStats" in fileName) & (plotIndividuals):
