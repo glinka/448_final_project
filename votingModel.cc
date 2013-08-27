@@ -230,7 +230,7 @@ int votingModel::vote() {
       //collect data every collectionInterval steps
       if(project && (waitCounter > waitingPeriod) && (conflicts > 0)) {
 	if(iters % (projectionInterval/100) == 0) {
-	  vector<double> data (opnCounts[0]<opnCounts[1]?(1.0*opnCounts[0])/n:(1.0*opnCounts[1])/n, conflicts, iters);
+	  vector<double> data (opnCounts[0]<opnCounts[1]?1.0*opnCounts[0]/n:1.0*opnCounts[1]/n, conflicts, iters);
 	  vmCPI->collectData(data);
 	}
 	if(iters % projectionInterval == 0 && iters > 0) {
