@@ -7,14 +7,14 @@ using namespace std;
 
 votingModelCPI::votingModelCPI(double projectionInterval): projectionInterval(projectionInterval) {};
 
-void votingModelCPI::collectData(const double data, const double interval) {
-  dataPts.push_back(data);
-  intervals.push_back(interval);
+void votingModelCPI::collectData(const vector<double> data) {
+  _data.push_back(data);
 }
 
 vector<double> *votingModelCPI::project() {
-  sort(dataPts.begin(), dataPts.end());
-  sort(intervals.begin(), intervals.end());
+  sort((_data[0]).begin(), (_data[0]).end());
+  sort((_data[1]).begin(), (_data[1]).end());
+  sort((_data[2]).begin(), (_data[2]).end());
   double ymin = intervals.front();
   double ymax = intervals.back();
   double yOffset = (ymax - ymin)/2.0;
