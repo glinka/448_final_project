@@ -230,15 +230,17 @@ int votingModel::vote() {
       //collect data every collectionInterval steps
       if(project && (waitCounter > waitingPeriod) && (conflicts > 0)) {
 	if(iters % (projectionInterval/100) == 0) {
-	  vector<double> data (opnCounts[0]<opnCounts[1]?1.0*opnCounts[0]/n:1.0*opnCounts[1]/n, conflicts, iters);
+	  vector<double> data;
+	  data.push_back(opnCounts[0]<opnCounts[1]?1.0*opnCounts[0]/n:1.0*opnCounts[1]/n);
+	  data.push_back(conflicts);
+	  data.push_back(iters);
 	  vmCPI->collectData(data);
 	}
 	if(iters % projectionInterval == 0 && iters > 0) {
 	  waitCounter = 0;
-	  vector<double> *line = vmCPI->project();
-	  double newDist[2] = {(*line)[0], 1-(*line)[0]};
-	  initGraph(newDist, (*line)[1], false);
-	  delete line;
+	  vector<double> newPts = vmCPI->project();
+	  double newDist[2] = {newPts[0], 1-newPts[0]};
+	  initGraph(newDist, newPts[1], false);
 	  //reset previously calculated properties
 	  totalEdges = 0;
 	  for(i = 0; i < k; i++) {
@@ -404,7 +406,7 @@ Rewire-to-same continues to choose vertex at random instead of edge
   string cnvTitle = ss.str();
   ofstream convData;
   convData.open(cnvTitle, ios::app);
-  convData << iters << "," << vmCPI->getProjectionstep();
+  convData << iters << "," << vmCPI->getProjectionStep();
   convData << "\n";
   convData.close();
   return 0;

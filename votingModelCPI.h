@@ -4,8 +4,6 @@
 
 class votingModelCPI {
  private:
-  std::vector<double> dataPts;
-  std::vector<double> intervals;
   /** 
       currently contains:
       1. minority opn fraction
@@ -14,13 +12,13 @@ class votingModelCPI {
   **/
   std::vector<std::vector<double>> _data;
   const double projectionInterval;
-  double getLeastSquaresSlope(const vector<double> x, const vector<double> y);
+  std::vector<double> fitLine(const std::vector<double> x, const std::vector<double> y);
  public:
-  std::vector<double> *project();
-  void collectData(const std::vector<double> data);
-  double getProjectionstep() {
+  std::vector<double> project();
+  double getProjectionStep() {
     return projectionInterval;
-  };
+  }
+  void collectData(const std::vector<double> data);
   votingModelCPI(double projectionInterval);
   ~votingModelCPI() {};
 };
