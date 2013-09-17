@@ -30,17 +30,4 @@ vector<double> fitCurves::fitFx(const vector<double> &xData, const vector<double
       coeffsCpy.push_back(coeffs(i));
     }
     return coeffsCpy;
-    /**    
-	used when returning fnlx, but need coeffs to project so return vector<double>
-	function<double(double)> fittedFns = [=] (double x) {
-	double eval = 0;
-	int count;
-	for(count = 0; count < nFns; count++) {
-	    eval += toFit[count](x)*coeffs(count);
-	}
-	return eval;
-    };
-    return fittedFns;
-    **/
-    
 }

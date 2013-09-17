@@ -2,6 +2,7 @@
 #define VOTINGMODEL_H
 #include <string>
 #include <vector>
+#include <random>
 
 class votingModelCPI;
 
@@ -27,8 +28,10 @@ class votingModel {
  public:
   int vote();
   void step();
-  void saveData(const std::vector<double> data, const std::ofstream &fileHandle);
-  void saveData(const std::vector<std::vector<double> > data, const std::ofstream &fileHandle);
+  template <typename dataType>
+    void saveData(const std::vector<dataType> data, std::ofstream &fileHandle);
+  template <typename dataType>
+    void saveData(const std::vector<std::vector<dataType> > data, std::ofstream &fileHandle);
   votingModel(int n, int k, int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, std::string rewireTo, std::string fileName, bool project, votingModelCPI *CPI);
   ~votingModel() {
     for(int i = 0; i < n; i++) {

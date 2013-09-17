@@ -4,7 +4,6 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <random>
 #include <chrono>
 #include <iomanip>
 #include "votingModel.h"
@@ -19,6 +18,8 @@ votingModel::votingModel(int n, int k, int maxIter, int collectionInterval, doub
   rnNormalization = (double) (mt->max()+1);
   degs = new int[n];
   Opns = new int[n];
+  nConflicts = new int[n];
+  opnCounts = new int[k];
   A = new int*[n];
   for(int i = 0; i < n; i++) {
     A[i] = new int[n];
@@ -34,8 +35,6 @@ double votingModel::genURN() {
 }
 
 int votingModel::vote() {
-  int waitingPeriod = 10000;
-  int projectionInterval = 1000;
   /* 
      n: number of vertices
      k: number of opinions
@@ -47,7 +46,7 @@ int votingModel::vote() {
      collectionInterval: graph data collected every "collectionInterval" number of iterations
      fileName: output filename
   */
-  int i, j;
+  unsigned int i;
   double sum = 0;
   //check that initial distribution has been properly specified
   for(i = 0; i < k; i++) {
@@ -58,17 +57,21 @@ int votingModel::vote() {
     return 1;
   }
   //init graph and uniform random number generator (mersenne twister)
-  int nData = ((int) maxIter/collectionInterval);
-  vector<int> n10TimeCourse(nData);
-  vector<int> minorityOpnTimeCourse(nData);
-  vector<int> stepTimeCourse(nData);
+  vector<int> n10TimeCourse;
+  vector<int> minorityOpnTimeCourse;
+  vector<int> stepTimeCourse;
+  vector<int> test;
+  for(i = 0; i < n; i++) {
+    test.push_back(i);
+  }
   initGraph(initDist);
   int iters = 0;
   while(iters < maxIter && conflicts > 0) {
     step();
     if((iters % collectionInterval == 0) || (conflicts==0)) {
       consistencyCheck();
-      minorityOpnTimeCourse.push_back(opnCounts[0]<opnCounts[1]?opnCounts[0]:opnCounts[1]);
+      int minorityOpn = opnCounts[0]<opnCounts[1]?opnCounts[0]:opnCounts[1];
+      minorityOpnTimeCourse.push_back(minorityOpn);
       n10TimeCourse.push_back(conflicts);
       stepTimeCourse.push_back(iters+1);
     }
@@ -82,7 +85,7 @@ int votingModel::vote() {
   graphStats << "avgDeg=" << avgDeg << ",";
   graphStats << "alpha=" << a << "\n";
   vector<vector<int> > data;
-  vector<double> v;
+  vector<int> v;
   data.push_back(stepTimeCourse);
   data.push_back(minorityOpnTimeCourse);
   data.push_back(n10TimeCourse);
@@ -130,27 +133,32 @@ int votingModel::vote() {
   return 0;
 }
 
-void votingModel::saveData(const vector<double> data, const ofstream &fileHandle) {
-  for(int i = 0; i < data.size(); i++) {
+template <typename dataType>
+void votingModel::saveData(const vector<dataType> data, ofstream &fileHandle) {
+  for(unsigned int i = 0; i < data.size(); i++) {
     fileHandle << data[i] << "\n";
   }
 }
+template void votingModel::saveData<int>(const vector<int> data, ofstream &fileHandle);
 
-void votingModel::saveData(const vector<vector<double> > data, const ofstream &fileHandle) {
+template <typename dataType>
+void votingModel::saveData(const vector<vector<dataType> > data, ofstream &fileHandle) {
   //data should be formatted as column vectors, i.e. the total number of different data types
   //to be saved should be data.size();
   int m = data[0].size();
   int n = data.size();
-  int i, j;
+  unsigned int i, j;
   for(i = 0; i < m; i++) {
     for(j = 0; j < n; j++) {
-      fileHandle << data[i][j];
+      fileHandle << data[j][i];
       if(j != n-1) {
 	fileHandle << ",";
       }
     }
     fileHandle << endl;
+  }
 }
+template void votingModel::saveData<int>(const vector<vector<int> > data, ofstream &fileHandle);
 
 void votingModel::step() {
   /**
@@ -241,7 +249,7 @@ void votingModel::step() {
 	A[chosenVertex][neighbor] = 0;
 	A[neighbor][chosenVertex] = 0;
 	degs[neighbor] = degs[neighbor] - 1;
-	newNeighbor = (int) floor(n*(genURN()));
+	int newNeighbor = (int) floor(n*(genURN()));
 	while((A[chosenVertex][newNeighbor] != 0) || (newNeighbor == chosenVertex)) {
 	  newNeighbor = (int) floor(n*(genURN()));
 	}
@@ -267,6 +275,7 @@ Rewire-to-same continues to choose vertex at random instead of edge
       //find vertex with nonzero degree
       int chosenVertex = (int) floor(n*(genURN()));
       int deg = 0;
+      int i, j;
       for(j = 0; j < n; j++) {
 	deg += A[chosenVertex][j];
       }
@@ -348,6 +357,7 @@ void votingModel::initGraph(double *dist) {
     for(i = 0; i < n; i++) {
       degs[i] = 0;
       Opns[i] = 0;
+      nConflicts[i] = 0;
       for(j = 0; j < n; j++) {
 	A[i][j] = 0;
       }
@@ -384,16 +394,21 @@ void votingModel::initGraph(double *dist) {
       currentOpn = Opns[i];
       for(j = i+1; j < n; j++) {
 	// !!!! May not work do to conversion of double to int !!!!
-	conflicts += (abs(currentOpn-Opns[j])*A[i][j]);
+	if(A[i][j] > 0 && currentOpn != Opns[j]) {
+	  conflicts++;
+	  nConflicts[i]++;
+	  nConflicts[j]++;
+	}
       }
     }
 }
 
-void votingModel::initGraph(double *dist, int conflicts) {
+void votingModel::initGraph(double *dist, int conflictCount) {
     int i, j;
     for(i = 0; i < n; i++) {
       degs[i] = 0;
       Opns[i] = 0;
+      nConflicts[i] = 0;
       for(j = 0; j < n; j++) {
 	A[i][j] = 0;
       }
@@ -407,11 +422,14 @@ void votingModel::initGraph(double *dist, int conflicts) {
     for(i = 0; i < n; i++) {
       if(i < nOnes) {
 	Opns[i] = 1;
+	opnCounts[0]++;
       }
       else {
 	Opns[i] = 2;
+	opnCounts[1]++;
       }
     }
+    conflicts = conflictCount;
     double pConflict = 1.0*conflicts/nEdges;
     int edgeCount;
     int chosenVertex, neighbor;
@@ -451,6 +469,9 @@ void votingModel::initGraph(double *dist, int conflicts) {
       opnCounts[Opns[i] - 1]++;
       for(j = 0; j < n; j++) {
 	degs[i] += A[i][j];
+	if(A[i][j] > 0 && Opns[i] != Opns[j]) {
+	  nConflicts[i]++;
+	}
       }
     }
 }
@@ -459,7 +480,7 @@ void votingModel::initGraph(double *dist, int conflicts) {
 int votingModel::consistencyCheck() {
   int sum = 0;
   int currentOpn, i, j;
-  int conflicts = 0;
+  int conflictCount = 0;
   for(i = 0; i < n; i++) {
     sum = 0;
     for(j = 0; j < n; j++) {
@@ -474,9 +495,9 @@ int votingModel::consistencyCheck() {
     currentOpn = Opns[i];
     for(j = i + 1; j < n; j++) {
       if((A[i][j] != 0) && (Opns[j] != currentOpn)) {
-	conflicts++;
+	conflictCount++;
       }
     }
   }
-  return conflicts;
+  return conflictCount;
 }

@@ -14,7 +14,7 @@ votingModelCPI::votingModelCPI(double projectionInterval): projectionInterval(pr
   }
 };
 void votingModelCPI::collectData(const vector<double> data) {
-  for(int i = 0; i < data.size(); i++) {
+  for(unsigned int i = 0; i < data.size(); i++) {
     _data[i].push_back(data[i]);
   }
 }
