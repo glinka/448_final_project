@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
+#include <cmath>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -14,11 +14,25 @@
 using namespace std;
   
 votingModel::votingModel(int n, int k, int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, string rewireTo, string fileName, bool project, votingModelCPI *CPI):project(project), ROUND_CONST(0.01), n(n), k(k), maxIter(maxIter), collectionInterval(collectionInterval), a(a), avgDeg(avgDeg), initDist(initDist), degs(NULL), Opns(NULL), A(NULL), rewireTo(rewireTo), fileName(fileName), vmCPI(CPI) {
+  unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+  mt = new mt19937(seed);
+  rnNormalization = (double) (mt->max()+1);
+  degs = new int[n];
+  Opns = new int[n];
+  A = new int*[n];
+  for(int i = 0; i < n; i++) {
+    A[i] = new int[n];
+  }
 };
 
 /**
    initializes and runs voting model to frozen state or maxIter
 **/  
+
+double votingModel::genURN() {
+  return (*mt)()/rnNormalization;
+}
+
 int votingModel::vote() {
   int waitingPeriod = 10000;
   int projectionInterval = 1000;
@@ -44,53 +58,101 @@ int votingModel::vote() {
     return 1;
   }
   //init graph and uniform random number generator (mersenne twister)
-  initGraph(initDist, 0, true);
-  unsigned seed = chrono::system_clock::now().time_since_epoch().count();
-  mt19937 mt1(seed);
-  //adding one to ensure the distribution lies in [0,1)
-  double normalization = (double) (mt1.max()+1);
-  //init matrices
-  int totalEdges = 0;
-  int currentOpn;
-  int opnCounts[k];
-  for(i = 0; i < k; i++) {
-    opnCounts[i] = 0;
-  }
-  //counts initial numbers of each opinion
-  for(i = 0; i < n; i++) {
-    currentOpn = Opns[i];
-    opnCounts[currentOpn-1] = opnCounts[currentOpn-1] + 1;
-    for(j = i+1; j < n; j++) {
-      totalEdges += A[i][j];
+  int nData = ((int) maxIter/collectionInterval);
+  vector<int> n10TimeCourse(nData);
+  vector<int> minorityOpnTimeCourse(nData);
+  vector<int> stepTimeCourse(nData);
+  initGraph(initDist);
+  int iters = 0;
+  while(iters < maxIter && conflicts > 0) {
+    step();
+    if((iters % collectionInterval == 0) || (conflicts==0)) {
+      consistencyCheck();
+      minorityOpnTimeCourse.push_back(opnCounts[0]<opnCounts[1]?opnCounts[0]:opnCounts[1]);
+      n10TimeCourse.push_back(conflicts);
+      stepTimeCourse.push_back(iters+1);
     }
+    iters++;
   }
-  //count initial number of conflicts
-  /**
-     Initially the code calculated the number of conflicts from scratch at each step (i.e from
-     the adjacency matrix and opinion vector), but this was prohibitively expensive
-  **/
-  int conflicts = 0;
-  nConflicts = new int[n];
-  for(i = 0; i < n; i++) {
-    nConflicts[i] = 0;
+  //output data into csv file, hardcoded for two opinions
+  ofstream graphStats;
+  graphStats.open(fileName);
+  graphStats << setiosflags(ios::left) << setiosflags(ios::fixed);
+  graphStats << "n=" << n << ",";
+  graphStats << "avgDeg=" << avgDeg << ",";
+  graphStats << "alpha=" << a << "\n";
+  vector<vector<int> > data;
+  vector<double> v;
+  data.push_back(stepTimeCourse);
+  data.push_back(minorityOpnTimeCourse);
+  data.push_back(n10TimeCourse);
+  saveData(data, graphStats);
+  graphStats.close();
+
+  stringstream ss;
+  ss << "bifData_" << rewireTo << "_" << n << "_" << avgDeg << ".csv";
+  string bifTitle = ss.str();
+  ofstream bifData;
+  bifData.open(bifTitle, ios::app);
+  vector<double> rowData;
+  rowData.push_back(a);
+  rowData.push_back(opnCounts[0]<opnCounts[1]?(1.0*opnCounts[0]/n):(1.0*opnCounts[1]/n));
+  if(conflicts != 0) {
+    rowData.push_back(1);
   }
-  for(i = 0; i < n; i++) {
-    currentOpn = Opns[i];
-    for(j = i+1; j < n; j++) {
-      if((A[i][j] != 0) && (Opns[j] != currentOpn)) {
-	conflicts++;
-	nConflicts[i]++;
-	nConflicts[j]++;
+  else {
+    rowData.push_back(0);
+  }
+  rowData.push_back(initDist[0]);
+  data.clear();
+  for(i = 0; i < rowData.size(); i++) {
+    data.push_back(v);
+    data[i].push_back(rowData[i]);
+  }
+  saveData(data, bifData);
+  bifData.close();
+
+  ss.str("");
+  ss << "convergenceData_" << a << "_" << n << "_" << initDist[0] << ".csv";
+  string cnvTitle = ss.str();
+  ofstream convData;
+  convData.open(cnvTitle, ios::app);
+  rowData.clear();
+  rowData.push_back(iters);
+  rowData.push_back(vmCPI->getProjectionStep());
+  data.clear();
+  for(i = 0; i < rowData.size(); i++) {
+    data.push_back(v);
+    data[i].push_back(rowData[i]);
+  }
+  saveData(data, convData);
+  convData.close();
+  return 0;
+}
+
+void votingModel::saveData(const vector<double> data, const ofstream &fileHandle) {
+  for(int i = 0; i < data.size(); i++) {
+    fileHandle << data[i] << "\n";
+  }
+}
+
+void votingModel::saveData(const vector<vector<double> > data, const ofstream &fileHandle) {
+  //data should be formatted as column vectors, i.e. the total number of different data types
+  //to be saved should be data.size();
+  int m = data[0].size();
+  int n = data.size();
+  int i, j;
+  for(i = 0; i < m; i++) {
+    for(j = 0; j < n; j++) {
+      fileHandle << data[i][j];
+      if(j != n-1) {
+	fileHandle << ",";
       }
     }
-  }
-  sum = 0;
-  for(i = 0; i < n; i++) {
-    sum += nConflicts[i];
-  }
-  if(sum != 2*conflicts) {
-    cout << "nConflicts not correctly calculated" << endl;
-  }
+    fileHandle << endl;
+}
+
+void votingModel::step() {
   /**
      iters: number of steps the simulation has executed
      N10timeCourse: stores the number of discordant edges
@@ -108,33 +170,20 @@ int votingModel::vote() {
      edgeCount: counter used to find randomly chosen edge
      actionToPerform: uniform random number on [0,1), determines what to do with the edge
   **/
-  int iters = 0, collectionStep = 0;
-  int chosenVertex, chosenEdge, neighborIndex, neighbor, conflictCounter, newNeighbor, edgeCount;
-  double actionToPerform;
-  int nData = ((int) maxIter/collectionInterval);
-  int N10timeCourse[nData];
-  int minorityOpnTimeCourse[nData];
-  int stepTimeCourse[nData];
-  int waitCounter = 0;
-  for(i = 0; i < nData; i++) {
-    N10timeCourse[i] = 0;
-    minorityOpnTimeCourse[i] = 0;
-    stepTimeCourse[i] = 0;
-  }
-  int V[n];
   if(rewireTo == "random") {
-    while((conflicts > 0) && (iters < maxIter)) {
+
       /******************** FROM CONFLICTS ********************/
       //chose edge at random, then select a chosenVertex and a neighbor at random
       //desire chosenEdge in [1, conflicts] instead of [0, conflicts - 1] so add one
-      chosenEdge = ((int) floor(2*conflicts*(mt1()/normalization))) + 1;
-      i = 0;
-      edgeCount = 0;
+
+      int chosenEdge = ((int) floor(2*conflicts*(genURN()))) + 1;
+      int i = 0;
+      int edgeCount = 0;
       while(edgeCount < chosenEdge) {
 	edgeCount += nConflicts[i++];
       }
       edgeCount -= nConflicts[--i];
-      j = 0;
+      int j = 0;
       while(edgeCount < chosenEdge) {
 	if((A[i][j] != 0) && (Opns[i] != Opns[j])) {
 	  edgeCount++;
@@ -142,7 +191,8 @@ int votingModel::vote() {
 	j++;
       }
       j--;
-      if(mt1()/normalization > 0.5) {
+      int chosenVertex, neighbor;
+      if(genURN() > 0.5) {
       	chosenVertex = i;
       	neighbor = j;
       }
@@ -150,28 +200,8 @@ int votingModel::vote() {
       	chosenVertex = j;
       	neighbor = i;
       }
-      // chosenEdge = ((int) floor(2*totalEdges*(mt1()/normalization))) + 1;
-      // i = 0;
-      // edgeCount = 0;
-      // while(edgeCount < chosenEdge) {
-      // 	edgeCount += degs[i++];
-      // }
-      // edgeCount -= degs[--i];
-      // j = 0;
-      // while(edgeCount < chosenEdge) {
-      // 	edgeCount += A[i][j++];
-      // }
-      // j--;
-      // if(mt1()/normalization > 0.5) {
-      // 	chosenVertex = i;
-      // 	neighbor = j;
-      // }
-      // else {
-      // 	chosenVertex = j;
-      // 	neighbor = i;
-      // }
-      actionToPerform = mt1()/normalization;
-      conflictCounter = 0;
+      double actionToPerform = genURN();
+      int conflictCounter = 0;
       //case one, change opinion of chosenVertex to match neighbor
       if(actionToPerform > a) {
 	//do nothing if opinions already match
@@ -211,9 +241,9 @@ int votingModel::vote() {
 	A[chosenVertex][neighbor] = 0;
 	A[neighbor][chosenVertex] = 0;
 	degs[neighbor] = degs[neighbor] - 1;
-	newNeighbor = (int) floor(n*(mt1()/normalization));
+	newNeighbor = (int) floor(n*(genURN()));
 	while((A[chosenVertex][newNeighbor] != 0) || (newNeighbor == chosenVertex)) {
-	  newNeighbor = (int) floor(n*(mt1()/normalization));
+	  newNeighbor = (int) floor(n*(genURN()));
 	}
 	A[chosenVertex][newNeighbor] = 1;
 	A[newNeighbor][chosenVertex] = 1;
@@ -225,69 +255,7 @@ int votingModel::vote() {
 	}
 	conflicts += conflictCounter;
       }
-	
-	
-      //collect data every collectionInterval steps
-      if(project && (waitCounter > waitingPeriod) && (conflicts > 0)) {
-	if(iters % (projectionInterval/100) == 0) {
-	  vector<double> data;
-	  data.push_back(opnCounts[0]<opnCounts[1]?1.0*opnCounts[0]/n:1.0*opnCounts[1]/n);
-	  data.push_back(conflicts);
-	  data.push_back(iters);
-	  vmCPI->collectData(data);
-	}
-	if(iters % projectionInterval == 0 && iters > 0) {
-	  waitCounter = 0;
-	  vector<double> newPts = vmCPI->project();
-	  iters = newPts[2];
-	  double newDist[2] = {newPts[0], 1-newPts[0]};
-	  initGraph(newDist, newPts[1], false);
-	  //reset previously calculated properties
-	  totalEdges = 0;
-	  for(i = 0; i < k; i++) {
-	    opnCounts[i] = 0;
-	  }
-	  //counts initial numbers of each opinion
-	  for(i = 0; i < n; i++) {
-	    currentOpn = Opns[i];
-	    opnCounts[currentOpn-1] = opnCounts[currentOpn-1] + 1;
-	    for(j = i+1; j < n; j++) {
-	      totalEdges += A[i][j];
-	    }
-	  }
-	  //count initial number of conflicts
-	  /**
-	     Initially the code calculated the number of conflicts from scratch at each step (i.e from
-	     the adjacency matrix and opinion vector), but this was prohibitively expensive
-	  **/
-	  conflicts = 0;
-	  for(i = 0; i < n; i++) {
-	    nConflicts[i] = 0;
-	  }
-	  for(i = 0; i < n; i++) {
-	    currentOpn = Opns[i];
-	    for(j = i+1; j < n; j++) {
-	      if((A[i][j] != 0) && (Opns[j] != currentOpn)) {
-		conflicts++;
-		nConflicts[i]++;
-		nConflicts[j]++;
-	      }
-	    }
-	  }
-	}
-      }
-
-      if((iters % collectionInterval == 0) || (conflicts==0)) {
-	minorityOpnTimeCourse[collectionStep] = opnCounts[0]<opnCounts[1]?opnCounts[0]:opnCounts[1];
-	N10timeCourse[collectionStep] = conflicts;
-	stepTimeCourse[collectionStep] = iters + 1;
-	collectionStep++;
-      }
-      iters++;
-      waitCounter++;
-    }
   }
-
   /**
 
 *********************************************************************************
@@ -296,21 +264,21 @@ Rewire-to-same continues to choose vertex at random instead of edge
 
 **/
   else if(rewireTo == "same") {
-    while((conflicts > 0) && (iters < maxIter)) {
       //find vertex with nonzero degree
-      chosenVertex = (int) floor(n*(mt1()/normalization));
+      int chosenVertex = (int) floor(n*(genURN()));
       int deg = 0;
       for(j = 0; j < n; j++) {
 	deg += A[chosenVertex][j];
       }
       while(deg == 0) {
-	chosenVertex = (int) floor(n*(mt1()/normalization));
+	chosenVertex = (int) floor(n*(genURN()));
 	deg = 0;
 	for(j = 0; j < n; j++) {
 	  deg += A[chosenVertex][j];
 	}
       }
       //assemble list of possible neighbors, storing their indices in V
+      int V[n];
       for(i = 0; i < n; i++) {
 	V[i] = 0;
       }
@@ -321,20 +289,12 @@ Rewire-to-same continues to choose vertex at random instead of edge
 	  i++;
 	}
       }
-      neighborIndex = (int) floor((i)*(mt1()/normalization));
-      neighbor = V[neighborIndex];
-      /**	
-		V(neighborIndex,0) = V(i,0);
-		while((i > 0) && (Opns(chosenVertex,0) == Opns(neighbor,0))) {
-		neighborIndex = (int) floor((i--)*(mt1()/normalization));
-		neighbor = V(neighborIndex,0);
-		V(neighborIndex,0) = V(i,0);
-		}
-      **/
+      int neighborIndex = (int) floor((i)*(genURN()));
+      int neighbor = V[neighborIndex];
       //check that chosenVertex has a disagreeing neighbor, else do nothing
       if(i > 0) {
-	actionToPerform = mt1()/normalization;
-	conflictCounter = 0;
+	double actionToPerform = genURN();
+	int conflictCounter = 0;
 	//case one, change chosenVertex's opinion to match that of neighbor
 	if(actionToPerform > a) {
 	  //adjust conflicts and opinion-counts
@@ -357,61 +317,18 @@ Rewire-to-same continues to choose vertex at random instead of edge
 	  conflictCounter--;
 	  A[chosenVertex][neighbor] = 0;
 	  A[neighbor][chosenVertex] = 0;
-	  newNeighbor = (int) floor(n*(mt1()/normalization));
+	  int newNeighbor = (int) floor(n*(genURN()));
 	  while((Opns[chosenVertex] != Opns[newNeighbor]) || (A[chosenVertex][newNeighbor] != 0) || (newNeighbor == chosenVertex)) {
-	    newNeighbor = (int) floor(n*(mt1()/normalization));
+	    newNeighbor = (int) floor(n*(genURN()));
 	  }
 	  A[chosenVertex][newNeighbor] = 1;
 	  A[newNeighbor][chosenVertex] = 1;
 	  conflicts += conflictCounter;
 	}
       }
-      if((iters % collectionInterval == 0) || (conflicts==0)) {
-	collectionStep = iters/collectionInterval;
-	minorityOpnTimeCourse[collectionStep] = opnCounts[0];//<opnCounts[1]?opnCounts[0]:opnCounts[1];
-	N10timeCourse[collectionStep] = conflicts;
-	stepTimeCourse[collectionStep] = collectionStep + 1;
-      }
-      iters++;
-    }
   }
-  //output data into csv file, hardcoded for two opinions
-  ofstream graphStats;
-  graphStats.open(fileName);
-  graphStats << setiosflags(ios::left) << setiosflags(ios::fixed);
-  for(i = 0; i < collectionStep; i++) {
-    graphStats << stepTimeCourse[i] << ",";
-    graphStats << 1.0*minorityOpnTimeCourse[i]/n << ",";
-    graphStats << 1.0*N10timeCourse[i] << "\n";
-  }
-  graphStats << "\n\n";
-  graphStats.close();
-  stringstream ss;
-  ss << "bifData_" << rewireTo << "_" << n << "_" << avgDeg << ".csv";
-  string bifTitle = ss.str();
-  ofstream bifData;
-  bifData.open(bifTitle, ios::app);
-  bifData << a << ",";
-  bifData << (opnCounts[0]<opnCounts[1]?(1.0*opnCounts[0]/n):(1.0*opnCounts[1]/n)) << ",";
-  //flag to determine whether corresponding data represents frozen state or not
-  if(conflicts != 0) {
-    bifData << "1" << ",";
-  }
-  else {
-    bifData << "0" << ",";
-  }
-  bifData << initDist[0] << "\n";
-  bifData.close();
-  ss.str("");
-  ss << "convergenceData_" << a << "_" << n << "_" << initDist[0] << ".csv";
-  string cnvTitle = ss.str();
-  ofstream convData;
-  convData.open(cnvTitle, ios::app);
-  convData << iters << "," << vmCPI->getProjectionStep();
-  convData << "\n";
-  convData.close();
-  return 0;
 }
+
 
 /**
    The following initializes a simple ER random graph based on the algorithm
@@ -421,33 +338,28 @@ Rewire-to-same continues to choose vertex at random instead of edge
        
    The resulting graphs have been tested to ensure the algorithm's performance.
 **/
-void votingModel::initGraph(double *dist, int conflicts, bool firstInitialization) {
-  if(firstInitialization) {
+void votingModel::initGraph(double *dist) {
     double p = avgDeg/(n-1);
     int v = 1;
     int w = -1;
-    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
-    mt19937 mt1(seed);
-    double normalization = (double) mt1.max();
     double rv1, rv2, partialSum;
     int indexCounter, i, j;
     //allocate and init arrays to zero
-    degs = new int[n];
-    Opns = new int[n];
-    A = new int*[n];
     for(i = 0; i < n; i++) {
       degs[i] = 0;
       Opns[i] = 0;
-      A[i] = new int[n];
       for(j = 0; j < n; j++) {
 	A[i][j] = 0;
       }
     }
+    for(i = 0; i < k; i++) {
+      opnCounts[i] = 0;
+    }
     while(v <= n) {
-      rv1 = mt1()/normalization;
+      rv1 = genURN();
       w = (int) (w + 1 + floor(log(1-rv1)/log(1-p)) + ROUND_CONST);
       while((w >= v) && (v <= n)) {
-	rv2 = mt1()/normalization;
+	rv2 = genURN();
 	partialSum = 0.0;
 	indexCounter = 0;
 	while(partialSum < rv2) {
@@ -455,6 +367,7 @@ void votingModel::initGraph(double *dist, int conflicts, bool firstInitializatio
 	  indexCounter++;
 	}
 	Opns[v-1] = indexCounter;
+	opnCounts[indexCounter - 1]++;
 	w = w - v;
 	v = v + 1;
       }
@@ -465,11 +378,18 @@ void votingModel::initGraph(double *dist, int conflicts, bool firstInitializatio
 	degs[w] = degs[w] + 1;
       }
     }
-  }
-  else {
-    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
-    mt19937 mt1(seed);
-    double normalization = (double) mt1.max();
+    conflicts = 0;
+    int currentOpn;
+    for(i = 0; i < n; i++) {
+      currentOpn = Opns[i];
+      for(j = i+1; j < n; j++) {
+	// !!!! May not work do to conversion of double to int !!!!
+	conflicts += (abs(currentOpn-Opns[j])*A[i][j]);
+      }
+    }
+}
+
+void votingModel::initGraph(double *dist, int conflicts) {
     int i, j;
     for(i = 0; i < n; i++) {
       degs[i] = 0;
@@ -477,6 +397,9 @@ void votingModel::initGraph(double *dist, int conflicts, bool firstInitializatio
       for(j = 0; j < n; j++) {
 	A[i][j] = 0;
       }
+    }
+    for(i = 0; i < k; i++) {
+      opnCounts[i] = 0;
     }
     int nEdges = avgDeg*n/2;
     int nOnes = (int) (dist[0]*n);
@@ -493,43 +416,43 @@ void votingModel::initGraph(double *dist, int conflicts, bool firstInitializatio
     int edgeCount;
     int chosenVertex, neighbor;
     for(edgeCount = 0; edgeCount < nEdges; edgeCount++) {
-      chosenVertex = n*mt1()/normalization;
+      chosenVertex = n*genURN();
       if(chosenVertex > nOnes-1) {
 	//operate on twos
-	if(mt1()/normalization > pConflict) {
+	if(genURN() > pConflict) {
 	  //no conflict, two to two edge
-	  neighbor = nTwos*mt1()/normalization;
+	  neighbor = nTwos*genURN();
 	  A[chosenVertex][nOnes-1+neighbor] = 1;
 	  A[nOnes-1+neighbor][chosenVertex] = 1;
 	}
 	else {
 	  //conflict, two to one edge
-	  neighbor = nOnes*mt1()/normalization;
+	  neighbor = nOnes*genURN();
 	  A[chosenVertex][neighbor] = 1;
 	  A[neighbor][chosenVertex] = 1;
 	}
       }
       else {
-	if(mt1()/normalization > pConflict) {
+	if(genURN() > pConflict) {
 	  //no conflict, one to one edge
-	  neighbor = nOnes*mt1()/normalization;
+	  neighbor = nOnes*genURN();
 	  A[chosenVertex][neighbor] = 1;
 	  A[neighbor][chosenVertex] = 1;
 	}
 	else {
 	  //conflict, one to two edge
-	  neighbor = nTwos*mt1()/normalization;
+	  neighbor = nTwos*genURN();
 	  A[chosenVertex][nOnes-1+neighbor] = 1;
 	  A[nOnes-1+neighbor][chosenVertex] = 1;
 	}
       }
     }
     for(i = 0; i < n; i++) {
+      opnCounts[Opns[i] - 1]++;
       for(j = 0; j < n; j++) {
 	degs[i] += A[i][j];
       }
     }
-  }
 }
     
 //test function, showed that conflicts and degrees were correctly tracked throughout the simulation

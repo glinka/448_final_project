@@ -1,6 +1,7 @@
 #ifndef VOTINGMODEL_H
 #define VOTINGMODEL_H
 #include <string>
+#include <vector>
 
 class votingModelCPI;
 
@@ -11,17 +12,23 @@ class votingModel {
   const int n, k, maxIter, collectionInterval;
   const double a, avgDeg;
   double *initDist;
-  int *degs;
-  int *Opns;
+  int *degs, *Opns, *opnCounts, *nConflicts;
   int **A;
+  double rnNormalization;
+  int conflicts;
   //tracks the number of conflicting edges at each vertex
-  int *nConflicts;
   std::string rewireTo, fileName;
+  std::mt19937 *mt;
   votingModelCPI *vmCPI;
-  void initGraph(double *dist, int conflicts, bool firstInitialization);
+  void initGraph(double *dist);
+  void initGraph(double *dist, int conflicts);
   int consistencyCheck();
+  double genURN();
  public:
   int vote();
+  void step();
+  void saveData(const std::vector<double> data, const std::ofstream &fileHandle);
+  void saveData(const std::vector<std::vector<double> > data, const std::ofstream &fileHandle);
   votingModel(int n, int k, int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, std::string rewireTo, std::string fileName, bool project, votingModelCPI *CPI);
   ~votingModel() {
     for(int i = 0; i < n; i++) {
@@ -30,6 +37,7 @@ class votingModel {
     delete[] A;
     delete[] degs;
     delete[] Opns;
+    delete[] opnCounts;
     delete[] nConflicts;
   };
 };
