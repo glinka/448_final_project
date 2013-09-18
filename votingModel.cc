@@ -12,7 +12,7 @@
 
 using namespace std;
   
-votingModel::votingModel(int n, int k, int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, string rewireTo, string fileName, bool project, votingModelCPI *CPI):project(project), ROUND_CONST(0.01), n(n), k(k), maxIter(maxIter), collectionInterval(collectionInterval), a(a), avgDeg(avgDeg), initDist(initDist), degs(NULL), Opns(NULL), A(NULL), rewireTo(rewireTo), fileName(fileName), vmCPI(CPI) {
+votingModel::votingModel(int n, int k, int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, string rewireTo, string fileName, bool project):project(project), ROUND_CONST(0.01), n(n), k(k), maxIter(maxIter), collectionInterval(collectionInterval), a(a), avgDeg(avgDeg), initDist(initDist), degs(NULL), Opns(NULL), A(NULL), rewireTo(rewireTo), fileName(fileName) {
   unsigned seed = chrono::system_clock::now().time_since_epoch().count();
   mt = new mt19937(seed);
   rnNormalization = (double) (mt->max()+1);
@@ -60,10 +60,6 @@ int votingModel::vote() {
   vector<int> n10TimeCourse;
   vector<int> minorityOpnTimeCourse;
   vector<int> stepTimeCourse;
-  vector<int> test;
-  for(i = 0; i < n; i++) {
-    test.push_back(i);
-  }
   initGraph(initDist);
   int iters = 0;
   while(iters < maxIter && conflicts > 0) {

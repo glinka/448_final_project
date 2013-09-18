@@ -1,65 +1,133 @@
-#include <vector>
-#include <algorithm>
-#include <iostream>
+#include <string>
+#include <sstream>
+#include "fitCurves.h"
+#include "votingModel.h"
 #include "votingModelCPI.h"
 
 using namespace std;
 
-votingModelCPI::votingModelCPI(double projectionInterval): projectionInterval(projectionInterval) {
-  int nData = 3;
-  int i;
-  vector<double> x;
-  for(i = 0; i < nData; i++) {
-    _data.push_back(x);
-  }
+typedef vector<votingModel>::iterator vmIt
+
+votingModelCPI::votingModelCPI(vector<votingModel> vms, const int projStep, int waitingPeriod, int collectionInterval): vms(vms), projStep(projStep), waitingPeriod(waitingPeriod), collectionInterval(collectionInterval), nMicroSteps(nMicroSteps) {
 };
-void votingModelCPI::collectData(const vector<double> data) {
-  for(unsigned int i = 0; i < data.size(); i++) {
-    _data[i].push_back(data[i]);
+
+votingModelCPI::run(int nSteps) {
+  int step = 0;
+  int microStepCount = 0;
+  int i, j;
+  int nVms = vms.size();
+  //initialize space for each vm's time-courses, all will share the same time vector
+  stringstream ss;
+  ss << "CPIAdj_nSteps_" << nSteps << "_projStep_" << projStep << ".csv";
+  string adjFilename = ss.str();
+  ofstream cpiAdjData;
+  cpiAdjData.open(adjFilename);
+  ss.str("");
+  ss << "CPIOpns_nSteps_" << nSteps << "_projStep_" << projStep << ".csv";
+  string opnsFilename = ss.str();
+  ofstream cpiOpnsData;
+  cpiOpnsData.open(opnsFilename);
+  bool addHeader = true;
+  vector<matrix> tempM;
+  vector<vect> tempV;
+  while(step < nSteps) {
+    for(vmIt vm = vms.begin(); vm != vms.end(); vm++) {
+      vm->step();
+    }
+    step++;
+    microStepCount++;
+    if(microStepCount > waitingPeriod) {
+      int onManifoldStep = microStepCount - waitingPeriod;
+      if(onManifoldStep % collectionInterval == 0) {
+	adjMatrices.push_back(tempM);
+	opns.push_back(tempV);
+	for(vmIt vm = vms.begin(); vm != vms.end(); vm++) {
+	  adjMatrices.back().push_back(vm->getAdjMatrix());
+	  opns.back().push_back(vm->getOpns());
+	}
+	times.push_back(onManifoldStep);
+	if(addHeader) {
+	  int n = adjMatrices[0][0].size();
+	  cpiAdjData << "n=" << n << ",nVms=" << nVms << endl;
+	  cpiOpnsData << "n=" << n << ",nVms=" << nVms << endl;
+	  addHeader = false;
+	}
+      }
+      if(microStepCount == nMicroSteps) {
+	//just project the minority fraction you fool
+	vmVects opnsTC = average(opns);
+	vmMatrices adjTC = average(adjMatrices);
+	saveData(opnsTC, cpiOpnsData);
+	saveData(adjTC, cpiAdjData);
+	vector<vect> minorityFracsTC = findMinorityFractions(opns);
+	vector<vect> conflictsTC = findConflicts(adjMatrices, opns);
+	double newOpns = project(times, average(minorityFractsTC));
+	int newConlicts = (int) (project(times, average(conflictsTC)) + 0.5);
+	for(i = 0; i < nVms; i++) {
+	  vms[i].initGraph(newDist, newConflicts);
+	  adjMatrices[i].clear();
+	  opns[i].clear();
+	  times[i].clear();
+	}
+	microStepCount = 0;
+	step += projStep;
+      }
+    }
   }
+  cpiAdjData.close();
+  cpiOpnsData.close();
 }
 
-vector<double> votingModelCPI::project() {
-  vector<double> minorityVsTime = fitLine(_data[2], _data[0]);
-  vector<double> conflictsVsTime = fitLine(_data[2], _data[1]);
-  double newTime = (_data[2]).back() + projectionInterval;
-  double newMinorityFrac = minorityVsTime[0]*newTime + minorityVsTime[1];
-  double newConflicts = conflictsVsTime[0]*newTime + conflictsVsTime[1];
-  double newInterval = projectionInterval;
-  while(newMinorityFrac < 0) {
-    newInterval/=2;
-    newTime -= newInterval;
-    newMinorityFrac = minorityVsTime[0]*newTime + minorityVsTime[1];
+template <typename T>
+double votingModel::average(const vector<T> &data) {
+  T sum = 0;
+  for(vector<T>::iterator v = data.begin(); v != data.end(); v++) {
+    sum += (*v);
   }
-  newConflicts = conflictsVsTime[0]*newTime + conflictsVsTime[1];
-  while(newConflicts < 0) {
-    newInterval/=2;
-    newTime -= newInterval;
-    newConflicts = conflictsVsTime[0]*newTime + conflictsVsTime[1];
-  }
-  newMinorityFrac = minorityVsTime[0]*newTime + minorityVsTime[1];
-  vector<double> newData;
-  newData.push_back(newMinorityFrac);
-  newData.push_back(newConflicts);
-  newData.push_back(newTime);
-  return newData;
+  return sum/data.size();
 }
+template double votingModelCPI::average<int>(const vector<int> &data);
 
-vector<double> votingModelCPI::fitLine(const vector<double> x, const vector<double> y) {
-  //assume x.size() == y.size()
+vect votingModel::average(const vector<vect> &data) {
+  vect avgdData;
+  vector<int> temp;
+  int nVs = data.size();
+  int nElements = data[0].size();
   int i;
-  int n = x.size();
-  double xSum = 0, ySum = 0, xSqSum = 0, xySum = 0;
-  for(i = 0; i < n; i++) {
-    xSum += x[i];
-    ySum += y[i];
-    xSqSum += (x[i]*x[i]);
-    xySum += (x[i]*y[i]);
+  for(i = 0; i < nElements; i++) {
+    for(vector<vect>::iterator v = data.begin(); v != data.end(); v++) {
+      temp.push_back(v[i]);
+    }
+    avgdData.push_back(average<int>(temp) + 0.5);
+    temp.clear();
   }
-  double a  = (n*xySum - xSum*ySum)/(n*xSqSum - xSum*xSum);
-  double b = (ySum*xSqSum - xSum*xySum)/(n*xSqSum - xSum*xSum);
-  vector<double> ab;
-  ab.push_back(a);
-  ab.push_back(b);
-  return ab;
+}
+
+vmVects votingModel::average(const vector<vmVects> &data) {
+  vmVects avgdData;
+  for(vector<vmVects>::iterator vmVs = data.begin(); vmVs != data.end(); vmVs++) {
+    avgdData.push_back(average(*vmVs));
+  }
+  return avgdData();
+}
+
+vmMatrices votingModel::average(const std::vector<vmMatrices> &data) {
+  vmMatrics avgdData;
+  matrix M;
+  vect v;
+  int n = data[0][0].size();
+  int i, j;
+  for(vector<vmMatrices>::iterator vmMs = data.begin(); vmMs != data.end(); vmMs++) {
+    avgdData.push_back(M);
+    for(i = 0; i < n; i++) {
+      for(j = 0; j < n; j++) {
+	for(vector<matrix>::iterator m = vmMs->begin(); m != v->end(); m++) {
+	  v.push_back((*m)[i][j]);
+	}
+	avgdData.back().push_back
+  
+  
+
+double votingModelCPI::project(vect data, vect times) {
+  
 }

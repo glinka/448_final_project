@@ -20,7 +20,6 @@ class votingModel {
   //tracks the number of conflicting edges at each vertex
   std::string rewireTo, fileName;
   std::mt19937 *mt;
-  votingModelCPI *vmCPI;
   void initGraph(double *dist);
   void initGraph(double *dist, int conflicts);
   int consistencyCheck();
@@ -28,11 +27,31 @@ class votingModel {
  public:
   int vote();
   void step();
+  void initGraph(double *dist, int conflicts);
   template <typename dataType>
     void saveData(const std::vector<dataType> data, std::ofstream &fileHandle);
   template <typename dataType>
     void saveData(const std::vector<std::vector<dataType> > data, std::ofstream &fileHandle);
-  votingModel(int n, int k, int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, std::string rewireTo, std::string fileName, bool project, votingModelCPI *CPI);
+  votingModel(int n, int k, int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, std::string rewireTo, std::string fileName, bool project);
+
+  std::vector<int> getOpns() {
+    std::vector<int> newOpns;
+    for(int i = 0; i < n; i++) {
+      newOpns.push_back(Opns[i]);
+    }
+    return newOpns;
+  }
+  std::vector<std::vector<int> > getAdjMatrix() {
+    std::vector<std::vector<int> > newA;
+    std::vector<int> v;
+    for(int i = 0; i < n; i++) {
+      newA.push_back(v);
+      for(j = 0; i < n; j++) {
+	newA.push_back(A[i][j]);
+      }
+    }
+    return newA;
+  };
   ~votingModel() {
     for(int i = 0; i < n; i++) {
       delete[] A[i];

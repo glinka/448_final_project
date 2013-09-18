@@ -1,26 +1,32 @@
 #ifndef VOTINGMODELCPI_H
 #define VOTINGMODELCPI_H
 #include <vector>
+#include <iostream>
+
+class votingModel;
+
+typedef std::vector<int> vect;
+typedef std::vector<vect> vmVects;
+typedef std::vector<std::vector<int> > matrix;
+typedef std::vector<matrix> vmMatrices;
 
 class votingModelCPI {
  private:
-  /** 
-      currently contains:
-      1. minority opn fraction
-      2. number of conflicts
-      3. number of iterations
-  **/
-  std::vector<std::vector<double>> _data;
-  const double projectionInterval;
-  std::vector<double> fitLine(const std::vector<double> x, const std::vector<double> y);
+  std::vector<votingModel> vms;
+  const int projStep, waitingPeriod, collectionInterval, nMicroSteps;
+  vect times;
+  std::vector<vmVects > opns;
+  std::vector<vmMatrices > adjMatrices;
+  double project(const vect &data, const vect &times);
+  vect average(const std::vector<vect> &data);
+  vmVects average(const std::vector<vmVects> &data);
+  vmMatrices average(const std::vector<vmMatrices> &data);
+  void saveData(const std::vector<matrix> &data, std::ofstream &fileHandle);
+  void saveData(const std::vector<vec> &data, std::ofstream &fileHandle);
  public:
-  std::vector<double> project();
-  double getProjectionStep() {
-    return projectionInterval;
-  }
-  void collectData(const std::vector<double> data);
-  votingModelCPI(double projectionInterval);
+  votingModelCPI(std::vector<votingModel> vms, const int projStep, int waitingPeriod, int collectionInterval, int nMicroSteps);
   ~votingModelCPI() {};
+  void run(int nSteps);
 };
 
 #endif
