@@ -68,10 +68,11 @@ int main(int argc, char *argv[]) {
   }
   ss << ".csv";
   string fileName = ss.str();
-  votingModelCPI *vmCPI = new votingModelCPI(projectionStep);
+  /**  votingModelCPI *vmCPI = new votingModelCPI(projectionStep);
   votingModel model(n, k, maxIter, collectionInterval, a, avgDeg, initDist, rewireTo, fileName, project, vmCPI);
   model.vote();
-  delete[] initDist;
   delete vmCPI;
+  **/
+  delete[] initDist;
   return 0;
 }

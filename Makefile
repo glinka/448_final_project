@@ -1,4 +1,4 @@
-toCompile = votingModelCPI.o votingModel.o vote.o
+toCompile = votingModelCPI.o votingModel.o vote.o fitCurves.o
 
 CXX = g++
 
@@ -9,7 +9,7 @@ all: vote
 %.o: %.c
 	$(CXX) $(CXXFLAGS) -c $<
 
-vote: votingModelCPI.o votingModel.o vote.o
+vote: $(toCompile)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 clean:

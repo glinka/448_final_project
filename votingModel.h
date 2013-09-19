@@ -21,7 +21,6 @@ class votingModel {
   std::string rewireTo, fileName;
   std::mt19937 *mt;
   void initGraph(double *dist);
-  void initGraph(double *dist, int conflicts);
   int consistencyCheck();
   double genURN();
  public:
@@ -46,8 +45,8 @@ class votingModel {
     std::vector<int> v;
     for(int i = 0; i < n; i++) {
       newA.push_back(v);
-      for(j = 0; i < n; j++) {
-	newA.push_back(A[i][j]);
+      for(int j = 0; i < n; j++) {
+	newA.back().push_back(A[i][j]);
       }
     }
     return newA;

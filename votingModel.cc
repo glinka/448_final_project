@@ -118,7 +118,6 @@ int votingModel::vote() {
   convData.open(cnvTitle, ios::app);
   rowData.clear();
   rowData.push_back(iters);
-  rowData.push_back(vmCPI->getProjectionStep());
   data.clear();
   for(i = 0; i < rowData.size(); i++) {
     data.push_back(v);
