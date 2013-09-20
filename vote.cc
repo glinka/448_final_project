@@ -18,6 +18,9 @@ int main(int argc, char *argv[]) {
   double a = 0.5;
   int k = 2;
   double *initDist = new double[2];
+  int nMS = n*n;
+  int waitingPeriod = n;
+  int nVMS = 4;
   initDist[0] = 0.5;
   initDist[1] = 0.5;
   //loop through all arguments, assign variables as needed
@@ -59,6 +62,10 @@ int main(int argc, char *argv[]) {
 	project = true;
 	projectionStep = atof(currentArg);
       }
+      else if(currentLabel == "-numberVotingModels" || currentLabel == "-numberVMS" || currentLabel == "-nVMS" || currentLabel == "-nvms") {
+	project = true;
+	nVMS = atoi(currentArg);
+      }
     }
   }
   stringstream ss;
@@ -68,11 +75,15 @@ int main(int argc, char *argv[]) {
   }
   ss << ".csv";
   string fileName = ss.str();
-  /**  votingModelCPI *vmCPI = new votingModelCPI(projectionStep);
-  votingModel model(n, k, maxIter, collectionInterval, a, avgDeg, initDist, rewireTo, fileName, project, vmCPI);
-  model.vote();
-  delete vmCPI;
-  **/
+  vector<votingModel> vmV;
+  for(i = 0; i < nVMS; i++) {
+    votingModel temp(n, k, maxIter, collectionInterval, a, avgDeg, initDist, rewireTo, fileName, project);
+    vmV.push_back(temp);
+  }
+  votingModelCPI *cpi = new votingModelCPI(vmV, projectionStep, waitingPeriod, collectionInterval, nMS);
+  cpi->run(maxIter);
+  delete cpi;
   delete[] initDist;
   return 0;
 }
+
