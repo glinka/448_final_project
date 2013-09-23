@@ -11,7 +11,7 @@
 
 using namespace std;
   
-votingModel::votingModel(int n, int k, int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, string rewireTo, string fileName, bool project):project(project), ROUND_CONST(0.01), n(n), k(k), maxIter(maxIter), collectionInterval(collectionInterval), a(a), avgDeg(avgDeg), initDist(initDist), degs(NULL), Opns(NULL), A(NULL), rewireTo(rewireTo), fileName(fileName) {
+votingModel::votingModel(int n, int k, long int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, string rewireTo, string fileName, bool project):project(project), ROUND_CONST(0.01), n(n), k(k), collectionInterval(collectionInterval), maxIter(maxIter), a(a), avgDeg(avgDeg), initDist(initDist), degs(NULL), Opns(NULL), A(NULL), rewireTo(rewireTo), fileName(fileName) {
   unsigned seed = chrono::system_clock::now().time_since_epoch().count();
   mt = new mt19937(seed);
   rnNormalization = (double) (mt->max()+1);
@@ -60,7 +60,7 @@ int votingModel::vote() {
   vector<int> n10TimeCourse;
   vector<int> minorityOpnTimeCourse;
   vector<int> stepTimeCourse;
-  int iters = 0;
+  long int iters = 0;
   while(iters < maxIter && conflicts > 0) {
     step();
     if((iters % collectionInterval == 0) || (conflicts==0)) {
@@ -209,8 +209,8 @@ void votingModel::step() {
 	//do nothing if opinions already match
 	if(Opns[chosenVertex] != Opns[neighbor]) {
 	  //adjust opinions and opinion counts
-	  opnCounts[Opns[chosenVertex] - 1] = opnCounts[Opns[chosenVertex] - 1] - 1;
-	  opnCounts[Opns[neighbor] - 1] = opnCounts[Opns[neighbor] - 1] + 1;
+	  opnCounts[Opns[chosenVertex] - 1]--;
+	  opnCounts[Opns[neighbor] - 1]++;
 	  Opns[chosenVertex] = Opns[neighbor];
 	  //adjust conflicts
 
@@ -242,14 +242,14 @@ void votingModel::step() {
 	//parallel edges are formed
 	A[chosenVertex][neighbor] = 0;
 	A[neighbor][chosenVertex] = 0;
-	degs[neighbor] = degs[neighbor] - 1;
+	degs[neighbor]--;
 	int newNeighbor = (int) floor(n*(genURN()));
 	while((A[chosenVertex][newNeighbor] != 0) || (newNeighbor == chosenVertex)) {
 	  newNeighbor = (int) floor(n*(genURN()));
 	}
 	A[chosenVertex][newNeighbor] = 1;
 	A[newNeighbor][chosenVertex] = 1;
-	degs[newNeighbor] = degs[newNeighbor] + 1;
+	degs[newNeighbor]++;
 	if(Opns[chosenVertex] != Opns[newNeighbor]) {
 	  conflictCounter++;
 	  nConflicts[chosenVertex]++;
@@ -387,7 +387,6 @@ void votingModel::initGraph(double *dist) {
     for(i = 0; i < n; i++) {
       currentOpn = Opns[i];
       for(j = i+1; j < n; j++) {
-	// !!!! May not work do to conversion of double to int !!!!
 	if(A[i][j] > 0 && currentOpn != Opns[j]) {
 	  conflicts++;
 	  nConflicts[i]++;
@@ -416,15 +415,12 @@ void votingModel::initGraph(double *dist, int conflictCount) {
     for(i = 0; i < n; i++) {
       if(i < nOnes) {
 	Opns[i] = 1;
-	opnCounts[0]++;
       }
       else {
 	Opns[i] = 2;
-	opnCounts[1]++;
       }
     }
-    conflicts = conflictCount;
-    double pConflict = 1.0*conflicts/nEdges;
+    double pConflict = 1.0*conflictCount/nEdges;
     int edgeCount;
     int chosenVertex, neighbor;
     for(edgeCount = 0; edgeCount < nEdges; edgeCount++) {
@@ -459,15 +455,18 @@ void votingModel::initGraph(double *dist, int conflictCount) {
 	}
       }
     }
+    conflicts = 0;
     for(i = 0; i < n; i++) {
       opnCounts[Opns[i] - 1]++;
       for(j = 0; j < n; j++) {
 	degs[i] += A[i][j];
 	if(A[i][j] > 0 && Opns[i] != Opns[j]) {
 	  nConflicts[i]++;
+	  conflicts++;
 	}
       }
     }
+    conflicts /= 2;
 }
     
 //test function, showed that conflicts and degrees were correctly tracked throughout the simulation

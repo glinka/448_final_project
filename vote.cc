@@ -10,17 +10,15 @@ int main(int argc, char *argv[]) {
   double avgDeg = 4;
   int i, j;
   bool project = false;
-  double projectionStep = 0.482;
   string rewireTo = "random";
   int n = 1000;
-  int maxIter = 1000000;
-  int collectionInterval = 500;
+  long int maxIter = 5*n*n;
+  int collectionInterval;
   double a = 0.5;
   int k = 2;
   double *initDist = new double[2];
-  int nMS = n*n;
-  int waitingPeriod = n;
   int nVMS = 4;
+  double projectionStep;
   initDist[0] = 0.5;
   initDist[1] = 0.5;
   //loop through all arguments, assign variables as needed
@@ -68,6 +66,10 @@ int main(int argc, char *argv[]) {
       }
     }
   }
+  int nMS = n;
+  int waitingPeriod = 100;
+  projectionStep = n;
+  collectionInterval = nMS/10;
   stringstream ss;
   ss << "graphStats_" << "n_" << n << "_avgDeg_" << avgDeg << "_alpha_" << a << "_projectionStep_" << projectionStep << "_initDist";
   for(i = 0; i < k; i++) {

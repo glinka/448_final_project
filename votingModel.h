@@ -11,7 +11,8 @@ class votingModel {
  private:
   const bool project;
   const double ROUND_CONST;
-  const int n, k, maxIter, collectionInterval;
+  const int n, k, collectionInterval;
+  const long int maxIter;
   const double a, avgDeg;
   double *initDist;
   int *degs, *Opns, *opnCounts, *nConflicts;
@@ -22,9 +23,9 @@ class votingModel {
   std::string rewireTo, fileName;
   std::mt19937 *mt;
   void initGraph(double *dist);
-  int consistencyCheck();
   double genURN();
  public:
+  int consistencyCheck();
   int vote();
   void step();
   void initGraph(double *dist, int conflicts);
@@ -32,7 +33,11 @@ class votingModel {
     void saveData(const std::vector<dataType> data, std::ofstream &fileHandle);
   template <typename dataType>
     void saveData(const std::vector<std::vector<dataType> > data, std::ofstream &fileHandle);
-  votingModel(int n, int k, int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, std::string rewireTo, std::string fileName, bool project);
+  votingModel(int n, int k, long int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, std::string rewireTo, std::string fileName, bool project);
+
+  int getConflicts() {
+    return conflicts;
+  };
 
   std::vector<int> getOpns() {
     std::vector<int> newOpns;
@@ -40,11 +45,12 @@ class votingModel {
       newOpns.push_back(Opns[i]);
     }
     return newOpns;
-  }
+  };
+
   std::vector<std::vector<int> > getAdjMatrix() {
     std::vector<std::vector<int> > newA;
     std::vector<int> v;
-    for(inpppt i = 0; i < n; i++) {
+    for(int i = 0; i < n; i++) {
       newA.push_back(v);
       for(int j = 0; j < n; j++) {
 	newA.back().push_back(A[i][j]);
@@ -52,6 +58,7 @@ class votingModel {
     }
     return newA;
   };
+
   ~votingModel() {
     for(int i = 0; i < n; i++) {
       delete[] A[i];
@@ -63,7 +70,8 @@ class votingModel {
     delete[] nConflicts;
     delete mt;
   };
- votingModel(const votingModel &toCopy): project(toCopy.project), ROUND_CONST(toCopy.ROUND_CONST), n(toCopy.n), k(toCopy.k), maxIter(toCopy.maxIter), collectionInterval(toCopy.collectionInterval), a(toCopy.a), avgDeg(toCopy.avgDeg) {
+
+ votingModel(const votingModel &toCopy): project(toCopy.project), ROUND_CONST(toCopy.ROUND_CONST), n(toCopy.n), k(toCopy.k), collectionInterval(toCopy.collectionInterval), maxIter(toCopy.maxIter), a(toCopy.a), avgDeg(toCopy.avgDeg) {
       A = new int*[n];
       for(int i = 0; i < n; i++) {
 	  A[i] = new int[n];

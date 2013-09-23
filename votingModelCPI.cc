@@ -39,8 +39,8 @@ template int whereIs<int>(int val, vector<int> v);
 votingModelCPI::votingModelCPI(vector<votingModel> vms, const int projStep, int waitingPeriod, int collectionInterval, int nMicroSteps): vms(vms), projStep(projStep), waitingPeriod(waitingPeriod), collectionInterval(collectionInterval), nMicroSteps(nMicroSteps) {
 };
 
-void votingModelCPI::run(int nSteps) {
-  int step = 0;
+int votingModelCPI::run(long int nSteps) {
+  long int step = 0;
   int microStepCount = 0;
   int i;
   int nVms = vms.size();
@@ -59,9 +59,17 @@ void votingModelCPI::run(int nSteps) {
   vector<matrix> tempM;
   vector<vect> tempV;
   while(step < nSteps) {
+    unsigned int nCompletedVMs = 0;
     for(vmIt vm = vms.begin(); vm != vms.end(); vm++) {
-	vms[0].step();
-	(*vm).step();
+      if(vm->getConflicts() > 0) {
+	vm->step();
+      }
+      else {
+	nCompletedVMs++;
+      }
+    }
+    if(nCompletedVMs == vms.size()) {
+      return 0;
     }
     step++;
     microStepCount++;
@@ -84,19 +92,34 @@ void votingModelCPI::run(int nSteps) {
       }
       if(microStepCount == nMicroSteps) {
 	//just project the minority fraction you fool
-	vmVects opnsTC = average(opns);
-	vmMatrices adjTC = average(adjMatrices);
-	this->saveData(opnsTC, cpiOpnsData);
-	this->saveData(adjTC, cpiAdjData);
+	this->saveData(opns, cpiOpnsData);
+	this->saveData(adjMatrices, cpiAdjData);
 	vector<double> minorityFracsTC = findAvgdMinorityFractions(opns);
 	vect conflictsTC = findAvgdConflicts(adjMatrices, opns);
-	double newOpns = project<double>(times, minorityFracsTC);
+	double newMinorityFrac = project<double>(times, minorityFracsTC);
+	double newDist[2] = {newMinorityFrac, 1 - newMinorityFrac};
 	int newConflicts = (int) (project<int>(times, conflictsTC) + 0.5);
-	for(i = 0; i < nVms; i++) {
-	  vms[i].initGraph(&newOpns, newConflicts);
-	  adjMatrices[i].clear();
-	  opns[i].clear();
+	if(newConflicts < 0) {
+	  return 2;
 	}
+	for(i = 0; i < nVms; i++) {
+	  vms[i].initGraph(newDist, newConflicts);
+	  /**
+	  for(vmMatrices::iterator M = adjMatrices[i].begin(); M != adjMatrices[i].end(); M++) {
+	    for(matrix::iterator V = (*M).begin(); V != (*M).end(); V++) {
+	      (*V).clear();
+	    }
+	    (*M).clear();
+	  }
+	  adjMatrices[i].clear();
+	  for(vmVects::iterator V = opns[i].begin(); V != opns[i].end(); V++) {
+	    (*V).clear();
+	  }
+	  opns[i].clear();
+	  **/
+	}
+	adjMatrices.clear();
+	opns.clear();
 	times.clear();
 	microStepCount = 0;
 	step += projStep;
@@ -105,6 +128,7 @@ void votingModelCPI::run(int nSteps) {
   }
   cpiAdjData.close();
   cpiOpnsData.close();
+  return 0;
 }
 
 template <typename T>
@@ -114,9 +138,10 @@ double votingModelCPI::average(const vector<T> &data) {
   for(myIt v = data.begin(); v != data.end(); v++) {
     sum += (*v);
   }
-  return sum/data.size();
+  return 1.0*sum/data.size();
 }
 template double votingModelCPI::average<int>(const vector<int> &data);
+template double votingModelCPI::average<double>(const vector<double> &data);
 
 vect votingModelCPI::average(const vector<vect> &data) {
   vect avgdData;
@@ -163,83 +188,104 @@ vmMatrices votingModelCPI::average(const std::vector<vmMatrices> &data) {
   return avgdData;
 }
 
-void votingModelCPI::saveData(const vector<vect> &data, ofstream &fileHandle) {
-  for(vector<vect>::const_iterator v = data.begin(); v != data.end(); v++) {
-    for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
-      fileHandle << *i << endl;
+void votingModelCPI::saveData(const vector<vmVects>  &data, ofstream &fileHandle) {
+  for(vector<vmVects>::const_iterator vmV = data.begin(); vmV != data.end(); vmV++) {
+    for(vector<vect>::const_iterator v = (*vmV).begin(); v != (*vmV).end(); v++) {
+      for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+	fileHandle << *i << endl;
+      }
     }
   }
 }
 
   
-void votingModelCPI::saveData(const vector<matrix> &data, ofstream &fileHandle) {
-  for(vector<matrix>::const_iterator m = data.begin(); m != data.end(); m++) {
-    for(matrix::const_iterator row = (*m).begin(); row != (*m).end(); row++) {
-      //row may not actually point to rows in the memory layout, but as our data is symmetric
-      //it doesn't matter if it's looping over rows or columns
-      for(vect::const_iterator i = (*row).begin(); i != (*row).end(); i++) {
-	fileHandle << *i;
-	if(i != --((*row).end())) {
-	  fileHandle << ",";
+void votingModelCPI::saveData(const vector<vmMatrices> &data, ofstream &fileHandle) {
+  for(vector<vmMatrices>::const_iterator vmM = data.begin(); vmM != data.end(); vmM++) {
+    for(vector<matrix>::const_iterator m = (*vmM).begin(); m != (*vmM).end(); m++) {
+      for(matrix::const_iterator row = (*m).begin(); row != (*m).end(); row++) {
+	//row may not actually point to rows in the memory layout, but as our data is symmetric
+	//it doesn't matter if it's looping over rows or columns
+	for(vect::const_iterator i = (*row).begin(); i != (*row).end(); i++) {
+	  fileHandle << *i;
+	  if(i != --((*row).end())) {
+	    fileHandle << ",";
+	  }
 	}
+	fileHandle << endl;
       }
-      fileHandle << endl;
     }
   }
 }
 
 vector<double> votingModelCPI::findAvgdMinorityFractions(const vector<vmVects> &opns) {
-  vector<vect> avgdOpnsTC = average(opns);
-  vector<double> avgdMinorityFrac;
-  int n = avgdOpnsTC[0].size();
-  int index;
-  vect ids;
-  vect counts;
-  for(vector<vect>::const_iterator v = avgdOpnsTC.begin(); v != avgdOpnsTC.end(); v++) {
-    for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
-      if(!inArray<int>(*i, ids)) {
-	ids.push_back(*i);
-	index = ids.size() - 1;
-      }
-      else {
-	index = whereIs<int>(*i, ids);
-      }
-      counts[index]++;
+  vector<vector<double> > minorityFracs;
+  vector<double> v;
+  for(vector<vmVects>::const_iterator vmV = opns.begin(); vmV != opns.end(); vmV++) {
+    minorityFracs.push_back(v);
+    for(vmVects::const_iterator opnV = (*vmV).begin(); opnV != (*vmV).end(); opnV++) {
+      minorityFracs.back().push_back(getMinorityFrac(*opnV));
     }
-    int max = 0;
-    for(vect::iterator c = counts.begin(); c != counts.end(); c++) {
-      if(max > *c) {
-	max = *c;
-      }
-    }
-    avgdMinorityFrac.push_back(1.0*max/n);
   }
-  return avgdMinorityFrac;
+  vector<double> avgdMinorityFracs;
+  for(vector<vector<double> >::iterator mfV = minorityFracs.begin(); mfV != minorityFracs.end(); mfV++) {
+    avgdMinorityFracs.push_back(average<double>(*mfV));
+  }
+  return avgdMinorityFracs;
+}
+
+double votingModelCPI::getMinorityFrac(const vect &opns) {
+  vect counts;
+  vect ids;
+  for(vect::const_iterator i = opns.begin(); i != opns.end(); i++) {
+    if(inArray<int>(*i, ids)) {
+      counts[whereIs<int>(*i, ids)]++;
+    }
+    else {
+      ids.push_back(*i);
+      counts.push_back(1);
+    }
+  }
+  int min = opns.size();
+  for(vect::iterator i = counts.begin(); i != counts.end(); i++) {
+    if(*i < min) {
+      min = *i;
+    }
+  }
+  return 1.0*min/opns.size();
 }
 
 vect votingModelCPI::findAvgdConflicts(const vector<vmMatrices> &As, const vector<vmVects> &opns) {
-  vector<matrix> avgdAs = average(As);
-  vector<vect> avgdOpns = average(opns);
-  vector<vect>::iterator opn = avgdOpns.begin();
-  vect conflictsV;
-  int n = opns[0][0].size();
-  for(vector<matrix>::iterator M = avgdAs.begin(); M != avgdAs.end(); M++) {
-    vect currentOpns = *opn;
-    opn++;
-    int conflicts = 0;
-    int i, j;
-    for(i = 0; i < n; i++) {
-      int currentOpn = currentOpns[i];
-      for(j = i; j < n; j++) {
-	if(currentOpn != currentOpns[j]) {
-	  conflicts += (*M)[i][j];
-	}
+  vector<vect> vmConflicts;
+  vector<vmVects>::const_iterator vmVs = opns.begin();
+  for(vector<vmMatrices>::const_iterator vmMs = As.begin(); vmMs != As.end(); vmMs++) {
+    vmConflicts.push_back(vect());
+    vmVects::const_iterator V = (*vmVs).begin();
+    for(vmMatrices::const_iterator M = (*vmMs).begin(); M != (*vmMs).end(); M++) {
+      vmConflicts.back().push_back(getConflicts(*M, *V));
+      V++;
+    }
+    vmVs++;
+  }
+  vect avgdConflicts;
+  for(vector<vect>::iterator V = vmConflicts.begin(); V != vmConflicts.end(); V++) {
+    avgdConflicts.push_back((int) average<int>(*V));
+  }
+  return avgdConflicts;
+}
+
+int votingModelCPI::getConflicts(const matrix &A, const vect &opns) {
+  int conflicts = 0;
+  int n = opns.size();
+  for(int i = 0; i < n; i++) {
+    int currentOpn = opns[i];
+    for(int j = i+1; j < n; j++) {
+      if(A[i][j] > 0 && opns[j] != currentOpn) {
+	conflicts++;
       }
     }
-    conflictsV.push_back(conflicts);
   }
-  return conflictsV;
-}    
+  return conflicts;
+}
 
 template <typename T>
 double votingModelCPI::project(const vect &times, const vector<T> &data) {
@@ -249,7 +295,7 @@ double votingModelCPI::project(const vect &times, const vector<T> &data) {
   vector<double> doubleTimes(times.begin(), times.end());
   vector<double> doubleData(data.begin(), data.end());
   vector<double> coeffs = fitCurves::fitFx(doubleTimes, doubleData, linearFit);
-  int newVal = 0;
+  double newVal = 0;
   vector<double>::iterator coeff = coeffs.begin();
   for(fxs::iterator f = linearFit.begin(); f != linearFit.end(); f++) {
     newVal += (*coeff)*((*f)(times.back() + projStep));
