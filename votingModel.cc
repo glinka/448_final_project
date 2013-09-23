@@ -4,7 +4,6 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <chrono>
 #include <iomanip>
 #include "votingModel.h"
 #include "votingModelCPI.h"
@@ -24,6 +23,7 @@ votingModel::votingModel(int n, int k, int maxIter, int collectionInterval, doub
   for(int i = 0; i < n; i++) {
     A[i] = new int[n];
   }
+  initGraph(initDist);
 };
 
 /**
@@ -60,7 +60,6 @@ int votingModel::vote() {
   vector<int> n10TimeCourse;
   vector<int> minorityOpnTimeCourse;
   vector<int> stepTimeCourse;
-  initGraph(initDist);
   int iters = 0;
   while(iters < maxIter && conflicts > 0) {
     step();

@@ -60,7 +60,8 @@ void votingModelCPI::run(int nSteps) {
   vector<vect> tempV;
   while(step < nSteps) {
     for(vmIt vm = vms.begin(); vm != vms.end(); vm++) {
-      vm->step();
+	vms[0].step();
+	(*vm).step();
     }
     step++;
     microStepCount++;

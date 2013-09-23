@@ -77,8 +77,7 @@ int main(int argc, char *argv[]) {
   string fileName = ss.str();
   vector<votingModel> vmV;
   for(i = 0; i < nVMS; i++) {
-    votingModel temp(n, k, maxIter, collectionInterval, a, avgDeg, initDist, rewireTo, fileName, project);
-    vmV.push_back(temp);
+    vmV.push_back(votingModel(n, k, maxIter, collectionInterval, a, avgDeg, initDist, rewireTo, fileName, project));
   }
   votingModelCPI *cpi = new votingModelCPI(vmV, projectionStep, waitingPeriod, collectionInterval, nMS);
   cpi->run(maxIter);
