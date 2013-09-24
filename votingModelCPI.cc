@@ -55,9 +55,15 @@ int votingModelCPI::run(long int nSteps) {
   string opnsFilename = ss.str();
   ofstream cpiOpnsData;
   cpiOpnsData.open(opnsFilename);
+  ss.str("");
+  ss << "CPITimes_nSteps_" << nSteps << "_projStep_" << projStep << ".csv";
+  string timesFilename = ss.str();
+  ofstream cpiTimesData;
+  cpiTimesData.open(timesFilename);
   bool addHeader = true;
   vector<matrix> tempM;
   vector<vect> tempV;
+  vect real_times;
   while(step < nSteps) {
     unsigned int nCompletedVMs = 0;
     for(vmIt vm = vms.begin(); vm != vms.end(); vm++) {
@@ -83,10 +89,12 @@ int votingModelCPI::run(long int nSteps) {
 	  opns.back().push_back(vm->getOpns());
 	}
 	times.push_back(onManifoldStep);
+	real_times.push_back(step);
 	if(addHeader) {
 	  int n = adjMatrices[0][0].size();
 	  cpiAdjData << "n=" << n << ",nVms=" << nVms << endl;
 	  cpiOpnsData << "n=" << n << ",nVms=" << nVms << endl;
+	  cpiTimesData << "n=" << n << ",nVms=" << nVms << endl;
 	  addHeader = false;
 	}
       }
@@ -94,6 +102,7 @@ int votingModelCPI::run(long int nSteps) {
 	//just project the minority fraction you fool
 	this->saveData(opns, cpiOpnsData);
 	this->saveData(adjMatrices, cpiAdjData);
+	this->saveData(real_times, cpiTimesData);
 	vector<double> minorityFracsTC = findAvgdMinorityFractions(opns);
 	vect conflictsTC = findAvgdConflicts(adjMatrices, opns);
 	double newMinorityFrac = project<double>(times, minorityFracsTC);
@@ -104,23 +113,11 @@ int votingModelCPI::run(long int nSteps) {
 	}
 	for(i = 0; i < nVms; i++) {
 	  vms[i].initGraph(newDist, newConflicts);
-	  /**
-	  for(vmMatrices::iterator M = adjMatrices[i].begin(); M != adjMatrices[i].end(); M++) {
-	    for(matrix::iterator V = (*M).begin(); V != (*M).end(); V++) {
-	      (*V).clear();
-	    }
-	    (*M).clear();
-	  }
-	  adjMatrices[i].clear();
-	  for(vmVects::iterator V = opns[i].begin(); V != opns[i].end(); V++) {
-	    (*V).clear();
-	  }
-	  opns[i].clear();
-	  **/
 	}
 	adjMatrices.clear();
 	opns.clear();
 	times.clear();
+	real_times.clear();
 	microStepCount = 0;
 	step += projStep;
       }
@@ -166,7 +163,7 @@ vmVects votingModelCPI::average(const vector<vmVects> &data) {
   return avgdData;
 }
 
-vmMatrices votingModelCPI::average(const std::vector<vmMatrices> &data) {
+vmMatrices votingModelCPI::average(const vector<vmMatrices> &data) {
   vmMatrices avgdData;
   matrix M;
   vect v;
@@ -186,6 +183,12 @@ vmMatrices votingModelCPI::average(const std::vector<vmMatrices> &data) {
     }
   }
   return avgdData;
+}
+
+void votingModelCPI::saveData(const vect &data, ofstream &fileHandle) {
+    for(vect::const_iterator i = data.begin(); i != data.end(); i++) {
+	fileHandle << *i << endl;
+    }
 }
 
 void votingModelCPI::saveData(const vector<vmVects>  &data, ofstream &fileHandle) {

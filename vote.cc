@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
   int i, j;
   bool project = false;
   string rewireTo = "random";
-  int n = 1000;
+  int n = 200;
   long int maxIter = 5*n*n;
   int collectionInterval;
   double a = 0.5;
