@@ -47,9 +47,9 @@ def make_filename(base_name, params, unique_id=''):
         filename = filename + '_' + unique_id
     return filename
     
-def plot_timecourse(adj_data, opns_data, time_data, params, scalar_fn, ax=''):
+def plot_timecourse(adj_data, opns_data, time_data, params, scalar_fn, average=False, ax=''):
     n = params['n']
-    n_vms = params['n_vms']
+    n_vms = params['nVms']
     n_data = time_data.shape[0]
     if not ax:
         fig = plt.figure()
@@ -59,9 +59,18 @@ def plot_timecourse(adj_data, opns_data, time_data, params, scalar_fn, ax=''):
         adj_matrices = [adj_data[(n_vms*i+k)*n:(n_vms*i+k+1)*n,:] for k in range(n_vms)]
         opn_vectors = [opns_data[(n_vms*i+k)*n:(n_vms*i+k+1)*n] for k in range(n_vms)]
         fn_evals = [scalar_fn(adj_matrices[k], opn_vectors[k]) for k in range(n_vms)]
-        yData.append(np.average(yData))
-    ax.plot(time_data, yData)
-        
+        if average:
+            yData.append(np.average(fn_evals))
+        else:
+            yData.append(fn_evals)
+    if average:
+        ax.plot(time_data, yData)
+    else:
+        yData = np.array(yData)
+        for k in range(n_vms):
+            ax.plot(time_data, yData[:,k])
+    plt.show()
+
 if __name__=="__main__":
     import argparse
     parser = argparse.ArgumentParser()
