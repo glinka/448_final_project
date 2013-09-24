@@ -9,7 +9,6 @@ class votingModelCPI;
 
 class votingModel {
  private:
-  const bool project;
   const double ROUND_CONST;
   const int n, k, collectionInterval;
   const long int maxIter;
@@ -33,7 +32,7 @@ class votingModel {
     void saveData(const std::vector<dataType> data, std::ofstream &fileHandle);
   template <typename dataType>
     void saveData(const std::vector<std::vector<dataType> > data, std::ofstream &fileHandle);
-  votingModel(int n, int k, long int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, std::string rewireTo, std::string fileName, bool project);
+  votingModel(int n, int k, long int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, std::string rewireTo, std::string fileName="");
 
   int getConflicts() {
     return conflicts;
@@ -71,7 +70,7 @@ class votingModel {
     delete mt;
   };
 
- votingModel(const votingModel &toCopy): project(toCopy.project), ROUND_CONST(toCopy.ROUND_CONST), n(toCopy.n), k(toCopy.k), collectionInterval(toCopy.collectionInterval), maxIter(toCopy.maxIter), a(toCopy.a), avgDeg(toCopy.avgDeg) {
+ votingModel(const votingModel &toCopy): ROUND_CONST(toCopy.ROUND_CONST), n(toCopy.n), k(toCopy.k), collectionInterval(toCopy.collectionInterval), maxIter(toCopy.maxIter), a(toCopy.a), avgDeg(toCopy.avgDeg) {
       A = new int*[n];
       for(int i = 0; i < n; i++) {
 	  A[i] = new int[n];
@@ -98,6 +97,36 @@ class votingModel {
       rewireTo = toCopy.rewireTo;
       fileName = toCopy.fileName;
       initDist = toCopy.initDist;
+  };
+
+  votingModel &operator=(const votingModel &rhs) {
+      A = new int*[n];
+      for(int i = 0; i < n; i++) {
+	  A[i] = new int[n];
+      }
+      degs = new int[n];
+      Opns = new int[n];
+      nConflicts = new int[n];
+      opnCounts = new int[k];
+      for(int i = 0; i < n; i++) {
+	  degs[i] = rhs.degs[i];
+	  Opns[i] = rhs.Opns[i];
+	  nConflicts[i] = rhs.nConflicts[i];
+	  for(int j = 0; j < n; j++) {
+	      A[i][j] = rhs.A[i][j];
+	  }
+      }
+      for(int i = 0; i < k; i++) {
+	  opnCounts[i] = rhs.opnCounts[i];
+      }
+      unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+      mt = new std::mt19937(seed);
+      rnNormalization = (double) (mt->max()+1);
+      conflicts = rhs.conflicts;
+      rewireTo = rhs.rewireTo;
+      fileName = rhs.fileName;
+      initDist = rhs.initDist;
+      return *this;
   };
 };
 

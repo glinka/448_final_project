@@ -20,4 +20,4 @@ def get_minority_fraction(adj_matrix, opns_vector):
     for val in unique_opns.itervalues():
         if val < min:
             min = val
-    return min
+    return 1.0*min/n

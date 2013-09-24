@@ -36,95 +36,133 @@ int whereIs(T val, vector<T> v) {
 template int whereIs<int>(int val, vector<int> v);
 
 
-votingModelCPI::votingModelCPI(vector<votingModel> vms, const int projStep, int waitingPeriod, int collectionInterval, int nMicroSteps): vms(vms), projStep(projStep), waitingPeriod(waitingPeriod), collectionInterval(collectionInterval), nMicroSteps(nMicroSteps) {
+votingModelCPI::votingModelCPI(vector<votingModel> vms, int waitingPeriod, int collectionInterval, int nMicroSteps, string file_header, string file_name): vms(vms), waitingPeriod(waitingPeriod), collectionInterval(collectionInterval), nMicroSteps(nMicroSteps), file_header(file_header), file_name(file_name) {
 };
 
-int votingModelCPI::run(long int nSteps) {
+int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) {
   long int step = 0;
   int microStepCount = 0;
   int i;
-  int nVms = vms.size();
-  //initialize space for each vm's time-courses, all will share the same time vector
   stringstream ss;
-  ss << "CPIAdj_nSteps_" << nSteps << "_projStep_" << projStep << ".csv";
+  ss << "CPIAdj_" << file_name << ".csv";
   string adjFilename = ss.str();
   ofstream cpiAdjData;
   cpiAdjData.open(adjFilename);
   ss.str("");
-  ss << "CPIOpns_nSteps_" << nSteps << "_projStep_" << projStep << ".csv";
+  ss << "CPIOpns_" << file_name << ".csv";
   string opnsFilename = ss.str();
   ofstream cpiOpnsData;
   cpiOpnsData.open(opnsFilename);
   ss.str("");
-  ss << "CPITimes_nSteps_" << nSteps << "_projStep_" << projStep << ".csv";
+  ss << "CPITimes_" << file_name << ".csv";
   string timesFilename = ss.str();
   ofstream cpiTimesData;
   cpiTimesData.open(timesFilename);
-  bool addHeader = true;
-  vector<matrix> tempM;
-  vector<vect> tempV;
-  vect real_times;
+  ss.str("");
+  ss << "CPINvms_" << file_name << ".csv";
+  string nvmsFilename = ss.str();
+  ofstream cpiNvmsData;
+  cpiNvmsData.open(nvmsFilename);
+  cpiAdjData << file_header << endl;
+  cpiOpnsData << file_header << endl;
+  cpiTimesData << file_header << endl;
+  cpiNvmsData << file_header << endl;
+  //initialize space for each vm's time-courses, all will share the same time vector
+  vect times_to_save;
+  vect nvms_to_save;
+  vector<vmMatrices> adj_to_save;
+  vector<vmVects> opns_to_save;
+  unsigned int nCompletedVMs = 0;
   while(step < nSteps) {
-    unsigned int nCompletedVMs = 0;
     for(vmIt vm = vms.begin(); vm != vms.end(); vm++) {
       if(vm->getConflicts() > 0) {
 	vm->step();
       }
       else {
+	//remove finished runs from simulation
+	vms.erase(vm);
 	nCompletedVMs++;
       }
     }
-    if(nCompletedVMs == vms.size()) {
-      return 0;
-    }
     step++;
     microStepCount++;
+    //collect data to save every save_data_interval steps, and also at the 
+    //beginning of each projection iteration and end of simulation
+    if(microStepCount % save_data_interval == 0 || microStepCount == 1 || nCompletedVMs == vms.size()) {
+      adj_to_save.push_back(vector<matrix>());
+      opns_to_save.push_back(vector<vect>());
+      for(vmIt vm = vms.begin(); vm != vms.end(); vm++) {
+	adj_to_save.back().push_back(vm->getAdjMatrix());
+	opns_to_save.back().push_back(vm->getOpns());
+      }
+      times_to_save.push_back(step);
+      nvms_to_save.push_back(vms.size());
+    }
+    if(nCompletedVMs == vms.size()) {
+      this->saveData(adj_to_save, cpiAdjData);
+      this->saveData(opns_to_save, cpiOpnsData);
+      this->saveData(times_to_save, cpiTimesData);
+      this->saveData(nvms_to_save, cpiNvmsData);
+      cpiAdjData.close();
+      cpiOpnsData.close();
+      cpiTimesData.close();
+      cpiNvmsData.close();
+      return 0;
+    }
     if(microStepCount > waitingPeriod) {
       int onManifoldStep = microStepCount - waitingPeriod;
       if(onManifoldStep % collectionInterval == 0) {
-	adjMatrices.push_back(tempM);
-	opns.push_back(tempV);
+	adjMatrices.push_back(vector<matrix>());
+	opns.push_back(vector<vect>());
 	for(vmIt vm = vms.begin(); vm != vms.end(); vm++) {
 	  adjMatrices.back().push_back(vm->getAdjMatrix());
 	  opns.back().push_back(vm->getOpns());
 	}
 	times.push_back(onManifoldStep);
-	real_times.push_back(step);
-	if(addHeader) {
-	  int n = adjMatrices[0][0].size();
-	  cpiAdjData << "n=" << n << ",nVms=" << nVms << endl;
-	  cpiOpnsData << "n=" << n << ",nVms=" << nVms << endl;
-	  cpiTimesData << "n=" << n << ",nVms=" << nVms << endl;
-	  addHeader = false;
-	}
       }
       if(microStepCount == nMicroSteps) {
 	//just project the minority fraction you fool
-	this->saveData(opns, cpiOpnsData);
-	this->saveData(adjMatrices, cpiAdjData);
-	this->saveData(real_times, cpiTimesData);
+	this->saveData(adj_to_save, cpiAdjData);
+	this->saveData(opns_to_save, cpiOpnsData);
+	this->saveData(times_to_save, cpiTimesData);
+	this->saveData(nvms_to_save, cpiNvmsData);
 	vector<double> minorityFracsTC = findAvgdMinorityFractions(opns);
 	vect conflictsTC = findAvgdConflicts(adjMatrices, opns);
-	double newMinorityFrac = project<double>(times, minorityFracsTC);
-	double newDist[2] = {newMinorityFrac, 1 - newMinorityFrac};
-	int newConflicts = (int) (project<int>(times, conflictsTC) + 0.5);
-	if(newConflicts < 0) {
-	  return 2;
+	double newMinorityFrac = project<double>(times, minorityFracsTC, proj_step);
+	//hard coded for two opinions
+	int newConflicts = (int) (project<int>(times, conflictsTC, proj_step) + 0.5);
+	int temp_proj_step = proj_step;
+	while(newConflicts < 0 || newMinorityFrac < 0) {
+	  temp_proj_step /= 2;
+	  minorityFracsTC = findAvgdMinorityFractions(opns);
+	  conflictsTC = findAvgdConflicts(adjMatrices, opns);
+	  newMinorityFrac = project<double>(times, minorityFracsTC, temp_proj_step);
+	  newConflicts = (int) (project<int>(times, conflictsTC, temp_proj_step) + 0.5);
 	}
-	for(i = 0; i < nVms; i++) {
+	double newDist[2] = {newMinorityFrac, 1 - newMinorityFrac};
+	for(i = 0; i < vms.size(); i++) {
 	  vms[i].initGraph(newDist, newConflicts);
 	}
+	adj_to_save.clear();
+	opns_to_save.clear();
+	times_to_save.clear();
+	nvms_to_save.clear();
 	adjMatrices.clear();
 	opns.clear();
 	times.clear();
-	real_times.clear();
 	microStepCount = 0;
-	step += projStep;
+	step += proj_step;
       }
     }
   }
+  this->saveData(adj_to_save, cpiAdjData);
+  this->saveData(opns_to_save, cpiOpnsData);
+  this->saveData(times_to_save, cpiTimesData);
+  this->saveData(nvms_to_save, cpiNvmsData);
   cpiAdjData.close();
   cpiOpnsData.close();
+  cpiTimesData.close();
+  cpiNvmsData.close();
   return 0;
 }
 
@@ -291,7 +329,7 @@ int votingModelCPI::getConflicts(const matrix &A, const vect &opns) {
 }
 
 template <typename T>
-double votingModelCPI::project(const vect &times, const vector<T> &data) {
+double votingModelCPI::project(const vect &times, const vector<T> &data, const int proj_step) {
   fxs linearFit;
   linearFit.push_back([] (double x) {return 1.0;});
   linearFit.push_back([] (double x) {return x;});
@@ -301,10 +339,10 @@ double votingModelCPI::project(const vect &times, const vector<T> &data) {
   double newVal = 0;
   vector<double>::iterator coeff = coeffs.begin();
   for(fxs::iterator f = linearFit.begin(); f != linearFit.end(); f++) {
-    newVal += (*coeff)*((*f)(times.back() + projStep));
+    newVal += (*coeff)*((*f)(times.back() + proj_step));
     coeff++;
   }
   return newVal;
 }
-template double votingModelCPI::project<int>(const vect &times, const vector<int> &data);
-template double votingModelCPI::project<double>(const vect &times, const vector<double> &data);
+template double votingModelCPI::project<int>(const vect &times, const vector<int> &data, const int proj_step);
+template double votingModelCPI::project<double>(const vect &times, const vector<double> &data, const int proj_step);

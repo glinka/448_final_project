@@ -71,20 +71,40 @@ int main(int argc, char *argv[]) {
   projectionStep = n;
   collectionInterval = nMS/10;
   stringstream ss;
-  ss << "graphStats_" << "n_" << n << "_avgDeg_" << avgDeg << "_alpha_" << a << "_projectionStep_" << projectionStep << "_initDist";
+  ss << "n=" << n;
+  ss << ",nVms=" << nVMS;
+  ss << ",nsteps=" << maxIter;
+  ss << ",avg_deg=" << avgDeg;
+  ss << ",alpha=" << a;
+  /**
+     
+     left out for ease of parsing arguments in python
+
+  ss << ",init_dist=";
   for(i = 0; i < k; i++) {
-    ss << "_" << initDist[i];
+    ss << initDist[i] << ",";
   }
-  ss << ".csv";
-  string fileName = ss.str();
-  vector<votingModel> vmV;
-  for(i = 0; i < nVMS; i++) {
-    vmV.push_back(votingModel(n, k, maxIter, collectionInterval, a, avgDeg, initDist, rewireTo, fileName, project));
+  //leave out last comma due to previous loop
+  ss << "rewire_to=" << rewireTo;
+  **/
+  string file_header = ss.str();
+  ss.str("");
+  ss << "n_" << n;
+  ss << "_nvms_" << nVMS;
+  ss << "_alpha_" << a;
+  ss << "_nsteps_" << maxIter;
+  ss << "_projstep_" << projectionStep;
+  ss << "_rewireto_" << rewireTo;
+  string file_name = ss.str();
+  if(project) {
+    vector<votingModel> vmV;
+    for(i = 0; i < nVMS; i++) {
+      vmV.push_back(votingModel(n, k, maxIter, collectionInterval, a, avgDeg, initDist, rewireTo));
+    }
+    votingModelCPI *cpi = new votingModelCPI(vmV, waitingPeriod, collectionInterval, nMS, file_header, file_name);
+    cpi->run(maxIter, projectionStep);
+    delete cpi;
   }
-  votingModelCPI *cpi = new votingModelCPI(vmV, projectionStep, waitingPeriod, collectionInterval, nMS);
-  cpi->run(maxIter);
-  delete cpi;
   delete[] initDist;
   return 0;
 }
-

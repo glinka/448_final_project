@@ -13,12 +13,13 @@ typedef std::vector<matrix> vmMatrices;
 class votingModelCPI {
  private:
   std::vector<votingModel> vms;
-  const int projStep, waitingPeriod, collectionInterval, nMicroSteps;
+  const int waitingPeriod, collectionInterval, nMicroSteps;
   vect times;
   std::vector<vmVects > opns;
   std::vector<vmMatrices > adjMatrices;
+  std::string file_header, file_name;
   template <typename T>
-    double project(const vect &times, const std::vector<T> &data);
+    double project(const vect &times, const std::vector<T> &data, const int proj_step);
   template <typename T>
     double average(const std::vector<T> &data);
   vect average(const std::vector<vect> &data);
@@ -32,9 +33,9 @@ class votingModelCPI {
   double getMinorityFrac(const vect &opns);
   int getConflicts(const matrix &A, const vect &opns);
  public:
-  votingModelCPI(std::vector<votingModel> vms, const int projStep, int waitingPeriod, int collectionInterval, int nMicroSteps);
+  votingModelCPI(std::vector<votingModel> vms, int waitingPeriod, int collectionInterval, int nMicroSteps, std::string file_header, std::string file_name);
   ~votingModelCPI() {};
-  int run(long int nSteps);
+  int run(long int nSteps, int proj_step, int save_data_interval=100);
 };
 
 #endif
