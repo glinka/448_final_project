@@ -42,24 +42,24 @@ votingModelCPI::votingModelCPI(vector<votingModel> vms, int waitingPeriod, int c
 int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) {
   long int step = 0;
   int microStepCount = 0;
-  int i;
   stringstream ss;
-  ss << "CPIAdj_" << file_name << ".csv";
+  string folder = "./csv_data/";
+  ss << folder << "CPIAdj_" << file_name << ".csv";
   string adjFilename = ss.str();
   ofstream cpiAdjData;
   cpiAdjData.open(adjFilename);
   ss.str("");
-  ss << "CPIOpns_" << file_name << ".csv";
+  ss << folder << "CPIOpns_" << file_name << ".csv";
   string opnsFilename = ss.str();
   ofstream cpiOpnsData;
   cpiOpnsData.open(opnsFilename);
   ss.str("");
-  ss << "CPITimes_" << file_name << ".csv";
+  ss << folder << "CPITimes_" << file_name << ".csv";
   string timesFilename = ss.str();
   ofstream cpiTimesData;
   cpiTimesData.open(timesFilename);
   ss.str("");
-  ss << "CPINvms_" << file_name << ".csv";
+  ss << folder << "CPINvms_" << file_name << ".csv";
   string nvmsFilename = ss.str();
   ofstream cpiNvmsData;
   cpiNvmsData.open(nvmsFilename);
@@ -122,10 +122,6 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
       }
       if(microStepCount == nMicroSteps) {
 	//just project the minority fraction you fool
-	this->saveData(adj_to_save, cpiAdjData);
-	this->saveData(opns_to_save, cpiOpnsData);
-	this->saveData(times_to_save, cpiTimesData);
-	this->saveData(nvms_to_save, cpiNvmsData);
 	vector<double> minorityFracsTC = findAvgdMinorityFractions(opns);
 	vect conflictsTC = findAvgdConflicts(adjMatrices, opns);
 	double newMinorityFrac = project<double>(times, minorityFracsTC, proj_step);
@@ -140,9 +136,13 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
 	  newConflicts = (int) (project<int>(times, conflictsTC, temp_proj_step) + 0.5);
 	}
 	double newDist[2] = {newMinorityFrac, 1 - newMinorityFrac};
-	for(i = 0; i < vms.size(); i++) {
-	  vms[i].initGraph(newDist, newConflicts);
+	for(vmIt vm = vms.begin(); vm != vms.end(); vm++) {
+	  vm->initGraph(newDist, newConflicts);
 	}
+	this->saveData(adj_to_save, cpiAdjData);
+	this->saveData(opns_to_save, cpiOpnsData);
+	this->saveData(times_to_save, cpiTimesData);
+	this->saveData(nvms_to_save, cpiNvmsData);
 	adj_to_save.clear();
 	opns_to_save.clear();
 	times_to_save.clear();

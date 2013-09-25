@@ -9,7 +9,7 @@ using namespace std;
 int main(int argc, char *argv[]) {
   double avgDeg = 4;
   int i, j;
-  bool project = false;
+  bool project = true;
   string rewireTo = "random";
   int n = 200;
   long int maxIter = 5*n*n;

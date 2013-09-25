@@ -100,14 +100,6 @@ class votingModel {
   };
 
   votingModel &operator=(const votingModel &rhs) {
-      A = new int*[n];
-      for(int i = 0; i < n; i++) {
-	  A[i] = new int[n];
-      }
-      degs = new int[n];
-      Opns = new int[n];
-      nConflicts = new int[n];
-      opnCounts = new int[k];
       for(int i = 0; i < n; i++) {
 	  degs[i] = rhs.degs[i];
 	  Opns[i] = rhs.Opns[i];
@@ -119,12 +111,9 @@ class votingModel {
       for(int i = 0; i < k; i++) {
 	  opnCounts[i] = rhs.opnCounts[i];
       }
-      unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-      mt = new std::mt19937(seed);
-      rnNormalization = (double) (mt->max()+1);
       conflicts = rhs.conflicts;
-      rewireTo = rhs.rewireTo;
-      fileName = rhs.fileName;
+      rewireTo.assign(rhs.rewireTo);
+      fileName.assign(rhs.fileName);
       initDist = rhs.initDist;
       return *this;
   };
