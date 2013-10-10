@@ -13,6 +13,8 @@ class votingModel {
   const int n, k, collectionInterval;
   const long int maxIter;
   const double a, avgDeg;
+  int id;
+  static int id_tracker;
   double *initDist;
   int *degs, *Opns, *opnCounts, *nConflicts;
   int **A;
@@ -33,6 +35,10 @@ class votingModel {
   template <typename dataType>
     void saveData(const std::vector<std::vector<dataType> > data, std::ofstream &fileHandle);
   votingModel(int n, int k, long int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, std::string rewireTo, std::string fileName="");
+
+  int get_id() {
+    return id;
+  };
 
   int getConflicts() {
     return conflicts;
@@ -70,7 +76,7 @@ class votingModel {
     delete mt;
   };
 
- votingModel(const votingModel &toCopy): ROUND_CONST(toCopy.ROUND_CONST), n(toCopy.n), k(toCopy.k), collectionInterval(toCopy.collectionInterval), maxIter(toCopy.maxIter), a(toCopy.a), avgDeg(toCopy.avgDeg) {
+ votingModel(const votingModel &toCopy): ROUND_CONST(toCopy.ROUND_CONST), n(toCopy.n), k(toCopy.k), collectionInterval(toCopy.collectionInterval), maxIter(toCopy.maxIter), a(toCopy.a), avgDeg(toCopy.avgDeg), id(toCopy.id) {
       A = new int*[n];
       for(int i = 0; i < n; i++) {
 	  A[i] = new int[n];
@@ -115,6 +121,7 @@ class votingModel {
       rewireTo.assign(rhs.rewireTo);
       fileName.assign(rhs.fileName);
       initDist = rhs.initDist;
+      id = rhs.id;
       return *this;
   };
 };

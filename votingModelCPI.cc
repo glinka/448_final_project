@@ -40,6 +40,7 @@ votingModelCPI::votingModelCPI(vector<votingModel> vms, int waitingPeriod, int c
 };
 
 int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) {
+  int nvms = vms.size();
   long int step = 0;
   int microStepCount = 0;
   stringstream ss;
@@ -59,17 +60,17 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
   ofstream cpiTimesData;
   cpiTimesData.open(timesFilename);
   ss.str("");
-  ss << folder << "CPINvms_" << file_name << ".csv";
-  string nvmsFilename = ss.str();
-  ofstream cpiNvmsData;
-  cpiNvmsData.open(nvmsFilename);
+  ss << folder << "CPIids_" << file_name << ".csv";
+  string idsFilename = ss.str();
+  ofstream cpiIdsData;
+  cpiIdsData.open(idsFilename);
   cpiAdjData << file_header << endl;
   cpiOpnsData << file_header << endl;
   cpiTimesData << file_header << endl;
-  cpiNvmsData << file_header << endl;
+  cpiIdsData << file_header << endl;
   //initialize space for each vm's time-courses, all will share the same time vector
   vect times_to_save;
-  vect nvms_to_save;
+  vector< vect > ids_to_save;
   vector<vmMatrices> adj_to_save;
   vector<vmVects> opns_to_save;
   unsigned int nCompletedVMs = 0;
@@ -88,25 +89,26 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
     microStepCount++;
     //collect data to save every save_data_interval steps, and also at the 
     //beginning of each projection iteration and end of simulation
-    if(microStepCount % save_data_interval == 0 || microStepCount == 1 || nCompletedVMs == vms.size()) {
+    if(microStepCount % save_data_interval == 0 || microStepCount == 1 || nCompletedVMs == nvms) {
       adj_to_save.push_back(vector<matrix>());
       opns_to_save.push_back(vector<vect>());
+      ids_to_save.push_back(vector<int>());
       for(vmIt vm = vms.begin(); vm != vms.end(); vm++) {
 	adj_to_save.back().push_back(vm->getAdjMatrix());
 	opns_to_save.back().push_back(vm->getOpns());
+	ids_to_save.back().push_back(vm->get_id());
       }
       times_to_save.push_back(step);
-      nvms_to_save.push_back(vms.size());
     }
-    if(nCompletedVMs == vms.size()) {
+    if(nCompletedVMs == nvms) {
       this->saveData(adj_to_save, cpiAdjData);
       this->saveData(opns_to_save, cpiOpnsData);
       this->saveData(times_to_save, cpiTimesData);
-      this->saveData(nvms_to_save, cpiNvmsData);
+      this->saveData(ids_to_save, cpiIdsData);
       cpiAdjData.close();
       cpiOpnsData.close();
       cpiTimesData.close();
-      cpiNvmsData.close();
+      cpiIdsData.close();
       return 0;
     }
     if(microStepCount > waitingPeriod) {
@@ -142,11 +144,11 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
 	this->saveData(adj_to_save, cpiAdjData);
 	this->saveData(opns_to_save, cpiOpnsData);
 	this->saveData(times_to_save, cpiTimesData);
-	this->saveData(nvms_to_save, cpiNvmsData);
+	this->saveData(ids_to_save, cpiIdsData);
 	adj_to_save.clear();
 	opns_to_save.clear();
 	times_to_save.clear();
-	nvms_to_save.clear();
+	ids_to_save.clear();
 	adjMatrices.clear();
 	opns.clear();
 	times.clear();
@@ -158,11 +160,11 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
   this->saveData(adj_to_save, cpiAdjData);
   this->saveData(opns_to_save, cpiOpnsData);
   this->saveData(times_to_save, cpiTimesData);
-  this->saveData(nvms_to_save, cpiNvmsData);
+  this->saveData(ids_to_save, cpiIdsData);
   cpiAdjData.close();
   cpiOpnsData.close();
   cpiTimesData.close();
-  cpiNvmsData.close();
+  cpiIdsData.close();
   return 0;
 }
 
@@ -227,6 +229,19 @@ void votingModelCPI::saveData(const vect &data, ofstream &fileHandle) {
     for(vect::const_iterator i = data.begin(); i != data.end(); i++) {
 	fileHandle << *i << endl;
     }
+}
+
+void votingModelCPI::saveData(const vector< vect > &data, ofstream &fileHandle) {
+  for(vector< vect >::const_iterator v = data.begin(); v != data.end(); v++) {
+    for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+      fileHandle << *i;
+      //add comma if not last element
+      if(i != ((*v).end() - 1)) {
+	fileHandle << ",";
+      }
+    }
+    fileHandle << endl;
+  }
 }
 
 void votingModelCPI::saveData(const vector<vmVects>  &data, ofstream &fileHandle) {

@@ -10,8 +10,10 @@
 
 
 using namespace std;
+
+int votingModel::id_tracker = 0;
   
-votingModel::votingModel(int n, int k, long int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, string rewireTo, string fileName):ROUND_CONST(0.01), n(n), k(k), collectionInterval(collectionInterval), maxIter(maxIter), a(a), avgDeg(avgDeg), initDist(initDist), degs(NULL), Opns(NULL), A(NULL), rewireTo(rewireTo), fileName(fileName) {
+votingModel::votingModel(int n, int k, long int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, string rewireTo, string fileName):ROUND_CONST(0.01), n(n), k(k), collectionInterval(collectionInterval), maxIter(maxIter), a(a), avgDeg(avgDeg), initDist(initDist), degs(NULL), Opns(NULL), A(NULL), rewireTo(rewireTo), fileName(fileName), id(id_tracker) {
   unsigned seed = chrono::system_clock::now().time_since_epoch().count();
   mt = new mt19937(seed);
   rnNormalization = (double) (mt->max()+1);
@@ -24,6 +26,7 @@ votingModel::votingModel(int n, int k, long int maxIter, int collectionInterval,
     A[i] = new int[n];
   }
   initGraph(initDist);
+  id_tracker++;
 };
 
 /**
@@ -177,7 +180,6 @@ void votingModel::step() {
       /******************** FROM CONFLICTS ********************/
       //chose edge at random, then select a chosenVertex and a neighbor at random
       //desire chosenEdge in [1, conflicts] instead of [0, conflicts - 1] so add one
-
       int chosenEdge = ((int) floor(2*conflicts*(genURN()))) + 1;
       int i = 0;
       int edgeCount = 0;
@@ -430,12 +432,18 @@ void votingModel::initGraph(double *dist, int conflictCount) {
 	if(genURN() > pConflict) {
 	  //no conflict, two to two edge
 	  neighbor = nTwos*genURN();
+	  while(chosenVertex == nOnes-1+neighbor) {
+	    neighbor = nTwos*genURN();
+	  }	    
 	  A[chosenVertex][nOnes-1+neighbor] = 1;
 	  A[nOnes-1+neighbor][chosenVertex] = 1;
 	}
 	else {
 	  //conflict, two to one edge
 	  neighbor = nOnes*genURN();
+	  while(chosenVertex == neighbor) {
+	    neighbor = nOnes*genURN();
+	  }	    
 	  A[chosenVertex][neighbor] = 1;
 	  A[neighbor][chosenVertex] = 1;
 	}
@@ -444,12 +452,18 @@ void votingModel::initGraph(double *dist, int conflictCount) {
 	if(genURN() > pConflict) {
 	  //no conflict, one to one edge
 	  neighbor = nOnes*genURN();
+	  while(chosenVertex == neighbor) {
+	    neighbor = nOnes*genURN();
+	  }	    
 	  A[chosenVertex][neighbor] = 1;
 	  A[neighbor][chosenVertex] = 1;
 	}
 	else {
 	  //conflict, one to two edge
 	  neighbor = nTwos*genURN();
+	  while(chosenVertex == nOnes-1+neighbor) {
+	    neighbor = nTwos*genURN();
+	  }	    
 	  A[chosenVertex][nOnes-1+neighbor] = 1;
 	  A[nOnes-1+neighbor][chosenVertex] = 1;
 	}
@@ -475,6 +489,9 @@ int votingModel::consistencyCheck() {
   int currentOpn, i, j;
   int conflictCount = 0;
   for(i = 0; i < n; i++) {
+    if(A[i][i] != 0) {
+      return -2;
+    }
     sum = 0;
     for(j = 0; j < n; j++) {
       sum += A[i][j];
