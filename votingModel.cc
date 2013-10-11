@@ -429,7 +429,7 @@ void votingModel::initGraph(double *dist, int conflictCount) {
       chosenVertex = n*genURN();
       if(chosenVertex > nOnes-1) {
 	//operate on twos
-	if(genURN() > pConflict) {
+	if(genURN() >= pConflict) {
 	  //no conflict, two to two edge
 	  neighbor = nTwos*genURN();
 	  while(chosenVertex == nOnes-1+neighbor) {
@@ -500,14 +500,18 @@ int votingModel::consistencyCheck() {
       return -1;
     }
   }
-
   for(i = 0; i < n; i++) {
+    int nconflict_check = 0;
     currentOpn = Opns[i];
-    for(j = i + 1; j < n; j++) {
+    for(j = 0; j < n; j++) {
       if((A[i][j] != 0) && (Opns[j] != currentOpn)) {
+	nconflict_check++;
 	conflictCount++;
       }
     }
+    if(nconflict_check != nConflicts[i]) {
+      return -3;
+    }
   }
-  return conflictCount;
+  return conflictCount/2;
 }

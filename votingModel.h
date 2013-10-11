@@ -76,7 +76,7 @@ class votingModel {
     delete mt;
   };
 
- votingModel(const votingModel &toCopy): ROUND_CONST(toCopy.ROUND_CONST), n(toCopy.n), k(toCopy.k), collectionInterval(toCopy.collectionInterval), maxIter(toCopy.maxIter), a(toCopy.a), avgDeg(toCopy.avgDeg), id(toCopy.id) {
+ votingModel(const votingModel &toCopy): ROUND_CONST(toCopy.ROUND_CONST), n(toCopy.n), k(toCopy.k), collectionInterval(toCopy.collectionInterval), maxIter(toCopy.maxIter), a(toCopy.a), avgDeg(toCopy.avgDeg), rewireTo(toCopy.rewireTo), fileName(toCopy.fileName), id(toCopy.id) {
       A = new int*[n];
       for(int i = 0; i < n; i++) {
 	  A[i] = new int[n];
@@ -100,8 +100,6 @@ class votingModel {
       mt = new std::mt19937(seed);
       rnNormalization = (double) (mt->max()+1);
       conflicts = toCopy.conflicts;
-      rewireTo = toCopy.rewireTo;
-      fileName = toCopy.fileName;
       initDist = toCopy.initDist;
   };
 
@@ -118,9 +116,9 @@ class votingModel {
 	  opnCounts[i] = rhs.opnCounts[i];
       }
       conflicts = rhs.conflicts;
+      initDist = rhs.initDist;
       rewireTo.assign(rhs.rewireTo);
       fileName.assign(rhs.fileName);
-      initDist = rhs.initDist;
       id = rhs.id;
       return *this;
   };

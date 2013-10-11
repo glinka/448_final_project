@@ -73,7 +73,7 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
   vector< vect > ids_to_save;
   vector<vmMatrices> adj_to_save;
   vector<vmVects> opns_to_save;
-  unsigned int nCompletedVMs = 0;
+  int nCompletedVMs = 0;
   while(step < nSteps) {
     for(vmIt vm = vms.begin(); vm != vms.end(); vm++) {
       if(vm->getConflicts() > 0) {
@@ -116,6 +116,7 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
       if(onManifoldStep % collectionInterval == 0) {
 	adjMatrices.push_back(vector<matrix>());
 	opns.push_back(vector<vect>());
+	ids_to_save.push_back(vector<int>());
 	for(vmIt vm = vms.begin(); vm != vms.end(); vm++) {
 	  adjMatrices.back().push_back(vm->getAdjMatrix());
 	  opns.back().push_back(vm->getOpns());
@@ -130,7 +131,7 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
 	//hard coded for two opinions
 	int newConflicts = (int) (project<int>(times, conflictsTC, proj_step) + 0.5);
 	int temp_proj_step = proj_step;
-	while(newConflicts < 0 || newMinorityFrac < 0) {
+	while(newConflicts <= 0 || newMinorityFrac <= 0) {
 	  temp_proj_step /= 2;
 	  minorityFracsTC = findAvgdMinorityFractions(opns);
 	  conflictsTC = findAvgdConflicts(adjMatrices, opns);
