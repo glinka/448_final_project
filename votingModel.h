@@ -34,7 +34,7 @@ class votingModel {
     void saveData(const std::vector<dataType> data, std::ofstream &fileHandle);
   template <typename dataType>
     void saveData(const std::vector<std::vector<dataType> > data, std::ofstream &fileHandle);
-  votingModel(int n, int k, long int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, std::string rewireTo, std::string fileName="");
+  votingModel(int n, int k, long int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, std::string rewireTo, std::string fileName);
 
   int get_id() {
     return id;
@@ -77,23 +77,23 @@ class votingModel {
   };
 
  votingModel(const votingModel &toCopy): ROUND_CONST(toCopy.ROUND_CONST), n(toCopy.n), k(toCopy.k), collectionInterval(toCopy.collectionInterval), maxIter(toCopy.maxIter), a(toCopy.a), avgDeg(toCopy.avgDeg), rewireTo(toCopy.rewireTo), fileName(toCopy.fileName), id(toCopy.id) {
-      A = new int*[n];
-      for(int i = 0; i < n; i++) {
-	  A[i] = new int[n];
+      A = new int*[toCopy.n];
+      for(int i = 0; i < toCopy.n; i++) {
+	  A[i] = new int[toCopy.n];
       }
-      degs = new int[n];
-      Opns = new int[n];
-      nConflicts = new int[n];
-      opnCounts = new int[k];
-      for(int i = 0; i < n; i++) {
+      degs = new int[toCopy.n];
+      Opns = new int[toCopy.n];
+      nConflicts = new int[toCopy.n];
+      opnCounts = new int[toCopy.k];
+      for(int i = 0; i < toCopy.n; i++) {
 	  degs[i] = toCopy.degs[i];
 	  Opns[i] = toCopy.Opns[i];
 	  nConflicts[i] = toCopy.nConflicts[i];
-	  for(int j = 0; j < n; j++) {
+	  for(int j = 0; j < toCopy.n; j++) {
 	      A[i][j] = toCopy.A[i][j];
 	  }
       }
-      for(int i = 0; i < k; i++) {
+      for(int i = 0; i < toCopy.k; i++) {
 	  opnCounts[i] = toCopy.opnCounts[i];
       }
       unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
@@ -104,16 +104,20 @@ class votingModel {
   };
 
   votingModel &operator=(const votingModel &rhs) {
+    if(this == &rhs) {
+      return *this;
+    }
+    else {
       for(int i = 0; i < n; i++) {
-	  degs[i] = rhs.degs[i];
-	  Opns[i] = rhs.Opns[i];
-	  nConflicts[i] = rhs.nConflicts[i];
-	  for(int j = 0; j < n; j++) {
-	      A[i][j] = rhs.A[i][j];
-	  }
+	degs[i] = rhs.degs[i];
+	Opns[i] = rhs.Opns[i];
+	nConflicts[i] = rhs.nConflicts[i];
+	for(int j = 0; j < n; j++) {
+	  A[i][j] = rhs.A[i][j];
+	}
       }
       for(int i = 0; i < k; i++) {
-	  opnCounts[i] = rhs.opnCounts[i];
+	opnCounts[i] = rhs.opnCounts[i];
       }
       conflicts = rhs.conflicts;
       initDist = rhs.initDist;
@@ -121,6 +125,7 @@ class votingModel {
       fileName.assign(rhs.fileName);
       id = rhs.id;
       return *this;
+    }
   };
 };
 

@@ -490,7 +490,7 @@ int votingModel::consistencyCheck() {
   int conflictCount = 0;
   for(i = 0; i < n; i++) {
     if(A[i][i] != 0) {
-      return -2;
+      return A[i][i];
     }
     sum = 0;
     for(j = 0; j < n; j++) {

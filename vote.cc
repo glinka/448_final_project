@@ -1,4 +1,4 @@
->#include <stdlib.h>
+#include <stdlib.h>
 #include <string>
 #include <sstream>
 #include "votingModel.h"
@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
   if(project) {
     vector<votingModel> vmV;
     for(i = 0; i < nVMS; i++) {
-      vmV.push_back(votingModel(n, k, maxIter, collectionInterval, a, avgDeg, initDist, rewireTo));
+      vmV.push_back(votingModel(n, k, maxIter, collectionInterval, a, avgDeg, initDist, rewireTo, ""));
     }
     votingModelCPI *cpi = new votingModelCPI(vmV, waitingPeriod, collectionInterval, nMS, file_header, file_name);
     cpi->run(maxIter, projectionStep);
