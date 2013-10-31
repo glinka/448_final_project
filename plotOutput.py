@@ -57,11 +57,13 @@ def plot_timecourse(adj_data, opns_data, time_data, nvms_data, params, scalar_fn
     jet = cm = plt.get_cmap('jet') 
     cNorm  = colors.Normalize(vmin=0, vmax=n_vms)
     scalarMap = cmx.ScalarMappable(norm=cNorm, cmap=jet)
+    textsize = 22
     if not ax:
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        ax.set_xlabel('Simulation step')
-        ax.set_ylabel('Conflicts')
+        plt.tick_params(axis='both', which='major', labelsize=18)
+        ax.set_xlabel('Simulation step', fontsize=textsize)
+        ax.set_ylabel('Conflicts', fontsize=textsize)
     ydata = []
     for i in range(n_data):
         #temp fp fix
@@ -83,24 +85,45 @@ def plot_timecourse(adj_data, opns_data, time_data, nvms_data, params, scalar_fn
 
 def plot_conflicts(data, params):
     fig = plt.figure()
+    textsize = 22
     ax1 = fig.add_subplot(211)
-    ax1.set_ylabel('Minority fraction')
+    ax1.set_ylabel('Minority fraction', fontsize=textsize)
+    plt.tick_params(axis='both', which='major', labelsize=18)
+    ax1.set_ylim((0,0.5))
+    ax1.set_yticks([(x+1)/10.0 for x in range(5)])
     ax2 = fig.add_subplot(212, sharex=ax1)
-    ax2.set_ylabel('Conflicts')
-    ax2.set_xlabel('Simulation step')
+    ax2.set_ylabel('Conflicts', fontsize=textsize)
+    ax2.set_ylim((0,400))
+    ax2.set_yticks([(x+1)*100 for x in range(4)])
+    ax2.set_xlabel('Simulation step', fontsize=textsize)
+    plt.tick_params(axis='both', which='major', labelsize=18)
     n = 1.0*params['n']
     ax1.plot(data[:,0], data[:,1]/n)
     ax2.plot(data[:,0], data[:,2])
     plt.show()
+    # ax = fig.add_subplot(111)
+    # textsize = 22
+    # plt.tick_params(axis='both', which='major', labelsize=18)
+    # plt.xticks(rotation=20)
+    # ax.set_xlabel('Simulation step', fontsize=textsize)
+    # ax.set_ylabel('Conflicts', fontsize=textsize)
+    # n = 1.0*params['n']
+    # ax.plot(data[:,0], data[:,2])
+    # plt.show()
+    
 
-def plot_phase(data, params):
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    ax.set_xlabel('Minority fraction')
-    ax.set_ylabel('Conflicts')
-    n = 1.0*params['n']
-    ax.plot(data[:,1]/n, data[:,2])
-    plt.show()
+def plot_phase(data, params, ax=False, c=False):
+    if not ax:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.set_xlabel('Minority fraction')
+        ax.set_ylabel('Conflicts')
+        n = 1.0*params['n']
+        ax.plot(data[:,1]/n, data[:,2])
+        plt.show()
+    else:
+        n = 1.0*params['n']
+        ax.plot(data[:,1]/n, data[:,2], color=c)
 
 def calc_conflict_triangles(adj, opns):
     n = adj.shape[0]
@@ -116,7 +139,7 @@ def calc_conflict_triangles(adj, opns):
                                 ntris = ntris + 1
     return ntris/2
 
-def plot_tc(adjs, opns, time, params):
+def plot_triangles(adjs, opns, time, params):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     nentries = len(opns)
@@ -133,9 +156,11 @@ def plot_bifdiag(data, params):
     markers = ["p", "v", "D", "x", "s", "+", "*", "8", ".", "^"]
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.set_xlabel('Probability of reattachment, ' + r"$\alpha$")
+    textsize = 24
+    plt.tick_params(axis='both', which='major', labelsize=22)
+    ax.set_xlabel('Probability of reattachment, ' + r"$\alpha$", fontsize=textsize)
     ax.set_xlim((0,1))
-    ax.set_ylabel('Final minority fraction')
+    ax.set_ylabel('Final minority fraction', fontsize=textsize)
     ax.set_ylim((0,0.5))
     ax.hold(True)
     n = data.shape[0]
@@ -148,9 +173,8 @@ def plot_bifdiag(data, params):
         i = nData-j-1
         toPlot = data[i*nPerSet:(i+1)*nPerSet,:]
         toPlot = np.array(filter(lambda x: (x[2] == 0), toPlot))
-        print toPlot
-        ax.scatter(toPlot[:,0], toPlot[:,1], color='k', marker=markers[i], label='Initial fraction: ' + str(data[i*nPerSet,3]))
-    ax.legend(loc=2)
+        ax.scatter(toPlot[:,0], toPlot[:,1], color='k', marker=markers[i], s=48, label='Initial fraction: ' + str(data[i*nPerSet,3]))
+    ax.legend(loc=2, fontsize=18)
     plt.show()
 
 if __name__=="__main__":
@@ -165,6 +189,7 @@ if __name__=="__main__":
     parser.add_argument('-phase', '--plot-phase-space', action='store_true', default=False)
     parser.add_argument('-bif', '--plot-bif-diag', action='store_true', default=False)
     parser.add_argument('-tris', '--plot-triangles', action='store_true', default=False)
+    parser.add_argument('-mps', '--plot-multiple-ps', action='store_true', default=False)
     args = parser.parse_args()
     #should have one of each file: CPIAdj_... and CPIOpns_...
     #which will have the same header (and thus same params)
@@ -194,7 +219,22 @@ if __name__=="__main__":
     if args.plot_bif_diag:
         plot_bifdiag(bifdata, params)
     if args.plot_triangles:
-        plot_tc(adj_data, opns_data, time_data, params)
-    testadj = np.array([[0,1,1],[1,0,1],[1,1,0]])
-    testopns = np.array([1,2,2])
-    print calc_conflict_triangles(testadj, testopns)
+        plot_triangles(adj_data, opns_data, time_data, params)
+    if args.plot_multiple_ps:
+        fig = plt.figure()
+        myax = fig.add_subplot(111)
+        myax.hold(True)
+        textsize=24
+        plt.tick_params(axis='both', which='major', labelsize=22)
+        myax.set_xlabel('Minority fraction', fontsize=textsize)
+        myax.set_ylabel('Conflicts', fontsize=textsize)
+        nfiles = len(args.input_files)
+        count = 0.0
+        for filename in args.input_files:
+            graphdata, params = get_data(filename)
+            print params
+            plot_phase(graphdata, params, ax=myax, c=[1-count/nfiles, np.cos(np.pi*count/nfiles/2), count/nfiles])
+            myax.hold(True)
+            count = count + 1.0
+            print count
+        plt.show()

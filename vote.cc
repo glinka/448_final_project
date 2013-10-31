@@ -113,14 +113,17 @@ int main(int argc, char *argv[]) {
     /**
        ******************** FOR BIFDATA PURPOSES ********************
        **/
-    for(double min = 0.1; min <= 0.5; min+=0.1) {
+    for(double min = 0.1; min < 1 ; min+=0.2) {
       initDist[0] = min;
       initDist[1] = 1-min;
-      for(a = 0; a <= 1; a += 0.1) {
-	votingModel vm = votingModel(n, k, maxIter, collectionInterval, a, avgDeg, initDist, rewireTo, file_name);
-	vm.vote();
-      }
-      cout << min << endl;
+      ss.str("");
+      ss << "n_" << n;
+      ss << "_alpha_" << a;
+      ss << "_nsteps_" << maxIter;
+      ss << "_min_" << min;
+      string file_name = ss.str();
+      votingModel vm = votingModel(n, k, maxIter, collectionInterval, a, avgDeg, initDist, rewireTo, file_name);
+      vm.vote();
     }
   }
   delete[] initDist;

@@ -75,6 +75,11 @@ int votingModel::vote() {
     }
     iters++;
   }
+  int minorityOpn = opnCounts[0]<opnCounts[1]?opnCounts[0]:opnCounts[1];
+  minorityOpnTimeCourse.push_back(minorityOpn);
+  n10TimeCourse.push_back(conflicts);
+  stepTimeCourse.push_back(iters+1);
+  cout << iters << endl;
   //output data into csv file, hardcoded for two opinions
   stringstream ss;
   ss << "graphStats_" << fileName << ".csv";
