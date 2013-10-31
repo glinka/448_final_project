@@ -2,7 +2,7 @@ toCompile = votingModelCPI.o votingModel.o vote.o fitCurves.o
 
 CXX = g++
 
-CXXFLAGS = -g -Wall -std=c++0x #-O3
+CXXFLAGS = -g -Wall -std=c++0x -O3
 
 all: vote
 

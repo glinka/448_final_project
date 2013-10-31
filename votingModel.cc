@@ -76,8 +76,10 @@ int votingModel::vote() {
     iters++;
   }
   //output data into csv file, hardcoded for two opinions
+  stringstream ss;
+  ss << "graphStats_" << fileName << ".csv";
   ofstream graphStats;
-  graphStats.open(fileName);
+  graphStats.open(ss.str());
   graphStats << setiosflags(ios::left) << setiosflags(ios::fixed);
   graphStats << "n=" << n << ",";
   graphStats << "avgDeg=" << avgDeg << ",";
@@ -89,8 +91,7 @@ int votingModel::vote() {
   data.push_back(n10TimeCourse);
   saveData(data, graphStats);
   graphStats.close();
-
-  stringstream ss;
+  ss.str("");
   ss << "bifData_" << rewireTo << "_" << n << "_" << avgDeg << ".csv";
   string bifTitle = ss.str();
   ofstream bifData;
@@ -105,12 +106,12 @@ int votingModel::vote() {
     rowData.push_back(0);
   }
   rowData.push_back(initDist[0]);
-  data.clear();
+  vector<vector<double> > columnData;
   for(i = 0; i < rowData.size(); i++) {
-    data.push_back(v);
-    data[i].push_back(rowData[i]);
+    columnData.push_back(vector<double>());
+    columnData[i].push_back(rowData[i]);
   }
-  saveData(data, bifData);
+  saveData(columnData, bifData);
   bifData.close();
 
   ss.str("");
@@ -137,6 +138,7 @@ void votingModel::saveData(const vector<dataType> data, ofstream &fileHandle) {
   }
 }
 template void votingModel::saveData<int>(const vector<int> data, ofstream &fileHandle);
+template void votingModel::saveData<double>(const vector<double> data, ofstream &fileHandle);
 
 template <typename dataType>
 void votingModel::saveData(const vector<vector<dataType> > data, ofstream &fileHandle) {

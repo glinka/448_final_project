@@ -73,15 +73,15 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
   vector< vect > ids_to_save;
   vector<vmMatrices> adj_to_save;
   vector<vmVects> opns_to_save;
-  int nCompletedVMs = 0;
   while(step < nSteps) {
+    int nCompletedVMs = 0;
     for(vmIt vm = vms.begin(); vm != vms.end(); vm++) {
       if(vm->getConflicts() > 0) {
 	vm->step();
       }
       else {
 	//remove finished runs from simulation
-	vms.erase(vm);
+	//vms.erase(vm);
 	nCompletedVMs++;
       }
     }
@@ -118,12 +118,14 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
 	opns.push_back(vector<vect>());
 	ids_to_save.push_back(vector<int>());
 	for(vmIt vm = vms.begin(); vm != vms.end(); vm++) {
-	  adjMatrices.back().push_back(vm->getAdjMatrix());
-	  opns.back().push_back(vm->getOpns());
+	  if(vm->getConflicts() > 0) {
+	    adjMatrices.back().push_back(vm->getAdjMatrix());
+	    opns.back().push_back(vm->getOpns());
+	  }
 	}
 	times.push_back(onManifoldStep);
       }
-      if(microStepCount == nMicroSteps) {
+      if(microStepCount == nMicroSteps && proj_step > 0) {
 	//just project the minority fraction you fool
 	vector<double> minorityFracsTC = findAvgdMinorityFractions(opns);
 	vect conflictsTC = findAvgdConflicts(adjMatrices, opns);
@@ -140,7 +142,9 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
 	}
 	double newDist[2] = {newMinorityFrac, 1 - newMinorityFrac};
 	for(vmIt vm = vms.begin(); vm != vms.end(); vm++) {
-	  vm->initGraph(newDist, newConflicts);
+	  if(vm->getConflicts() > 0) {
+	    vm->initGraph(newDist, newConflicts);
+	  }
 	}
 	this->saveData(adj_to_save, cpiAdjData);
 	this->saveData(opns_to_save, cpiOpnsData);
@@ -155,6 +159,7 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
 	times.clear();
 	microStepCount = 0;
 	step += proj_step;
+	cout << step << endl;
       }
     }
   }

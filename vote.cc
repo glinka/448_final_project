@@ -9,16 +9,18 @@ using namespace std;
 int main(int argc, char *argv[]) {
   double avgDeg = 4;
   int i, j;
-  bool project = true;
+  bool project = false;
   string rewireTo = "random";
   int n = 200;
   long int maxIter = 5*n*n;
-  int collectionInterval;
   double a = 0.5;
   int k = 2;
   double *initDist = new double[2];
   int nVMS = 4;
-  double projectionStep;
+  double projectionStep = n;
+  int nMS = n;
+  int waitingPeriod = 100;
+  int collectionInterval = nMS/10;
   initDist[0] = 0.5;
   initDist[1] = 0.5;
   //loop through all arguments, assign variables as needed
@@ -64,12 +66,14 @@ int main(int argc, char *argv[]) {
 	project = true;
 	nVMS = atoi(currentArg);
       }
+      else if(currentLabel == "-numbermicrosteps" || currentLabel == "-nMS" || currentLabel == "-nms") {
+	project = true;
+	nMS = atoi(currentArg);
+	collectionInterval = nMS/10;
+	waitingPeriod = nMS/2;
+      }
     }
   }
-  int nMS = n;
-  int waitingPeriod = 100;
-  projectionStep = n;
-  collectionInterval = nMS/10;
   stringstream ss;
   ss << "n=" << n;
   ss << ",nVms=" << nVMS;
@@ -102,8 +106,22 @@ int main(int argc, char *argv[]) {
       vmV.push_back(votingModel(n, k, maxIter, collectionInterval, a, avgDeg, initDist, rewireTo, ""));
     }
     votingModelCPI *cpi = new votingModelCPI(vmV, waitingPeriod, collectionInterval, nMS, file_header, file_name);
-    cpi->run(maxIter, projectionStep);
+    cpi->run(maxIter, projectionStep, nMS/10);
     delete cpi;
+  }
+  else {
+    /**
+       ******************** FOR BIFDATA PURPOSES ********************
+       **/
+    for(double min = 0.1; min <= 0.5; min+=0.1) {
+      initDist[0] = min;
+      initDist[1] = 1-min;
+      for(a = 0; a <= 1; a += 0.1) {
+	votingModel vm = votingModel(n, k, maxIter, collectionInterval, a, avgDeg, initDist, rewireTo, file_name);
+	vm.vote();
+      }
+      cout << min << endl;
+    }
   }
   delete[] initDist;
   return 0;
