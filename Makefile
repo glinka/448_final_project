@@ -1,20 +1,25 @@
-toCompile = votingModelCPI.o votingModel.o vote.o fitCurves.o
+SRCS=vote.cc votingModel.cc votingModelCPI.cc fitCurves.cc
+OBJECTS=$(SRCS:.cc=.o)
 
 CXX = g++
 
-CXXFLAGS = -g -Wall -std=c++0x #-O3
+CXXFLAGS = -g -Wall -std=c++0x -O3
 
 all: vote
 
 %.o: %.c
 	$(CXX) $(CXXFLAGS) -c $<
 
-vote: $(toCompile)
+vote: $(OBJECTS)
 	$(CXX) $(CXXFLAGS) -o $@ $^
+
+depend: .depend
+
+.depend: $(SRCS)
+	rm -f ./.depend
+	$(CXX) $(CXXFLAGS) -MM $^ > ./.depend
 
 clean:
 	$(RM) *.o 
 
-debug:
-	gdb --args vote random 1000 100000 100 0.5 2 0.5 0.5
-
+include .depend

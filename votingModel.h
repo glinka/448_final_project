@@ -23,12 +23,12 @@ class votingModel {
   //tracks the number of conflicting edges at each vertex
   std::string rewireTo, fileName;
   std::mt19937 *mt;
-  void initGraph(double *dist);
   double genURN();
  public:
   int consistencyCheck();
   int vote();
   void step();
+  void initGraph();
   void initGraph(double *dist, int conflicts);
   template <typename dataType>
     void saveData(const std::vector<dataType> data, std::ofstream &fileHandle);
@@ -74,9 +74,15 @@ class votingModel {
     delete[] opnCounts;
     delete[] nConflicts;
     delete mt;
+    A = 0;
+    degs = 0;
+    Opns = 0;
+    opnCounts = 0;
+    nConflicts = 0;
+    mt = 0;
   };
 
- votingModel(const votingModel &toCopy): ROUND_CONST(toCopy.ROUND_CONST), n(toCopy.n), k(toCopy.k), collectionInterval(toCopy.collectionInterval), maxIter(toCopy.maxIter), a(toCopy.a), avgDeg(toCopy.avgDeg), rewireTo(toCopy.rewireTo), fileName(toCopy.fileName), id(toCopy.id) {
+ votingModel(const votingModel &toCopy): ROUND_CONST(toCopy.ROUND_CONST), n(toCopy.n), k(toCopy.k), collectionInterval(toCopy.collectionInterval), maxIter(toCopy.maxIter), a(toCopy.a), avgDeg(toCopy.avgDeg), id(toCopy.id), rewireTo(toCopy.rewireTo), fileName(toCopy.fileName), conflicts(toCopy.conflicts), initDist(toCopy.initDist) {
       A = new int*[toCopy.n];
       for(int i = 0; i < toCopy.n; i++) {
 	  A[i] = new int[toCopy.n];
@@ -99,8 +105,6 @@ class votingModel {
       unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
       mt = new std::mt19937(seed);
       rnNormalization = (double) (mt->max()+1);
-      conflicts = toCopy.conflicts;
-      initDist = toCopy.initDist;
   };
 
   votingModel &operator=(const votingModel &rhs) {

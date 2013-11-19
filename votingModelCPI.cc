@@ -43,6 +43,7 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
   int nvms = vms.size();
   long int step = 0;
   int microStepCount = 0;
+  //open all the files
   stringstream ss;
   string folder = "./csv_data/";
   ss << folder << "CPIAdj_" << file_name << ".csv";
@@ -74,6 +75,10 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
   vector<vmMatrices> adj_to_save;
   vector<vmVects> opns_to_save;
   int nCompletedVMs = 0;
+  for(vmIt vm = vms.begin(); vm != vms.end(); vm++) {
+    vm->initGraph();
+  }
+  vector< vmIt > to_delete;
   while(step < nSteps) {
     for(vmIt vm = vms.begin(); vm != vms.end(); vm++) {
       if(vm->getConflicts() > 0) {
@@ -81,9 +86,18 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
       }
       else {
 	//remove finished runs from simulation
-	vms.erase(vm);
+	to_delete.push_back(vm);
 	nCompletedVMs++;
       }
+    }
+    //******************************
+    //faster to check if size > 0 ?
+    //******************************
+    if(to_delete.size() > 0) {
+      for(vector< vmIt >::const_iterator vm = to_delete.begin(); vm != to_delete.end(); vm++) {
+	vms.erase(*vm);
+      }
+      to_delete.clear();
     }
     step++;
     microStepCount++;
@@ -116,7 +130,6 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
       if(onManifoldStep % collectionInterval == 0) {
 	adjMatrices.push_back(vector<matrix>());
 	opns.push_back(vector<vect>());
-	ids_to_save.push_back(vector<int>());
 	for(vmIt vm = vms.begin(); vm != vms.end(); vm++) {
 	  adjMatrices.back().push_back(vm->getAdjMatrix());
 	  opns.back().push_back(vm->getOpns());

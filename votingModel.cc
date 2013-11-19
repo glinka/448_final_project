@@ -25,7 +25,6 @@ votingModel::votingModel(int n, int k, long int maxIter, int collectionInterval,
   for(int i = 0; i < n; i++) {
     A[i] = new int[n];
   }
-  initGraph(initDist);
   id_tracker++;
 };
 
@@ -343,7 +342,8 @@ Rewire-to-same continues to choose vertex at random instead of edge
        
    The resulting graphs have been tested to ensure the algorithm's performance.
 **/
-void votingModel::initGraph(double *dist) {
+//only to be used at the very start with defined initDist
+void votingModel::initGraph() {
     double p = avgDeg/(n-1);
     int v = 1;
     int w = -1;
@@ -369,7 +369,7 @@ void votingModel::initGraph(double *dist) {
 	partialSum = 0.0;
 	indexCounter = 0;
 	while(partialSum < rv2) {
-	  partialSum = partialSum + dist[indexCounter];
+	  partialSum = partialSum + initDist[indexCounter];
 	  indexCounter++;
 	}
 	Opns[v-1] = indexCounter;
