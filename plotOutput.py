@@ -46,30 +46,32 @@ def make_filename(base_name, params, unique_id=''):
     if not unique_id:
         filename = filename + '_' + unique_id
     return filename
-    
-def plot_timecourse(adj_data, opns_data, time_data, nvms_data, params, scalar_fn, average=False, ax=''):
+
+def plot_timecourse(adj_data, opns_data, time_data, ids_data, params, scalar_fn, average=False, ax=''):
     starting_nvms = params['nVms']
     n = params['n']
     n_data = time_data.shape[0]
+    for i in range(starting_nvms):
+        ydata[str(i)] = []
+    data_count = 0
+    for i in range(n_data):
+        for j in range(ids_data[i]):
+            adj = adj_data[data_count*n:(data_count+1)*n,:]
+            opns = opns_data[data_count*n:(data_count+1)*n]
+            ydata[str(j)].append(scalar_fn(adj, opns))
+            data_count = data_count + 1
+    final_ydata = []
+    if average:
+        for i in range(n_data):
+            final_ydata.append(np.average([ydata[str(j)][i] for j in ids_data[i]]))
+    else:
+        for key in ydata.keys():
+            final_ydata.append(ydata[key])
+    final_ydata = np.array(final_ydata)
     if not ax:
         fig = plt.figure()
         ax = fig.add_subplot(111)
-    ydata = []
-    for i in range(n_data):
-        n_vms = int(nvms_data[i] + 0.5)
-        adj_matrices = [adj_data[(n_vms*i+k)*n:(n_vms*i+k+1)*n,:] for k in range(n_vms)]
-        opn_vectors = [opns_data[(n_vms*i+k)*n:(n_vms*i+k+1)*n] for k in range(n_vms)]
-        fn_evals = [scalar_fn(adj_matrices[k], opn_vectors[k]) for k in range(n_vms)]
-        if average:
-            ydata.append(np.average(fn_evals))
-        else:
-            ydata.append(fn_evals)
-    if average:
-        ax.plot(time_data, ydata)
-    else:
-        ydata = np.array(ydata)
-        for k in range(starting_nvms):
-            ax.plot(time_data, ydata[:,k])
+    ax.plot(time_data, fina_ydata)
     plt.show()
 
 if __name__=="__main__":

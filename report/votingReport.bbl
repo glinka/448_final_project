@@ -1,3 +1,19 @@
-\begin{thebibliography}{}
+\begin{thebibliography}{1}
+
+\bibitem{batagelj:pre05}
+V.~Batagelj and U.~Brandes.
+\newblock Efficient generation of large random networks.
+\newblock {\em Physical Review E}, 2005.
+
+\bibitem{durret:pnas12}
+R.~Durret, J.~P. Gleeson, A.~L. Lloyd, P.~J. Mucha, F.~Shi, D.~Sivakoff,
+  J.~E.~S. Socolar, and C.~Varghese.
+\newblock Graph fission in an evolving voter model.
+\newblock {\em Proceedings of the National Academy of Science}, 2012.
+
+\bibitem{vazquez:prl08}
+F.~Vazquez, V.~M. Egu\'{i}luz, and M.~S. Miguel.
+\newblock Generic absorbing transition in coevolution dynamics.
+\newblock {\em Physical Review Letters}, 2008.
 
 \end{thebibliography}
