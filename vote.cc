@@ -19,6 +19,7 @@ int main(int argc, char *argv[]) {
   double *initDist = new double[2];
   int nVMS = 4;
   double projectionStep;
+  int save_interval = 1000;
   initDist[0] = 0.5;
   initDist[1] = 0.5;
   //loop through all arguments, assign variables as needed
@@ -64,6 +65,10 @@ int main(int argc, char *argv[]) {
 	project = true;
 	nVMS = atoi(currentArg);
       }
+      else if(currentLabel == "-saveInterval" || currentLabel == "-saveinterval" || currentLabel == "-si") {
+	project = true;
+	save_interval = atoi(currentArg);
+      }
     }
   }
   int nMS = n;
@@ -80,7 +85,7 @@ int main(int argc, char *argv[]) {
      
      left out for ease of parsing arguments in python
 
-  ss << ",init_dist=";
+  ss << ",init_ndist=";
   for(i = 0; i < k; i++) {
     ss << initDist[i] << ",";
   }
@@ -102,7 +107,7 @@ int main(int argc, char *argv[]) {
       vmV.push_back(votingModel(n, k, maxIter, collectionInterval, a, avgDeg, initDist, rewireTo, ""));
     }
     votingModelCPI *cpi = new votingModelCPI(vmV, waitingPeriod, collectionInterval, nMS, file_header, file_name);
-    cpi->run(maxIter, projectionStep);
+    cpi->run(maxIter, projectionStep, save_interval);
     delete cpi;
   }
   delete[] initDist;

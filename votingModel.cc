@@ -13,7 +13,7 @@ using namespace std;
 
 int votingModel::id_tracker = 0;
   
-votingModel::votingModel(int n, int k, long int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, string rewireTo, string fileName):ROUND_CONST(0.01), n(n), k(k), collectionInterval(collectionInterval), maxIter(maxIter), a(a), avgDeg(avgDeg), initDist(initDist), degs(NULL), Opns(NULL), A(NULL), rewireTo(rewireTo), fileName(fileName), id(id_tracker) {
+votingModel::votingModel(int n, int k, long int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, string rewireTo, string fileName):ROUND_CONST(0.01), n(n), k(k), collectionInterval(collectionInterval), maxIter(maxIter), a(a), avgDeg(avgDeg), id(id_tracker), initDist(initDist), degs(NULL), Opns(NULL), A(NULL), rewireTo(rewireTo), fileName(fileName) {
   unsigned seed = chrono::system_clock::now().time_since_epoch().count();
   mt = new mt19937(seed);
   rnNormalization = (double) (mt->max()+1);

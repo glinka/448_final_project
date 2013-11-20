@@ -82,7 +82,7 @@ class votingModel {
     mt = 0;
   };
 
- votingModel(const votingModel &toCopy): ROUND_CONST(toCopy.ROUND_CONST), n(toCopy.n), k(toCopy.k), collectionInterval(toCopy.collectionInterval), maxIter(toCopy.maxIter), a(toCopy.a), avgDeg(toCopy.avgDeg), id(toCopy.id), rewireTo(toCopy.rewireTo), fileName(toCopy.fileName), conflicts(toCopy.conflicts), initDist(toCopy.initDist) {
+ votingModel(const votingModel &toCopy): ROUND_CONST(toCopy.ROUND_CONST), n(toCopy.n), k(toCopy.k), collectionInterval(toCopy.collectionInterval), maxIter(toCopy.maxIter), a(toCopy.a), avgDeg(toCopy.avgDeg), id(toCopy.id), initDist(toCopy.initDist), conflicts(toCopy.conflicts), rewireTo(toCopy.rewireTo), fileName(toCopy.fileName) {
       A = new int*[toCopy.n];
       for(int i = 0; i < toCopy.n; i++) {
 	  A[i] = new int[toCopy.n];

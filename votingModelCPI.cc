@@ -1,3 +1,6 @@
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <fstream>
 #include <string>
 #include <sstream>
@@ -45,23 +48,39 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
   int microStepCount = 0;
   //open all the files
   stringstream ss;
-  string folder = "./csv_data/";
-  ss << folder << "CPIAdj_" << file_name << ".csv";
+  int folder_counter = 0;
+  string dir_base = "./csv_data";
+  string dir;
+  bool isdir = true;
+  struct stat stat_dir;
+  do {
+    ss.str("");
+    ss << dir_base << folder_counter << "/";
+    folder_counter++;
+    dir = ss.str();
+    int check = stat(dir.c_str(), &stat_dir);
+    if(check == -1) {
+      mkdir(dir.c_str(), 0700);
+      isdir = false;
+    }
+  } while (isdir);
+  ss.str("");
+  ss << dir << "CPIAdj_" << file_name << ".csv";
   string adjFilename = ss.str();
   ofstream cpiAdjData;
   cpiAdjData.open(adjFilename);
   ss.str("");
-  ss << folder << "CPIOpns_" << file_name << ".csv";
+  ss << dir << "CPIOpns_" << file_name << ".csv";
   string opnsFilename = ss.str();
   ofstream cpiOpnsData;
   cpiOpnsData.open(opnsFilename);
   ss.str("");
-  ss << folder << "CPITimes_" << file_name << ".csv";
+  ss << dir << "CPITimes_" << file_name << ".csv";
   string timesFilename = ss.str();
   ofstream cpiTimesData;
   cpiTimesData.open(timesFilename);
   ss.str("");
-  ss << folder << "CPIids_" << file_name << ".csv";
+  ss << dir << "CPIids_" << file_name << ".csv";
   string idsFilename = ss.str();
   ofstream cpiIdsData;
   cpiIdsData.open(idsFilename);
@@ -80,6 +99,7 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
   }
   vector< vmIt > to_delete;
   while(step < nSteps) {
+    int finishedVMs = 0;
     for(vmIt vm = vms.begin(); vm != vms.end(); vm++) {
       if(vm->getConflicts() > 0) {
 	vm->step();
@@ -87,23 +107,18 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
       else {
 	//remove finished runs from simulation
 	to_delete.push_back(vm);
-	nCompletedVMs++;
+	finishedVMs++;
       }
     }
     //******************************
     //faster to check if size > 0 ?
     //******************************
-    if(to_delete.size() > 0) {
-      for(vector< vmIt >::const_iterator vm = to_delete.begin(); vm != to_delete.end(); vm++) {
-	vms.erase(*vm);
-      }
-      to_delete.clear();
-    }
+    nCompletedVMs += finishedVMs;
     step++;
     microStepCount++;
     //collect data to save every save_data_interval steps, and also at the 
     //beginning of each projection iteration and end of simulation
-    if(microStepCount % save_data_interval == 0 || microStepCount == 1 || nCompletedVMs == nvms) {
+    if(microStepCount % save_data_interval == 0 || microStepCount == 1 || finishedVMs > 0) {
       adj_to_save.push_back(vector<matrix>());
       opns_to_save.push_back(vector<vect>());
       ids_to_save.push_back(vector<int>());
@@ -113,17 +128,23 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
 	ids_to_save.back().push_back(vm->get_id());
       }
       times_to_save.push_back(step);
+      if(nCompletedVMs == nvms) {
+	this->saveData(adj_to_save, cpiAdjData);
+	this->saveData(opns_to_save, cpiOpnsData);
+	this->saveData(times_to_save, cpiTimesData);
+	this->saveData(ids_to_save, cpiIdsData);
+	cpiAdjData.close();
+	cpiOpnsData.close();
+	cpiTimesData.close();
+	cpiIdsData.close();
+	return 0;
+      }
     }
-    if(nCompletedVMs == nvms) {
-      this->saveData(adj_to_save, cpiAdjData);
-      this->saveData(opns_to_save, cpiOpnsData);
-      this->saveData(times_to_save, cpiTimesData);
-      this->saveData(ids_to_save, cpiIdsData);
-      cpiAdjData.close();
-      cpiOpnsData.close();
-      cpiTimesData.close();
-      cpiIdsData.close();
-      return 0;
+    if(to_delete.size() > 0) {
+      for(vector< vmIt >::const_iterator vm = to_delete.begin(); vm != to_delete.end(); vm++) {
+	vms.erase(*vm);
+      }
+      to_delete.clear();
     }
     if(microStepCount > waitingPeriod) {
       int onManifoldStep = microStepCount - waitingPeriod;
