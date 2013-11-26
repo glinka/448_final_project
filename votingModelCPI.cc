@@ -75,6 +75,11 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
   ofstream cpiOpnsData;
   cpiOpnsData.open(opnsFilename);
   ss.str("");
+  ss << dir << "CPIConflicts_" << file_name << ".csv";
+  string conflictsFilename = ss.str();
+  ofstream cpiConflictsData;
+  cpiConflictsData.open(conflictsFilename);
+  ss.str("");
   ss << dir << "CPITimes_" << file_name << ".csv";
   string timesFilename = ss.str();
   ofstream cpiTimesData;
@@ -93,6 +98,7 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
   vector< vect > ids_to_save;
   vector<vmMatrices> adj_to_save;
   vector<vmVects> opns_to_save;
+  vector< vect > conflicts_to_save;
   int nCompletedVMs = 0;
   for(vmIt vm = vms.begin(); vm != vms.end(); vm++) {
     vm->initGraph();
@@ -110,9 +116,6 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
 	finishedVMs++;
       }
     }
-    //******************************
-    //faster to check if size > 0 ?
-    //******************************
     nCompletedVMs += finishedVMs;
     step++;
     microStepCount++;
@@ -122,10 +125,12 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
       adj_to_save.push_back(vector<matrix>());
       opns_to_save.push_back(vector<vect>());
       ids_to_save.push_back(vector<int>());
+      conflicts_to_save.push_back(vector<int>());
       for(vmIt vm = vms.begin(); vm != vms.end(); vm++) {
 	adj_to_save.back().push_back(vm->getAdjMatrix());
 	opns_to_save.back().push_back(vm->getOpns());
 	ids_to_save.back().push_back(vm->get_id());
+	conflicts_to_save.back().push_back(vm->getConflicts());
       }
       times_to_save.push_back(step);
       if(nCompletedVMs == nvms) {
@@ -133,13 +138,18 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
 	this->saveData(opns_to_save, cpiOpnsData);
 	this->saveData(times_to_save, cpiTimesData);
 	this->saveData(ids_to_save, cpiIdsData);
+	this->saveData(conflicts_to_save, cpiConflictsData);
 	cpiAdjData.close();
 	cpiOpnsData.close();
 	cpiTimesData.close();
 	cpiIdsData.close();
+	cpiConflictsData.close();
 	return 0;
       }
     }
+    //******************************
+    //faster to check if size > 0 ?
+    //******************************
     if(to_delete.size() > 0) {
       for(vector< vmIt >::const_iterator vm = to_delete.begin(); vm != to_delete.end(); vm++) {
 	vms.erase(*vm);
@@ -180,10 +190,12 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
 	this->saveData(opns_to_save, cpiOpnsData);
 	this->saveData(times_to_save, cpiTimesData);
 	this->saveData(ids_to_save, cpiIdsData);
+	this->saveData(conflicts_to_save, cpiConflictsData);
 	adj_to_save.clear();
 	opns_to_save.clear();
 	times_to_save.clear();
 	ids_to_save.clear();
+	conflicts_to_save.clear();
 	adjMatrices.clear();
 	opns.clear();
 	times.clear();
@@ -196,10 +208,12 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
   this->saveData(opns_to_save, cpiOpnsData);
   this->saveData(times_to_save, cpiTimesData);
   this->saveData(ids_to_save, cpiIdsData);
+  this->saveData(conflicts_to_save, cpiConflictsData);
   cpiAdjData.close();
   cpiOpnsData.close();
   cpiTimesData.close();
   cpiIdsData.close();
+  cpiConflictsData.close();
   return 0;
 }
 

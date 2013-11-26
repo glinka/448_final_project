@@ -28,10 +28,13 @@ def read_ids(filename, header_rows=1, **kwargs):
     ids = []
     string_numbers = [str(i) for i in range(10)]
     for line in str_ids:
+        myline = line
         ids.append([])
-        for char in line:
-            if char in string_numbers:
-                ids[-1].append(int(char))
+        comma_loc = 0
+        while comma_loc >= 0:
+            comma_loc = myline.find(",")
+            ids[-1].append(int(myline[0:comma_loc]))
+            myline = myline[comma_loc+1:]
     return np.array(ids), params
 
 
@@ -103,6 +106,39 @@ def plot_timecourse(adj_data, opns_data, time_data, ids_data, params, folder, sc
             ax.plot(time_data[:npoints], final_ydata[i])
     plt.show()
 
+def plot_conflicts(conflicts_data, time_data, ids_data, params, folder, average=False, ax=''):
+    starting_nvms = params['nVms']
+    n = params['n']
+    n_data = time_data.shape[0]
+    ydata = {}
+    for i in range(starting_nvms):
+        ydata[str(i)] = []
+    data_count = 0
+    for i in range(n_data):
+        count = 0
+        for j in ids_data[i]:
+            ydata[str(j)].append(conflicts_data[i][count])
+            count = count + 1
+    final_ydata = []
+    if average:
+        for i in range(n_data):
+            final_ydata.append(np.average([ydata[str(j)][i] for j in ids_data[i]]))
+    else:
+        for key in ydata.keys():
+            final_ydata.append(ydata[key])
+    final_ydata = np.array(final_ydata)
+    if not ax:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+    if average:
+        ax.plot(time_data, final_ydata)
+    else:
+        ax.hold(True)
+        for i in range(starting_nvms):
+            npoints = len(final_ydata[i])
+            ax.plot(time_data[:npoints], final_ydata[i])
+    plt.show()
+
 if __name__=="__main__":
     import argparse
     parser = argparse.ArgumentParser()
@@ -117,16 +153,20 @@ if __name__=="__main__":
     for filename in args.input_files:
         slash = filename.find('/')
         folder = filename[:slash+1]
-        if 'Adj' in filename:
-            adj_data, params = get_data(filename)
-        elif 'Opns' in filename:
+        # if 'Adj' in filename:
+        #     adj_data, params = get_data(filename)
+        if 'Opns' in filename:
             opns_data, params = get_data(filename)
         elif 'Times' in filename:
             time_data, params = get_data(filename)
         elif 'ids' in filename:
             ids_data, params = read_ids(filename)
+        elif 'Conflicts' in filename:
+            conflicts_data, params = read_ids(filename, header_rows=0)
+    # if args.plot_cpi_conflicts:
+    #     plot_timecourse(adj_data, opns_data, time_data, ids_data, params, folder, cvmp.get_conflicts, average=args.average)
     if args.plot_cpi_conflicts:
-        plot_timecourse(adj_data, opns_data, time_data, ids_data, params, folder, cvmp.get_conflicts, average=args.average)
+        plot_conflicts(conflicts_data, time_data, ids_data, params, folder, average=args.average)
     if args.plot_cpi_minority_fraction:
         plot_timecourse(adj_data, opns_data, time_data, ids_data, params, folder, cvmp.get_minority_fraction, average=args.averager)
     if args.plot_cpi_phase_portrait:

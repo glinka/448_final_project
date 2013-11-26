@@ -63,6 +63,7 @@ int votingModel::vote() {
   vector<int> minorityOpnTimeCourse;
   vector<int> stepTimeCourse;
   long int iters = 0;
+  initGraph();
   while(iters < maxIter && conflicts > 0) {
     step();
     if((iters % collectionInterval == 0) || (conflicts==0)) {
@@ -90,7 +91,7 @@ int votingModel::vote() {
   graphStats.close();
 
   stringstream ss;
-  ss << "bifData_" << rewireTo << "_" << n << "_" << avgDeg << ".csv";
+  ss << "single_runs/bifData_" << rewireTo << "_" << n << "_" << avgDeg << ".csv";
   string bifTitle = ss.str();
   ofstream bifData;
   bifData.open(bifTitle, ios::app);
@@ -113,7 +114,7 @@ int votingModel::vote() {
   bifData.close();
 
   ss.str("");
-  ss << "convergenceData_" << a << "_" << n << "_" << initDist[0] << ".csv";
+  ss << "single_runs/convergenceData_" << a << "_" << n << "_" << initDist[0] << ".csv";
   string cnvTitle = ss.str();
   ofstream convData;
   convData.open(cnvTitle, ios::app);
@@ -160,7 +161,7 @@ void votingModel::step() {
   /**
      iters: number of steps the simulation has executed
      N10timeCourse: stores the number of discordant edges
-     minorityOpnTimeCourse: stores the number of vertices holding the minority opinion
+     minorityOpnTimeCours:e stores the number of vertices holding the minority opinion
      V: during each step, stores the index of potential neighbors to chosenVertex (only used in rewire-to-same)
      ***********
      chosenVertex: in rewire-to-random, randomly chosen vertex of randomly chosen edge, in

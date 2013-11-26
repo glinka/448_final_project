@@ -9,7 +9,7 @@ using namespace std;
 int main(int argc, char *argv[]) {
   double avgDeg = 4;
   int i, j;
-  bool project = true;
+  bool project = false;
   string rewireTo = "random";
   int n = 200;
   long int maxIter = 5*n*n;
@@ -18,8 +18,9 @@ int main(int argc, char *argv[]) {
   int k = 2;
   double *initDist = new double[2];
   int nVMS = 4;
-  double projectionStep;
+  double projectionStep = n;
   int save_interval = 1000;
+  int nMS = n;
   initDist[0] = 0.5;
   initDist[1] = 0.5;
   //loop through all arguments, assign variables as needed
@@ -69,11 +70,13 @@ int main(int argc, char *argv[]) {
 	project = true;
 	save_interval = atoi(currentArg);
       }
+      else if(currentLabel == "-nMicroSteps" || currentLabel == "-microSteps" || currentLabel == "-nms" || currentLabel == "-ms") {
+	project = true;
+	nMS = atoi(currentArg);
+      }
     }
   }
-  int nMS = n;
   int waitingPeriod = 100;
-  projectionStep = n;
   collectionInterval = nMS/10;
   stringstream ss;
   ss << "n=" << n;
@@ -109,6 +112,10 @@ int main(int argc, char *argv[]) {
     votingModelCPI *cpi = new votingModelCPI(vmV, waitingPeriod, collectionInterval, nMS, file_header, file_name);
     cpi->run(maxIter, projectionStep, save_interval);
     delete cpi;
+  }
+  else {
+    votingModel vm(n, k, maxIter, collectionInterval, a, avgDeg, initDist, rewireTo, "single_runs/general_data.csv");
+    vm.vote();
   }
   delete[] initDist;
   return 0;
