@@ -10,7 +10,6 @@ def get_data(filename, header_rows=1, **kwargs):
     params = get_header_data(params_str)
     f.close()
     data = np.genfromtxt(path_to_file, delimiter=",", skip_header=header_rows, **kwargs)
-    print params
     return data, params
 
 def read_ids(filename, header_rows=1, **kwargs):
@@ -122,7 +121,11 @@ def plot_conflicts(conflicts_data, time_data, ids_data, params, folder, average=
     final_ydata = []
     if average:
         for i in range(n_data):
-            final_ydata.append(np.average([ydata[str(j)][i] for j in ids_data[i]]))
+            to_average = []
+            [to_average.append(ydata[str(j)][i]) for j in ids_data[i]]
+            #pad with zeros for finished runs
+            [to_average.append(0) for j in range(starting_nvms - len(ids_data[i]))]
+            final_ydata.append(np.average(to_average))
     else:
         for key in ydata.keys():
             final_ydata.append(ydata[key])
@@ -139,35 +142,92 @@ def plot_conflicts(conflicts_data, time_data, ids_data, params, folder, average=
             ax.plot(time_data[:npoints], final_ydata[i])
     plt.show()
 
+def plot_single_conflicts(data, params, ax='', average=True):
+    # textsize = 22
+    # ax1 = fig.add_subplot(211)
+    # ax1.set_ylabel('Minority fraction', fontsize=textsize)
+    # plt.tick_params(axis='both', which='major', labelsize=18)
+    # ax1.set_ylim((0,0.5))
+    # ax1.set_yticks([(x+1)/10.0 for x in range(5)])
+    # ax2 = fig.add_subplot(212, sharex=ax1)
+    # ax2.set_ylabel('Conflicts', fontsize=textsize)
+    # ax2.set_ylim((0,400))
+    # ax2.set_yticks([(x+1)*100 for x in range(4)])
+    # ax2.set_xlabel('Simulation step', fontsize=textsize)
+    # plt.tick_params(axis='both', which='major', labelsize=18)
+    # n = 1.0*params['n']
+    # ax1.plot(data[:,0], data[:,1]/n)
+    # ax2.plot(data[:,0], data[:,2])
+    # plt.show()
+    toplot = []
+    nruns = len(data)
+    maxiter = np.max([data[j][0].shape[0] for j in range(nruns)])
+    maxstep = int(np.max([data[j][0][-1,0] for j in range(nruns)]))
+    runlengths = []
+    for i in range(nruns):
+        runlengths.append(data[i][0].shape[0])
+    if not ax:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+    textsize = 22
+    plt.tick_params(axis='both', which='major', labelsize=18)
+    plt.xticks(rotation=20)
+    ax.set_xlabel('Simulation step', fontsize=textsize)
+    ax.set_ylabel('Conflicts', fontsize=textsize)
+    n = 1.0*params['n']
+    if average:
+        for i in range(maxiter):
+            to_average = []
+            for j in range(nruns):
+                if runlengths[j] > i:
+                    to_average.append(data[j][0][i,2])
+                else:
+                    to_average.append(0)
+            toplot.append(np.average(to_average))
+        ax.plot(np.linspace(0, maxstep, maxiter), toplot)
+    else:
+        for j in range(nruns):
+            ax.plot(data[j][0][:,0], data[j][0][:,2])
+
 if __name__=="__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('input_files', nargs='+')
     parser.add_argument('-cpic', '--plot-cpi-conflicts', action='store_true', default=False)
+    parser.add_argument('-psc', '--plot-single-conflicts', action='store_true', default=False)
     parser.add_argument('-cpimf', '--plot-cpi-minority-fraction', action='store_true', default=False)
     parser.add_argument('-cpipp', '--plot-cpi-phase-portrait', action='store_true', default=False)
     parser.add_argument('-avg', '--average', action='store_true', default=False)
     args = parser.parse_args()
     #should have one of each file: CPIAdj_... and CPIOpns_...
     #which will have the same header (and thus same params)
+    graphdata = []
+    fig = plt.figure()
+    myax = fig.add_subplot(111)
+    myax.hold(True)
     for filename in args.input_files:
         slash = filename.find('/')
         folder = filename[:slash+1]
         # if 'Adj' in filename:
         #     adj_data, params = get_data(filename)
         if 'Opns' in filename:
-            opns_data, params = get_data(filename)
+            opns_data, cpiparams = get_data(filename)
         elif 'Times' in filename:
             time_data, params = get_data(filename)
         elif 'ids' in filename:
-            ids_data, params = read_ids(filename)
+            ids_data, cpiparams = read_ids(filename)
         elif 'Conflicts' in filename:
-            conflicts_data, params = read_ids(filename, header_rows=0)
+            conflicts_data, cpiparams = read_ids(filename, header_rows=0)
+        elif "graphstats" in filename:
+            graphdata.append(get_data(filename))
     # if args.plot_cpi_conflicts:
     #     plot_timecourse(adj_data, opns_data, time_data, ids_data, params, folder, cvmp.get_conflicts, average=args.average)
+    if args.plot_single_conflicts:
+        params = graphdata[0][1]
+        plot_single_conflicts(graphdata, params, ax=myax, average=args.average)
     if args.plot_cpi_conflicts:
-        plot_conflicts(conflicts_data, time_data, ids_data, params, folder, average=args.average)
+        plot_conflicts(conflicts_data, time_data, ids_data, cpiparams, folder, average=args.average, ax=myax)
     if args.plot_cpi_minority_fraction:
-        plot_timecourse(adj_data, opns_data, time_data, ids_data, params, folder, cvmp.get_minority_fraction, average=args.averager)
+        plot_timecourse(adj_data, opns_data, time_data, ids_data, cpiparams, folder, cvmp.get_minority_fraction, average=args.averager)
     if args.plot_cpi_phase_portrait:
-        plot_phase_portrait(adj_data, opns_data, time_data, ids_data, params, folder, cvmp.get_minority_fraction, cvmp.get_conflicts)
+        plot_phase_portrait(adj_data, opns_data, time_data, ids_data, cpiparams, folder, cvmp.get_minority_fraction, cvmp.get_conflicts)

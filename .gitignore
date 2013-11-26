@@ -34,4 +34,5 @@ v5same/*
 *.avi
 .depend
 runlots
-single_data*
+single_runs*
+.#*

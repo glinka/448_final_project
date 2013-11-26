@@ -43,6 +43,7 @@ votingModelCPI::votingModelCPI(vector<votingModel> vms, int waitingPeriod, int c
 };
 
 int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) {
+  const int MAX_PROJECTION_ATTEMPTS = 10;
   int nvms = vms.size();
   long int step = 0;
   int microStepCount = 0;
@@ -150,12 +151,14 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
     //******************************
     //faster to check if size > 0 ?
     //******************************
+    /**
     if(to_delete.size() > 0) {
       for(vector< vmIt >::const_iterator vm = to_delete.begin(); vm != to_delete.end(); vm++) {
 	vms.erase(*vm);
       }
       to_delete.clear();
     }
+    **/
     if(microStepCount > waitingPeriod) {
       int onManifoldStep = microStepCount - waitingPeriod;
       if(onManifoldStep % collectionInterval == 0) {
@@ -175,7 +178,7 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
 	//hard coded for two opinions
 	int newConflicts = (int) (project<int>(times, conflictsTC, proj_step) + 0.5);
 	int temp_proj_step = proj_step;
-	while(newConflicts <= 0 || newMinorityFrac <= 0) {
+	while((newConflicts <= 0 || newMinorityFrac <= 0)) {
 	  temp_proj_step /= 2;
 	  minorityFracsTC = findAvgdMinorityFractions(opns);
 	  conflictsTC = findAvgdConflicts(adjMatrices, opns);
@@ -184,7 +187,9 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
 	}
 	double newDist[2] = {newMinorityFrac, 1 - newMinorityFrac};
 	for(vmIt vm = vms.begin(); vm != vms.end(); vm++) {
-	  vm->initGraph(newDist, newConflicts);
+	  if(vm->getConflicts() > 0) {
+	    vm->initGraph(newDist, newConflicts);
+	  }
 	}
 	this->saveData(adj_to_save, cpiAdjData);
 	this->saveData(opns_to_save, cpiOpnsData);

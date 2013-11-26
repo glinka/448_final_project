@@ -23,6 +23,7 @@ int main(int argc, char *argv[]) {
   int nMS = n;
   initDist[0] = 0.5;
   initDist[1] = 0.5;
+  int nruns = 128;
   //loop through all arguments, assign variables as needed
   for(i = 1; i < argc; i++) {
     if(argv[i][0] == '-') {
@@ -114,8 +115,17 @@ int main(int argc, char *argv[]) {
     delete cpi;
   }
   else {
-    votingModel vm(n, k, maxIter, collectionInterval, a, avgDeg, initDist, rewireTo, "single_runs/general_data.csv");
-    vm.vote();
+    for(i = 0; i < nruns; i++) {
+      ss.str("");
+      ss << "single_runs/graphstats_n_" << n;
+      ss << "_alpha_" << a;
+      ss << "_nsteps_" << maxIter;
+      ss << "_rewireto_" << rewireTo;
+      ss << "_" << i;
+      file_name = ss.str();
+      votingModel vm(n, k, maxIter, collectionInterval, a, avgDeg, initDist, rewireTo, file_name);
+      vm.vote();
+    }
   }
   delete[] initDist;
   return 0;
