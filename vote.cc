@@ -24,6 +24,7 @@ int main(int argc, char *argv[]) {
   initDist[0] = 0.5;
   initDist[1] = 0.5;
   int nruns = 128;
+  int waitingPeriod = 100;
   //loop through all arguments, assign variables as needed
   for(i = 1; i < argc; i++) {
     if(argv[i][0] == '-') {
@@ -77,7 +78,6 @@ int main(int argc, char *argv[]) {
       }
     }
   }
-  int waitingPeriod = 100;
   collectionInterval = nMS/10;
   stringstream ss;
   ss << "n=" << n;

@@ -122,7 +122,7 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
     microStepCount++;
     //collect data to save every save_data_interval steps, and also at the 
     //beginning of each projection iteration and end of simulation
-    if(microStepCount % save_data_interval == 0 || microStepCount == 1 || finishedVMs > 0) {
+    if(microStepCount % save_data_interval == 0 || microStepCount == 1 || finishedVMs == nvms) {
       adj_to_save.push_back(vector<matrix>());
       opns_to_save.push_back(vector<vect>());
       ids_to_save.push_back(vector<int>());
@@ -134,7 +134,8 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
 	conflicts_to_save.back().push_back(vm->getConflicts());
       }
       times_to_save.push_back(step);
-      if(nCompletedVMs == nvms) {
+      //      if(nCompletedVMs == nvms) {
+      if(finishedVMs == nvms) {
 	this->saveData(adj_to_save, cpiAdjData);
 	this->saveData(opns_to_save, cpiOpnsData);
 	this->saveData(times_to_save, cpiTimesData);
@@ -178,12 +179,18 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
 	//hard coded for two opinions
 	int newConflicts = (int) (project<int>(times, conflictsTC, proj_step) + 0.5);
 	int temp_proj_step = proj_step;
-	while((newConflicts <= 0 || newMinorityFrac <= 0)) {
+	int nattempts = 0;
+	while((newConflicts <= 0 || newMinorityFrac <= 0) && (nattempts < MAX_PROJECTION_ATTEMPTS)) {
 	  temp_proj_step /= 2;
 	  minorityFracsTC = findAvgdMinorityFractions(opns);
 	  conflictsTC = findAvgdConflicts(adjMatrices, opns);
 	  newMinorityFrac = project<double>(times, minorityFracsTC, temp_proj_step);
 	  newConflicts = (int) (project<int>(times, conflictsTC, temp_proj_step) + 0.5);
+	  nattempts++;
+	}
+	if(nattempts == MAX_PROJECTION_ATTEMPTS) {
+	  cout << "failed projection" << endl;
+	  return -1;
 	}
 	double newDist[2] = {newMinorityFrac, 1 - newMinorityFrac};
 	for(vmIt vm = vms.begin(); vm != vms.end(); vm++) {
