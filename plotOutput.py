@@ -134,12 +134,13 @@ def plot_conflicts(conflicts_data, time_data, ids_data, params, folder, average=
         fig = plt.figure()
         ax = fig.add_subplot(111)
     if average:
-        ax.plot(time_data, final_ydata)
+        ax.plot(time_data, final_ydata, label='cpi')
     else:
         ax.hold(True)
         for i in range(starting_nvms):
             npoints = len(final_ydata[i])
             ax.plot(time_data[:npoints], final_ydata[i])
+    ax.legend()
     plt.show()
 
 def plot_single_conflicts(data, params, ax='', average=True):
@@ -184,7 +185,7 @@ def plot_single_conflicts(data, params, ax='', average=True):
                 else:
                     to_average.append(0)
             toplot.append(np.average(to_average))
-        ax.plot(np.linspace(0, maxstep, maxiter), toplot)
+        ax.plot(np.linspace(0, maxstep, maxiter), toplot, label='averaged direct simulations')
     else:
         for j in range(nruns):
             ax.plot(data[j][0][:,0], data[j][0][:,2])
@@ -205,29 +206,65 @@ if __name__=="__main__":
     fig = plt.figure()
     myax = fig.add_subplot(111)
     myax.hold(True)
-    for filename in args.input_files:
-        slash = filename.find('/')
-        folder = filename[:slash+1]
-        # if 'Adj' in filename:
-        #     adj_data, params = get_data(filename)
-        if 'Opns' in filename:
-            opns_data, cpiparams = get_data(filename)
-        elif 'Times' in filename:
-            time_data, params = get_data(filename)
-        elif 'ids' in filename:
-            ids_data, cpiparams = read_ids(filename)
-        elif 'Conflicts' in filename:
-            conflicts_data, cpiparams = read_ids(filename, header_rows=0)
-        elif "graphstats" in filename:
-            graphdata.append(get_data(filename))
+    myax.set_xlabel('iterations')
+    myax.set_ylabel('conflicts')
+    # for filename in args.input_files:
+    #     slash = filename.find('/')
+    #     folder = filename[:slash+1]
+    #     if 'Adj' in filename:
+    #         adj_data, params = get_data(filename)
+    #     if 'Opns' in filename:
+    #         opns_data, cpiparams = get_data(filename)
+    #     elif 'Times' in filename:
+    #         time_data, params = get_data(filename)
+    #     elif 'ids' in filename:
+    #         ids_data, cpiparams = read_ids(filename)
+    #     elif 'Conflicts' in filename:
+    #         conflicts_data, cpiparams = read_ids(filename, header_rows=0)
+    #     elif "graphstats" in filename:
+    #         graphdata.append(get_data(filename))
     # if args.plot_cpi_conflicts:
     #     plot_timecourse(adj_data, opns_data, time_data, ids_data, params, folder, cvmp.get_conflicts, average=args.average)
     if args.plot_single_conflicts:
+        for filename in args.input_files:
+            if "graphstats" in filename:
+                graphdata.append(get_data(filename))
         params = graphdata[0][1]
         plot_single_conflicts(graphdata, params, ax=myax, average=args.average)
     if args.plot_cpi_conflicts:
+        for filename in args.input_files:
+            slash = filename.find('/')
+            folder = filename[:slash+1]
+            if 'Times' in filename:
+                time_data, params = get_data(filename)
+            elif 'ids' in filename:
+                ids_data, cpiparams = read_ids(filename)
+            elif 'Conflicts' in filename:
+                conflicts_data, cpiparams = read_ids(filename, header_rows=0)
         plot_conflicts(conflicts_data, time_data, ids_data, cpiparams, folder, average=args.average, ax=myax)
     if args.plot_cpi_minority_fraction:
-        plot_timecourse(adj_data, opns_data, time_data, ids_data, cpiparams, folder, cvmp.get_minority_fraction, average=args.averager)
+        for filename in args.input_files:
+            slash = filename.find('/')
+            folder = filename[:slash+1]
+            if 'Adj' in filename:
+                adj_data, cpiparams = get_data(filename)
+            if 'Opns' in filename:
+                opns_data, cpiparams = get_data(filename)
+            elif 'Times' in filename:
+                time_data, params = get_data(filename)
+            elif 'ids' in filename:
+                ids_data, cpiparams = read_ids(filename)
+        plot_timecourse(adj_data, opns_data, time_data, ids_data, cpiparams, folder, cvmp.get_minority_fraction, average=args.average)
     if args.plot_cpi_phase_portrait:
+        for filename in args.input_files:
+            slash = filename.find('/')
+            folder = filename[:slash+1]
+            if 'Adj' in filename:
+                adj_data, cpiparams = get_data(filename)
+            if 'Opns' in filename:
+                opns_data, cpiparams = get_data(filename)
+            elif 'Times' in filename:
+                time_data, params = get_data(filename)
+            elif 'ids' in filename:
+                ids_data, cpiparams = read_ids(filename)
         plot_phase_portrait(adj_data, opns_data, time_data, ids_data, cpiparams, folder, cvmp.get_minority_fraction, cvmp.get_conflicts)

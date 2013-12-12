@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
   int nMS = n;
   initDist[0] = 0.5;
   initDist[1] = 0.5;
-  int nruns = 128;
+  int nruns = 1;
   int waitingPeriod = 100;
   //loop through all arguments, assign variables as needed
   for(i = 1; i < argc; i++) {
@@ -75,6 +75,10 @@ int main(int argc, char *argv[]) {
       else if(currentLabel == "-nMicroSteps" || currentLabel == "-microSteps" || currentLabel == "-nms" || currentLabel == "-ms") {
 	project = true;
 	nMS = atoi(currentArg);
+      }
+      else if(currentLabel == "-waitingperiod" || currentLabel == "-wp") {
+	project = true;
+	waitingPeriod = atoi(currentArg);
       }
     }
   }
@@ -130,3 +134,4 @@ int main(int argc, char *argv[]) {
   delete[] initDist;
   return 0;
 }
+

@@ -53,7 +53,7 @@ def plotGraphStats(fileNames):
                         break
             plt.show(fig)
         #don't do individual plotting right now
-        if ("graphStats" in fileName) & (plotIndividuals):
+        if ("graphstats" in fileName) & (plotIndividuals):
             haveGraphStats = True
             paramstr = fileName
             us = paramstr.find("_")

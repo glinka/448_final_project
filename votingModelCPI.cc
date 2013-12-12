@@ -50,7 +50,7 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
   //open all the files
   stringstream ss;
   int folder_counter = 0;
-  string dir_base = "./csv_data";
+  string dir_base = "./csv_data_slow";
   string dir;
   bool isdir = true;
   struct stat stat_dir;
@@ -134,8 +134,8 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
 	conflicts_to_save.back().push_back(vm->getConflicts());
       }
       times_to_save.push_back(step);
-      //      if(nCompletedVMs == nvms) {
-      if(finishedVMs == nvms) {
+      if(nCompletedVMs == nvms) {
+      //      if(finishedVMs == nvms) {
 	this->saveData(adj_to_save, cpiAdjData);
 	this->saveData(opns_to_save, cpiOpnsData);
 	this->saveData(times_to_save, cpiTimesData);
@@ -152,14 +152,14 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
     //******************************
     //faster to check if size > 0 ?
     //******************************
-    /**
+
     if(to_delete.size() > 0) {
       for(vector< vmIt >::const_iterator vm = to_delete.begin(); vm != to_delete.end(); vm++) {
 	vms.erase(*vm);
       }
       to_delete.clear();
     }
-    **/
+
     if(microStepCount > waitingPeriod) {
       int onManifoldStep = microStepCount - waitingPeriod;
       if(onManifoldStep % collectionInterval == 0) {
@@ -301,7 +301,10 @@ void votingModelCPI::saveData(const vector< vect > &data, ofstream &fileHandle) 
 	fileHandle << ",";
       }
     }
-    fileHandle << endl;
+    //don't add newline if content wasn't added
+    if(!(*v).empty()) {
+      fileHandle << endl;
+    }
   }
 }
 
