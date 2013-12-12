@@ -82,7 +82,7 @@ int votingModel::vote() {
   cout << iters << endl;
   //output data into csv file, hardcoded for two opinions
   stringstream ss;
-  ss << "graphStats_" << fileName << ".csv";
+  ss << "bif_data/graphStats_" << fileName << ".csv";
   ofstream graphStats;
   graphStats.open(ss.str());
   graphStats << setiosflags(ios::left) << setiosflags(ios::fixed);

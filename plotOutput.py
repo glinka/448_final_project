@@ -87,15 +87,15 @@ def plot_conflicts(data, params):
     fig = plt.figure()
     textsize = 22
     ax1 = fig.add_subplot(211)
-    ax1.set_ylabel('Minority fraction', fontsize=textsize)
+    ax1.set_ylabel('minority fraction', fontsize=textsize)
     plt.tick_params(axis='both', which='major', labelsize=18)
     ax1.set_ylim((0,0.5))
     ax1.set_yticks([(x+1)/10.0 for x in range(5)])
     ax2 = fig.add_subplot(212, sharex=ax1)
-    ax2.set_ylabel('Conflicts', fontsize=textsize)
-    ax2.set_ylim((0,400))
-    ax2.set_yticks([(x+1)*100 for x in range(4)])
-    ax2.set_xlabel('Simulation step', fontsize=textsize)
+    ax2.set_ylabel('conflicts', fontsize=textsize)
+#    ax2.set_ylim((0,400))
+#    ax2.set_yticks([(x+1)*100 for x in range(4)])
+    ax2.set_xlabel('simulation step', fontsize=textsize)
     plt.tick_params(axis='both', which='major', labelsize=18)
     n = 1.0*params['n']
     ax1.plot(data[:,0], data[:,1]/n)
@@ -123,7 +123,8 @@ def plot_phase(data, params, ax=False, c=False):
         plt.show()
     else:
         n = 1.0*params['n']
-        ax.plot(data[:,1]/n, data[:,2], color=c)
+        a = 1.0*params['alpha']
+        ax.plot(data[:,1]/n, data[:,2], color=c, label=r'$\alpha$ = ' + str(a))
 
 def calc_conflict_triangles(adj, opns):
     n = adj.shape[0]
@@ -193,6 +194,9 @@ if __name__=="__main__":
     args = parser.parse_args()
     #should have one of each file: CPIAdj_... and CPIOpns_...
     #which will have the same header (and thus same params)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.hold(True)
     for filename in args.input_files:
         if 'Adj' in filename:
             adj_data, params = get_data(filename)
@@ -215,7 +219,7 @@ if __name__=="__main__":
     if args.plot_tc:
         plot_conflicts(graphStats, params)
     if args.plot_phase_space:
-        plot_phase(graphStats, params)
+        plot_phase(graphStats, params, ax)
     if args.plot_bif_diag:
         plot_bifdiag(bifdata, params)
     if args.plot_triangles:
@@ -226,8 +230,8 @@ if __name__=="__main__":
         myax.hold(True)
         textsize=24
         plt.tick_params(axis='both', which='major', labelsize=22)
-        myax.set_xlabel('Minority fraction', fontsize=textsize)
-        myax.set_ylabel('Conflicts', fontsize=textsize)
+        myax.set_xlabel('minority fraction', fontsize=textsize)
+        myax.set_ylabel('conflicts', fontsize=textsize)
         nfiles = len(args.input_files)
         count = 0.0
         for filename in args.input_files:
@@ -237,4 +241,5 @@ if __name__=="__main__":
             myax.hold(True)
             count = count + 1.0
             print count
+        myax.legend(loc=2)
         plt.show()

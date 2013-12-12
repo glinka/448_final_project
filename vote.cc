@@ -113,7 +113,8 @@ int main(int argc, char *argv[]) {
     /**
        ******************** FOR BIFDATA PURPOSES ********************
        **/
-    for(double min = 0.1; min < 1 ; min+=0.2) {
+    for(a = 0.1; a < 1 ; a+=0.2) {
+      double min = 0.5;
       initDist[0] = min;
       initDist[1] = 1-min;
       ss.str("");
