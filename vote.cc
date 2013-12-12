@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
   int nMS = n;
   initDist[0] = 0.5;
   initDist[1] = 0.5;
-  int nruns = 1;
+  int nruns = 64;
   int waitingPeriod = 100;
   //loop through all arguments, assign variables as needed
   for(i = 1; i < argc; i++) {

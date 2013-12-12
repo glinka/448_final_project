@@ -103,7 +103,7 @@ def plot_timecourse(adj_data, opns_data, time_data, ids_data, params, folder, sc
         for i in range(starting_nvms):
             npoints = len(final_ydata[i])
             ax.plot(time_data[:npoints], final_ydata[i])
-    plt.show()
+#    plt.show()
 
 def plot_conflicts(conflicts_data, time_data, ids_data, params, folder, average=False, ax=''):
     starting_nvms = params['nVms']
@@ -141,7 +141,7 @@ def plot_conflicts(conflicts_data, time_data, ids_data, params, folder, average=
             npoints = len(final_ydata[i])
             ax.plot(time_data[:npoints], final_ydata[i])
     ax.legend()
-    plt.show()
+#    plt.show()
 
 def plot_single_conflicts(data, params, ax='', average=True):
     # textsize = 22
@@ -173,8 +173,8 @@ def plot_single_conflicts(data, params, ax='', average=True):
     textsize = 22
     plt.tick_params(axis='both', which='major', labelsize=18)
     plt.xticks(rotation=20)
-    ax.set_xlabel('Simulation step', fontsize=textsize)
-    ax.set_ylabel('Conflicts', fontsize=textsize)
+    ax.set_xlabel('simulation step', fontsize=textsize)
+    ax.set_ylabel('conflicts', fontsize=textsize)
     n = 1.0*params['n']
     if average:
         for i in range(maxiter):
@@ -268,3 +268,4 @@ if __name__=="__main__":
             elif 'ids' in filename:
                 ids_data, cpiparams = read_ids(filename)
         plot_phase_portrait(adj_data, opns_data, time_data, ids_data, cpiparams, folder, cvmp.get_minority_fraction, cvmp.get_conflicts)
+    plt.show()

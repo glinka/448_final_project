@@ -3,7 +3,7 @@
 \usepackage[top=1in, bottom=1in, left=1in, right=1in]{geometry}
 \pagestyle{plain}
 \begin{document}
-\title{\vspace{-5mm}Voting Model and Edge Reconnecting CPI}
+\title{\vspace{-5mm}Voting Model and Edge Reconnecting Model CPI}
 \author{Alexander Holiday}
 \maketitle
 \section*{Voting model}
@@ -37,24 +37,76 @@
 
 \begin{figure}
   \centering
-  \includegraphics[height=65mm]{vmCPIFast}
-  \caption{Second CPI method in which finished runs in the ensemble contribute their data to the projection step, but are no longer evolved in time. As this amounts to added zero conflict runs to the ensemble, convergence is faster}
-  \label{fig:vmSlow}
+  \subfloat[Evolved $15,000$ steps, projected $5,000$.]{
+    \includegraphics[height=65mm]{vmCPIFast1}
+    \label{fig:vmFast1}
+  }
+  \hspace{3mm}
+  \subfloat[Evolved $15,000$ steps, projected $10,000$.]{
+    \includegraphics[height=65mm]{vmCPIFast2}
+    \label{fig:vmFast2}
+  }
+  \caption{Second CPI method in which finished runs in the ensemble contribute their data to the projection step, but are no longer evolved in time. As this amounts to adding zero conflict runs to the ensemble, convergence is faster.}
+  \label{fig:vmFast}
 \end{figure}
 
 \begin{figure}
   \centering
-  \subfloat[Only includes runs that have reached consensus]{
-    \includegraphics[width=72mm]{bifData_same_1000_4}
-    \label{fig:rwSameA}
-  }
-  \hspace{3mm}
-  \subfloat[Includes all runs, even if conflicts exist at the simulation's end] {
-    \includegraphics[width=72mm]{bifData_noConvergence_same_1000_4}
-    \label{fig:rwSameB}
-  }
-  \caption{Final minority fraction as a function of $\alpha$ and initial minority fraction (rewire-to-same), results from our data.}
-  \label{fig:myRWtoSameBD}
+  \includegraphics[height=65mm]{vmCPIPP}
+  \caption{Phase portrait calculated with CPI.
+  \label{fig:vmSlow}
 \end{figure}
+
+\section*{Edge reconnecting model}
+
+\begin{figure}
+  \centering
+  \includegraphics[height=65mm]{erTimescaleFast}
+  \caption{Attempt to visualize the fast, $n^{2}$, timescale, on which the degree distribution is expected to remain constant.}
+  \label{fig:erFast}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[height=65mm]{erTimescalesSlow}
+  \caption{Attempt to visualize the slower, $n^{3}$, timescale, on which the degree distribution should evolves to a steady state.}
+  \label{fig:erSlow}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[height=65mm]{erRecon}
+  \caption{Reconstructin of adjacency matrix using the leading eigenvector and eigenvalue.}
+  \label{fig:erRecon}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[height=65mm]{erCPI}
+  \caption{Evolution of degree distribution during CPI (blue) and direct simulation (red).}
+  \label{fig:erRecon}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[height=65mm{erCoeffEvol}
+  \caption{Evolution of projected coefficients.}
+  \label{fig:erEvol}
+\end{figure}
+
+%% \begin{figure}
+%%   \centering
+%%   \subfloat[Only includes runs that have reached consensus]{
+%%     \includegraphics[width=72mm]{bifData_same_1000_4}
+%%     \label{fig:rwSameA}
+%%   }
+%%   \hspace{3mm}
+%%   \subfloat[Includes all runs, even if conflicts exist at the simulation's end] {
+%%     \includegraphics[width=72mm]{bifData_noConvergence_same_1000_4}
+%%     \label{fig:rwSameB}
+%%   }
+%%   \caption{Final minority fraction as a function of $\alpha$ and initial minority fraction (rewire-to-same), results from our data.}
+%%   \label{fig:myRWtoSameBD}
+%% \end{figure}
 
 \end{document}
