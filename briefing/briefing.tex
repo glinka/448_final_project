@@ -98,9 +98,30 @@
 
 \begin{figure}
   \centering
-  \includegraphics[height=65mm]{erCoeffEvol}
-  \caption{Evolution of projected coefficients.}
-  \label{fig:erEvol}
+  \subfloat[1st Coeff.]{
+    \includegraphics[height=65mm]{coeff0}
+    \label{fig:er1Coef}
+  }
+  \subfloat[2nd Coeff.]{
+    \includegraphics[height=65mm]{coeff1}
+    \label{fig:er2Coef}
+  }
+  \hspace{3mm}
+  \subfloat[3rd Coeff.]{
+    \includegraphics[height=65mm]{coeff2}
+    \label{fig:er3Coef}
+  }
+  \subfloat[4th Coeff.]{
+    \includegraphics[height=65mm]{coeff3}
+    \label{fig:er4Coef}
+  }
+  \hspace{3mm}
+  \subfloat[5th Coeff.]{
+    \includegraphics[height=65mm]{coeff4}
+    \label{fig:er5Coef}
+  }
+  \caption{Evolution of coefficients used to fit first eigenvector of adjacency matrix, which were used as coarse variables.}
+  \label{fig:erCoeff}
 \end{figure}
 
 %% \begin{figure}
