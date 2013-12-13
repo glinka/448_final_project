@@ -27,6 +27,7 @@ class votingModelCPI {
   vmMatrices average(const std::vector<vmMatrices> &data);
   void saveData(const vect &data, std::ofstream &fileHandle);
   void saveData(const std::vector< vect > &data, std::ofstream &fileHandle);
+  void saveData(const std::vector< std::vector< double > > &data, std::ofstream &fileHandle);
   void saveData(const std::vector<vmMatrices> &data, std::ofstream &fileHandle);
   void saveData(const std::vector<vmVects> &data, std::ofstream &fileHandle);
   std::vector<double> findAvgdMinorityFractions(const std::vector<vmVects> &opns);

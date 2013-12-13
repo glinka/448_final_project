@@ -44,6 +44,16 @@ class votingModel {
     return conflicts;
   };
 
+  double getMinorityFraction() {
+    int min = n;
+    for(int i = 0; i < k; i++) {
+      if(opnCounts[i] < min) {
+	min = opnCounts[i];
+      }
+    }
+    return (1.0*min)/n;
+  }
+
   std::vector<int> getOpns() {
     std::vector<int> newOpns;
     for(int i = 0; i < n; i++) {

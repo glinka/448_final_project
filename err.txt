@@ -1,0 +1,1023 @@
+votingModelCPI.cc: In member function ‘void votingModelCPI::saveData(const std::vector<std::vector<double> >&, std::ofstream&)’:
+votingModelCPI.cc:328:45: error: conversion from ‘std::vector<double>::const_iterator {aka __gnu_cxx::__normal_iterator<const double*, std::vector<double> >}’ to non-scalar type ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ requested
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                             ^
+votingModelCPI.cc:328:50: error: no match for ‘operator!=’ (operand types are ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ and ‘std::vector<double>::const_iterator {aka __gnu_cxx::__normal_iterator<const double*, std::vector<double> >}’)
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                  ^
+votingModelCPI.cc:328:50: note: candidates are:
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/iosfwd:40:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/postypes.h:221:5: note: template<class _StateT> bool std::operator!=(const std::fpos<_StateT>&, const std::fpos<_StateT>&)
+     operator!=(const fpos<_StateT>& __lhs, const fpos<_StateT>& __rhs)
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/postypes.h:221:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::fpos<_StateT>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_algobase.h:64:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/char_traits.h:39,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:40,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_pair.h:227:5: note: template<class _T1, class _T2> constexpr bool std::operator!=(const std::pair<_T1, _T2>&, const std::pair<_T1, _T2>&)
+     operator!=(const pair<_T1, _T2>& __x, const pair<_T1, _T2>& __y)
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_pair.h:227:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::pair<_T1, _T2>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_algobase.h:67:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/char_traits.h:39,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:40,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_iterator.h:303:5: note: template<class _Iterator> bool std::operator!=(const std::reverse_iterator<_Iterator>&, const std::reverse_iterator<_Iterator>&)
+     operator!=(const reverse_iterator<_Iterator>& __x,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_iterator.h:303:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::reverse_iterator<_Iterator>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_algobase.h:67:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/char_traits.h:39,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:40,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_iterator.h:353:5: note: template<class _IteratorL, class _IteratorR> bool std::operator!=(const std::reverse_iterator<_Iterator>&, const std::reverse_iterator<_IteratorR>&)
+     operator!=(const reverse_iterator<_IteratorL>& __x,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_iterator.h:353:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::reverse_iterator<_Iterator>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_algobase.h:67:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/char_traits.h:39,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:40,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_iterator.h:1043:5: note: template<class _IteratorL, class _IteratorR> bool std::operator!=(const std::move_iterator<_Iterator>&, const std::move_iterator<_IteratorR>&)
+     operator!=(const move_iterator<_IteratorL>& __x,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_iterator.h:1043:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::move_iterator<_Iterator>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_algobase.h:67:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/char_traits.h:39,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:40,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_iterator.h:1049:5: note: template<class _Iterator> bool std::operator!=(const std::move_iterator<_Iterator>&, const std::move_iterator<_Iterator>&)
+     operator!=(const move_iterator<_Iterator>& __x,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_iterator.h:1049:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::move_iterator<_Iterator>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/string:41:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/locale_classes.h:40,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/ios_base.h:41,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:42,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/allocator.h:138:5: note: template<class _T1, class _T2> bool std::operator!=(const std::allocator<_CharT>&, const std::allocator<_T2>&)
+     operator!=(const allocator<_T1>&, const allocator<_T2>&)
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/allocator.h:138:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::allocator<_CharT>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/string:41:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/locale_classes.h:40,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/ios_base.h:41,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:42,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/allocator.h:143:5: note: template<class _Tp> bool std::operator!=(const std::allocator<_CharT>&, const std::allocator<_CharT>&)
+     operator!=(const allocator<_Tp>&, const allocator<_Tp>&)
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/allocator.h:143:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::allocator<_CharT>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/string:52:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/locale_classes.h:40,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/ios_base.h:41,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:42,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/basic_string.h:2532:5: note: template<class _CharT, class _Traits, class _Alloc> bool std::operator!=(const std::basic_string<_CharT, _Traits, _Alloc>&, const std::basic_string<_CharT, _Traits, _Alloc>&)
+     operator!=(const basic_string<_CharT, _Traits, _Alloc>& __lhs,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/basic_string.h:2532:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::basic_string<_CharT, _Traits, _Alloc>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/string:52:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/locale_classes.h:40,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/ios_base.h:41,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:42,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/basic_string.h:2544:5: note: template<class _CharT, class _Traits, class _Alloc> bool std::operator!=(const _CharT*, const std::basic_string<_CharT, _Traits, _Alloc>&)
+     operator!=(const _CharT* __lhs,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/basic_string.h:2544:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   mismatched types ‘const _CharT*’ and ‘__gnu_cxx::__normal_iterator<const int*, std::vector<int> >’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/string:52:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/locale_classes.h:40,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/ios_base.h:41,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:42,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/basic_string.h:2556:5: note: template<class _CharT, class _Traits, class _Alloc> bool std::operator!=(const std::basic_string<_CharT, _Traits, _Alloc>&, const _CharT*)
+     operator!=(const basic_string<_CharT, _Traits, _Alloc>& __lhs,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/basic_string.h:2556:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::basic_string<_CharT, _Traits, _Alloc>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/bits/locale_facets.h:48:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/basic_ios.h:37,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:44,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/streambuf_iterator.h:210:5: note: template<class _CharT, class _Traits> bool std::operator!=(const std::istreambuf_iterator<_CharT, _Traits>&, const std::istreambuf_iterator<_CharT, _Traits>&)
+     operator!=(const istreambuf_iterator<_CharT, _Traits>& __a,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/streambuf_iterator.h:210:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::istreambuf_iterator<_CharT, _Traits>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/vector:64:0,
+                 from fitCurves.h:3,
+                 from votingModelCPI.cc:7:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_vector.h:1427:5: note: template<class _Tp, class _Alloc> bool std::operator!=(const std::vector<_Tp, _Alloc>&, const std::vector<_Tp, _Alloc>&)
+     operator!=(const vector<_Tp, _Alloc>& __x, const vector<_Tp, _Alloc>& __y)
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_vector.h:1427:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::vector<_Tp, _Alloc>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/tuple:39:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/functional:55,
+                 from fitCurves.h:4,
+                 from votingModelCPI.cc:7:
+/home/oakridge/holiday/build/include/c++/4.8.1/array:233:5: note: template<class _Tp, long unsigned int _Nm> bool std::operator!=(const std::array<_Tp, _Nm>&, const std::array<_Tp, _Nm>&)
+     operator!=(const array<_Tp, _Nm>& __one, const array<_Tp, _Nm>& __two)
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/array:233:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::array<_Tp, _Nm>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/functional:55:0,
+                 from fitCurves.h:4,
+                 from votingModelCPI.cc:7:
+/home/oakridge/holiday/build/include/c++/4.8.1/tuple:833:5: note: template<class ... _TElements, class ... _UElements> constexpr bool std::operator!=(const std::tuple<_Elements ...>&, const std::tuple<_Elements ...>&)
+     operator!=(const tuple<_TElements...>& __t,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/tuple:833:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::tuple<_Elements ...>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from fitCurves.h:4:0,
+                 from votingModelCPI.cc:7:
+/home/oakridge/holiday/build/include/c++/4.8.1/functional:2552:5: note: template<class _Res, class ... _Args> bool std::operator!=(const std::function<_Res(_ArgTypes ...)>&, std::nullptr_t)
+     operator!=(const function<_Res(_Args...)>& __f, nullptr_t) noexcept
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/functional:2552:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::function<_Res(_ArgTypes ...)>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from fitCurves.h:4:0,
+                 from votingModelCPI.cc:7:
+/home/oakridge/holiday/build/include/c++/4.8.1/functional:2558:5: note: template<class _Res, class ... _Args> bool std::operator!=(std::nullptr_t, const std::function<_Res(_ArgTypes ...)>&)
+     operator!=(nullptr_t, const function<_Res(_Args...)>& __f) noexcept
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/functional:2558:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   cannot convert ‘i’ (type ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’) to type ‘std::nullptr_t’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:409:5: note: template<class _UIntType, _UIntType __a, _UIntType __c, _UIntType __m> bool std::operator!=(const std::linear_congruential_engine<_UIntType, __a, __c, __m>&, const std::linear_congruential_engine<_UIntType, __a, __c, __m>&)
+     operator!=(const std::linear_congruential_engine<_UIntType, __a,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:409:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::linear_congruential_engine<_UIntType, __a, __c, __m>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:641:5: note: template<class _UIntType, long unsigned int __w, long unsigned int __n, long unsigned int __m, long unsigned int __r, _UIntType __a, long unsigned int __u, _UIntType __d, long unsigned int __s, _UIntType __b, long unsigned int __t, _UIntType __c, long unsigned int __l, _UIntType __f> bool std::operator!=(const std::mersenne_twister_engine<_UIntType, __w, __n, __m, __r, __a, __u, __d, __s, __b, __t, __c, __l, __f>&, const std::mersenne_twister_engine<_UIntType, __w, __n, __m, __r, __a, __u, __d, __s, __b, __t, __c, __l, __f>&)
+     operator!=(const std::mersenne_twister_engine<_UIntType, __w, __n, __m,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:641:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::mersenne_twister_engine<_UIntType, __w, __n, __m, __r, __a, __u, __d, __s, __b, __t, __c, __l, __f>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:840:5: note: template<class _UIntType, long unsigned int __w, long unsigned int __s, long unsigned int __r> bool std::operator!=(const std::subtract_with_carry_engine<_UIntType, __w, __s, __r>&, const std::subtract_with_carry_engine<_UIntType, __w, __s, __r>&)
+     operator!=(const std::subtract_with_carry_engine<_UIntType, __w,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:840:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::subtract_with_carry_engine<_UIntType, __w, __s, __r>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:1062:5: note: template<class _RandomNumberEngine, long unsigned int __p, long unsigned int __r> bool std::operator!=(const std::discard_block_engine<_RandomNumberEngine, __p, __r>&, const std::discard_block_engine<_RandomNumberEngine, __p, __r>&)
+     operator!=(const std::discard_block_engine<_RandomNumberEngine, __p,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:1062:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::discard_block_engine<_RandomNumberEngine, __p, __r>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:1258:5: note: template<class _RandomNumberEngine, long unsigned int __w, class _UIntType> bool std::operator!=(const std::independent_bits_engine<_RandomNumberEngine, __w, _UIntType>&, const std::independent_bits_engine<_RandomNumberEngine, __w, _UIntType>&)
+     operator!=(const std::independent_bits_engine<_RandomNumberEngine, __w,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:1258:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::independent_bits_engine<_RandomNumberEngine, __w, _UIntType>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:1510:5: note: template<class _RandomNumberEngine, long unsigned int __k> bool std::operator!=(const std::shuffle_order_engine<_RandomNumberEngine, __k>&, const std::shuffle_order_engine<_RandomNumberEngine, __k>&)
+     operator!=(const std::shuffle_order_engine<_RandomNumberEngine,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:1510:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::shuffle_order_engine<_RandomNumberEngine, __k>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:1825:5: note: template<class _IntType> bool std::operator!=(const std::uniform_int_distribution<_IntType>&, const std::uniform_int_distribution<_IntType>&)
+     operator!=(const std::uniform_int_distribution<_IntType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:1825:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::uniform_int_distribution<_IntType>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:2034:5: note: template<class _IntType> bool std::operator!=(const std::uniform_real_distribution<_IntType>&, const std::uniform_real_distribution<_IntType>&)
+     operator!=(const std::uniform_real_distribution<_IntType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:2034:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::uniform_real_distribution<_IntType>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:2283:5: note: template<class _RealType> bool std::operator!=(const std::normal_distribution<_RealType>&, const std::normal_distribution<_RealType>&)
+     operator!=(const std::normal_distribution<_RealType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:2283:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::normal_distribution<_RealType>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:2487:5: note: template<class _RealType> bool std::operator!=(const std::lognormal_distribution<_RealType>&, const std::lognormal_distribution<_RealType>&)
+     operator!=(const std::lognormal_distribution<_RealType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:2487:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::lognormal_distribution<_RealType>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:2707:6: note: template<class _RealType> bool std::operator!=(const std::gamma_distribution<_RealType>&, const std::gamma_distribution<_RealType>&)
+      operator!=(const std::gamma_distribution<_RealType>& __d1,
+      ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:2707:6: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::gamma_distribution<_RealType>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:2917:5: note: template<class _RealType> bool std::operator!=(const std::chi_squared_distribution<_RealType>&, const std::chi_squared_distribution<_RealType>&)
+     operator!=(const std::chi_squared_distribution<_RealType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:2917:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::chi_squared_distribution<_RealType>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:3084:5: note: template<class _RealType> bool std::operator!=(const std::cauchy_distribution<_RealType>&, const std::cauchy_distribution<_RealType>&)
+     operator!=(const std::cauchy_distribution<_RealType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:3084:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::cauchy_distribution<_RealType>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:3340:5: note: template<class _RealType> bool std::operator!=(const std::fisher_f_distribution<_RealType>&, const std::fisher_f_distribution<_RealType>&)
+     operator!=(const std::fisher_f_distribution<_RealType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:3340:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::fisher_f_distribution<_RealType>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:3553:5: note: template<class _RealType> bool std::operator!=(const std::student_t_distribution<_RealType>&, const std::student_t_distribution<_RealType>&)
+     operator!=(const std::student_t_distribution<_RealType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:3553:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::student_t_distribution<_RealType>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:3729:3: note: bool std::operator!=(const std::bernoulli_distribution&, const std::bernoulli_distribution&)
+   operator!=(const std::bernoulli_distribution& __d1,
+   ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:3729:3: note:   no known conversion for argument 1 from ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ to ‘const std::bernoulli_distribution&’
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:3994:5: note: template<class _IntType> bool std::operator!=(const std::binomial_distribution<_IntType>&, const std::binomial_distribution<_IntType>&)
+     operator!=(const std::binomial_distribution<_IntType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:3994:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::binomial_distribution<_IntType>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:4163:5: note: template<class _IntType> bool std::operator!=(const std::geometric_distribution<_IntType>&, const std::geometric_distribution<_IntType>&)
+     operator!=(const std::geometric_distribution<_IntType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:4163:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::geometric_distribution<_IntType>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:4408:5: note: template<class _IntType> bool std::operator!=(const std::negative_binomial_distribution<_IntType>&, const std::negative_binomial_distribution<_IntType>&)
+     operator!=(const std::negative_binomial_distribution<_IntType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:4408:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::negative_binomial_distribution<_IntType>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:4624:5: note: template<class _IntType> bool std::operator!=(const std::poisson_distribution<_IntType>&, const std::poisson_distribution<_IntType>&)
+     operator!=(const std::poisson_distribution<_IntType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:4624:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::poisson_distribution<_IntType>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:4802:5: note: template<class _RealType> bool std::operator!=(const std::exponential_distribution<_RealType>&, const std::exponential_distribution<_RealType>&)
+     operator!=(const std::exponential_distribution<_RealType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:4802:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::exponential_distribution<_RealType>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:5005:5: note: template<class _RealType> bool std::operator!=(const std::weibull_distribution<_RealType>&, const std::weibull_distribution<_RealType>&)
+     operator!=(const std::weibull_distribution<_RealType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:5005:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::weibull_distribution<_RealType>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:5208:5: note: template<class _RealType> bool std::operator!=(const std::extreme_value_distribution<_RealType>&, const std::extreme_value_distribution<_RealType>&)
+     operator!=(const std::extreme_value_distribution<_RealType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:5208:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::extreme_value_distribution<_RealType>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:5468:5: note: template<class _IntType> bool std::operator!=(const std::discrete_distribution<_IntType>&, const std::discrete_distribution<_IntType>&)
+     operator!=(const std::discrete_distribution<_IntType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:5468:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::discrete_distribution<_IntType>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:5735:5: note: template<class _RealType> bool std::operator!=(const std::piecewise_constant_distribution<_RealType>&, const std::piecewise_constant_distribution<_RealType>&)
+     operator!=(const std::piecewise_constant_distribution<_RealType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:5735:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::piecewise_constant_distribution<_RealType>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:6005:5: note: template<class _RealType> bool std::operator!=(const std::piecewise_linear_distribution<_RealType>&, const std::piecewise_linear_distribution<_RealType>&)
+     operator!=(const std::piecewise_linear_distribution<_RealType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:6005:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::piecewise_linear_distribution<_RealType>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/x86_64-unknown-linux-gnu/bits/c++allocator.h:33:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/allocator.h:46,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/string:41,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/locale_classes.h:40,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/ios_base.h:41,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:42,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/ext/new_allocator.h:144:5: note: template<class _Tp> bool __gnu_cxx::operator!=(const __gnu_cxx::new_allocator<_Tp>&, const __gnu_cxx::new_allocator<_Tp>&)
+     operator!=(const new_allocator<_Tp>&, const new_allocator<_Tp>&)
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/ext/new_allocator.h:144:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const __gnu_cxx::new_allocator<_Tp>’
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_algobase.h:67:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/char_traits.h:39,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:40,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_iterator.h:823:5: note: template<class _Iterator, class _Container> bool __gnu_cxx::operator!=(const __gnu_cxx::__normal_iterator<_Iterator, _Container>&, const __gnu_cxx::__normal_iterator<_Iterator, _Container>&)
+     operator!=(const __normal_iterator<_Iterator, _Container>& __lhs,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_iterator.h:823:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   deduced conflicting types for parameter ‘_Iterator’ (‘const int*’ and ‘const double*’)
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_algobase.h:67:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/char_traits.h:39,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:40,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_iterator.h:817:5: note: template<class _IteratorL, class _IteratorR, class _Container> bool __gnu_cxx::operator!=(const __gnu_cxx::__normal_iterator<_IteratorL, _Container>&, const __gnu_cxx::__normal_iterator<_IteratorR, _Container>&)
+     operator!=(const __normal_iterator<_IteratorL, _Container>& __lhs,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_iterator.h:817:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:328:62: note:   deduced conflicting types for parameter ‘_Container’ (‘std::vector<int>’ and ‘std::vector<double>’)
+     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+                                                              ^
+votingModelCPI.cc:331:12: error: no match for ‘operator!=’ (operand types are ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ and ‘__gnu_cxx::__normal_iterator<const double*, std::vector<double> >’)
+       if(i != ((*v).end() - 1)) {
+            ^
+votingModelCPI.cc:331:12: note: candidates are:
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/iosfwd:40:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/postypes.h:221:5: note: template<class _StateT> bool std::operator!=(const std::fpos<_StateT>&, const std::fpos<_StateT>&)
+     operator!=(const fpos<_StateT>& __lhs, const fpos<_StateT>& __rhs)
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/postypes.h:221:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::fpos<_StateT>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_algobase.h:64:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/char_traits.h:39,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:40,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_pair.h:227:5: note: template<class _T1, class _T2> constexpr bool std::operator!=(const std::pair<_T1, _T2>&, const std::pair<_T1, _T2>&)
+     operator!=(const pair<_T1, _T2>& __x, const pair<_T1, _T2>& __y)
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_pair.h:227:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::pair<_T1, _T2>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_algobase.h:67:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/char_traits.h:39,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:40,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_iterator.h:303:5: note: template<class _Iterator> bool std::operator!=(const std::reverse_iterator<_Iterator>&, const std::reverse_iterator<_Iterator>&)
+     operator!=(const reverse_iterator<_Iterator>& __x,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_iterator.h:303:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::reverse_iterator<_Iterator>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_algobase.h:67:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/char_traits.h:39,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:40,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_iterator.h:353:5: note: template<class _IteratorL, class _IteratorR> bool std::operator!=(const std::reverse_iterator<_Iterator>&, const std::reverse_iterator<_IteratorR>&)
+     operator!=(const reverse_iterator<_IteratorL>& __x,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_iterator.h:353:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::reverse_iterator<_Iterator>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_algobase.h:67:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/char_traits.h:39,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:40,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_iterator.h:1043:5: note: template<class _IteratorL, class _IteratorR> bool std::operator!=(const std::move_iterator<_Iterator>&, const std::move_iterator<_IteratorR>&)
+     operator!=(const move_iterator<_IteratorL>& __x,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_iterator.h:1043:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::move_iterator<_Iterator>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_algobase.h:67:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/char_traits.h:39,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:40,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_iterator.h:1049:5: note: template<class _Iterator> bool std::operator!=(const std::move_iterator<_Iterator>&, const std::move_iterator<_Iterator>&)
+     operator!=(const move_iterator<_Iterator>& __x,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_iterator.h:1049:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::move_iterator<_Iterator>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/string:41:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/locale_classes.h:40,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/ios_base.h:41,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:42,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/allocator.h:138:5: note: template<class _T1, class _T2> bool std::operator!=(const std::allocator<_CharT>&, const std::allocator<_T2>&)
+     operator!=(const allocator<_T1>&, const allocator<_T2>&)
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/allocator.h:138:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::allocator<_CharT>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/string:41:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/locale_classes.h:40,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/ios_base.h:41,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:42,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/allocator.h:143:5: note: template<class _Tp> bool std::operator!=(const std::allocator<_CharT>&, const std::allocator<_CharT>&)
+     operator!=(const allocator<_Tp>&, const allocator<_Tp>&)
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/allocator.h:143:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::allocator<_CharT>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/string:52:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/locale_classes.h:40,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/ios_base.h:41,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:42,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/basic_string.h:2532:5: note: template<class _CharT, class _Traits, class _Alloc> bool std::operator!=(const std::basic_string<_CharT, _Traits, _Alloc>&, const std::basic_string<_CharT, _Traits, _Alloc>&)
+     operator!=(const basic_string<_CharT, _Traits, _Alloc>& __lhs,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/basic_string.h:2532:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::basic_string<_CharT, _Traits, _Alloc>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/string:52:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/locale_classes.h:40,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/ios_base.h:41,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:42,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/basic_string.h:2544:5: note: template<class _CharT, class _Traits, class _Alloc> bool std::operator!=(const _CharT*, const std::basic_string<_CharT, _Traits, _Alloc>&)
+     operator!=(const _CharT* __lhs,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/basic_string.h:2544:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   mismatched types ‘const _CharT*’ and ‘__gnu_cxx::__normal_iterator<const int*, std::vector<int> >’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/string:52:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/locale_classes.h:40,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/ios_base.h:41,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:42,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/basic_string.h:2556:5: note: template<class _CharT, class _Traits, class _Alloc> bool std::operator!=(const std::basic_string<_CharT, _Traits, _Alloc>&, const _CharT*)
+     operator!=(const basic_string<_CharT, _Traits, _Alloc>& __lhs,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/basic_string.h:2556:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::basic_string<_CharT, _Traits, _Alloc>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/bits/locale_facets.h:48:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/basic_ios.h:37,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:44,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/streambuf_iterator.h:210:5: note: template<class _CharT, class _Traits> bool std::operator!=(const std::istreambuf_iterator<_CharT, _Traits>&, const std::istreambuf_iterator<_CharT, _Traits>&)
+     operator!=(const istreambuf_iterator<_CharT, _Traits>& __a,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/streambuf_iterator.h:210:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::istreambuf_iterator<_CharT, _Traits>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/vector:64:0,
+                 from fitCurves.h:3,
+                 from votingModelCPI.cc:7:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_vector.h:1427:5: note: template<class _Tp, class _Alloc> bool std::operator!=(const std::vector<_Tp, _Alloc>&, const std::vector<_Tp, _Alloc>&)
+     operator!=(const vector<_Tp, _Alloc>& __x, const vector<_Tp, _Alloc>& __y)
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_vector.h:1427:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::vector<_Tp, _Alloc>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/tuple:39:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/functional:55,
+                 from fitCurves.h:4,
+                 from votingModelCPI.cc:7:
+/home/oakridge/holiday/build/include/c++/4.8.1/array:233:5: note: template<class _Tp, long unsigned int _Nm> bool std::operator!=(const std::array<_Tp, _Nm>&, const std::array<_Tp, _Nm>&)
+     operator!=(const array<_Tp, _Nm>& __one, const array<_Tp, _Nm>& __two)
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/array:233:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::array<_Tp, _Nm>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/functional:55:0,
+                 from fitCurves.h:4,
+                 from votingModelCPI.cc:7:
+/home/oakridge/holiday/build/include/c++/4.8.1/tuple:833:5: note: template<class ... _TElements, class ... _UElements> constexpr bool std::operator!=(const std::tuple<_Elements ...>&, const std::tuple<_Elements ...>&)
+     operator!=(const tuple<_TElements...>& __t,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/tuple:833:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::tuple<_Elements ...>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from fitCurves.h:4:0,
+                 from votingModelCPI.cc:7:
+/home/oakridge/holiday/build/include/c++/4.8.1/functional:2552:5: note: template<class _Res, class ... _Args> bool std::operator!=(const std::function<_Res(_ArgTypes ...)>&, std::nullptr_t)
+     operator!=(const function<_Res(_Args...)>& __f, nullptr_t) noexcept
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/functional:2552:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::function<_Res(_ArgTypes ...)>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from fitCurves.h:4:0,
+                 from votingModelCPI.cc:7:
+/home/oakridge/holiday/build/include/c++/4.8.1/functional:2558:5: note: template<class _Res, class ... _Args> bool std::operator!=(std::nullptr_t, const std::function<_Res(_ArgTypes ...)>&)
+     operator!=(nullptr_t, const function<_Res(_Args...)>& __f) noexcept
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/functional:2558:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   cannot convert ‘i’ (type ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’) to type ‘std::nullptr_t’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:409:5: note: template<class _UIntType, _UIntType __a, _UIntType __c, _UIntType __m> bool std::operator!=(const std::linear_congruential_engine<_UIntType, __a, __c, __m>&, const std::linear_congruential_engine<_UIntType, __a, __c, __m>&)
+     operator!=(const std::linear_congruential_engine<_UIntType, __a,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:409:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::linear_congruential_engine<_UIntType, __a, __c, __m>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:641:5: note: template<class _UIntType, long unsigned int __w, long unsigned int __n, long unsigned int __m, long unsigned int __r, _UIntType __a, long unsigned int __u, _UIntType __d, long unsigned int __s, _UIntType __b, long unsigned int __t, _UIntType __c, long unsigned int __l, _UIntType __f> bool std::operator!=(const std::mersenne_twister_engine<_UIntType, __w, __n, __m, __r, __a, __u, __d, __s, __b, __t, __c, __l, __f>&, const std::mersenne_twister_engine<_UIntType, __w, __n, __m, __r, __a, __u, __d, __s, __b, __t, __c, __l, __f>&)
+     operator!=(const std::mersenne_twister_engine<_UIntType, __w, __n, __m,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:641:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::mersenne_twister_engine<_UIntType, __w, __n, __m, __r, __a, __u, __d, __s, __b, __t, __c, __l, __f>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:840:5: note: template<class _UIntType, long unsigned int __w, long unsigned int __s, long unsigned int __r> bool std::operator!=(const std::subtract_with_carry_engine<_UIntType, __w, __s, __r>&, const std::subtract_with_carry_engine<_UIntType, __w, __s, __r>&)
+     operator!=(const std::subtract_with_carry_engine<_UIntType, __w,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:840:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::subtract_with_carry_engine<_UIntType, __w, __s, __r>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:1062:5: note: template<class _RandomNumberEngine, long unsigned int __p, long unsigned int __r> bool std::operator!=(const std::discard_block_engine<_RandomNumberEngine, __p, __r>&, const std::discard_block_engine<_RandomNumberEngine, __p, __r>&)
+     operator!=(const std::discard_block_engine<_RandomNumberEngine, __p,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:1062:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::discard_block_engine<_RandomNumberEngine, __p, __r>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:1258:5: note: template<class _RandomNumberEngine, long unsigned int __w, class _UIntType> bool std::operator!=(const std::independent_bits_engine<_RandomNumberEngine, __w, _UIntType>&, const std::independent_bits_engine<_RandomNumberEngine, __w, _UIntType>&)
+     operator!=(const std::independent_bits_engine<_RandomNumberEngine, __w,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:1258:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::independent_bits_engine<_RandomNumberEngine, __w, _UIntType>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:1510:5: note: template<class _RandomNumberEngine, long unsigned int __k> bool std::operator!=(const std::shuffle_order_engine<_RandomNumberEngine, __k>&, const std::shuffle_order_engine<_RandomNumberEngine, __k>&)
+     operator!=(const std::shuffle_order_engine<_RandomNumberEngine,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:1510:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::shuffle_order_engine<_RandomNumberEngine, __k>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:1825:5: note: template<class _IntType> bool std::operator!=(const std::uniform_int_distribution<_IntType>&, const std::uniform_int_distribution<_IntType>&)
+     operator!=(const std::uniform_int_distribution<_IntType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:1825:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::uniform_int_distribution<_IntType>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:2034:5: note: template<class _IntType> bool std::operator!=(const std::uniform_real_distribution<_IntType>&, const std::uniform_real_distribution<_IntType>&)
+     operator!=(const std::uniform_real_distribution<_IntType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:2034:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::uniform_real_distribution<_IntType>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:2283:5: note: template<class _RealType> bool std::operator!=(const std::normal_distribution<_RealType>&, const std::normal_distribution<_RealType>&)
+     operator!=(const std::normal_distribution<_RealType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:2283:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::normal_distribution<_RealType>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:2487:5: note: template<class _RealType> bool std::operator!=(const std::lognormal_distribution<_RealType>&, const std::lognormal_distribution<_RealType>&)
+     operator!=(const std::lognormal_distribution<_RealType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:2487:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::lognormal_distribution<_RealType>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:2707:6: note: template<class _RealType> bool std::operator!=(const std::gamma_distribution<_RealType>&, const std::gamma_distribution<_RealType>&)
+      operator!=(const std::gamma_distribution<_RealType>& __d1,
+      ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:2707:6: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::gamma_distribution<_RealType>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:2917:5: note: template<class _RealType> bool std::operator!=(const std::chi_squared_distribution<_RealType>&, const std::chi_squared_distribution<_RealType>&)
+     operator!=(const std::chi_squared_distribution<_RealType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:2917:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::chi_squared_distribution<_RealType>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:3084:5: note: template<class _RealType> bool std::operator!=(const std::cauchy_distribution<_RealType>&, const std::cauchy_distribution<_RealType>&)
+     operator!=(const std::cauchy_distribution<_RealType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:3084:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::cauchy_distribution<_RealType>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:3340:5: note: template<class _RealType> bool std::operator!=(const std::fisher_f_distribution<_RealType>&, const std::fisher_f_distribution<_RealType>&)
+     operator!=(const std::fisher_f_distribution<_RealType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:3340:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::fisher_f_distribution<_RealType>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:3553:5: note: template<class _RealType> bool std::operator!=(const std::student_t_distribution<_RealType>&, const std::student_t_distribution<_RealType>&)
+     operator!=(const std::student_t_distribution<_RealType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:3553:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::student_t_distribution<_RealType>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:3729:3: note: bool std::operator!=(const std::bernoulli_distribution&, const std::bernoulli_distribution&)
+   operator!=(const std::bernoulli_distribution& __d1,
+   ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:3729:3: note:   no known conversion for argument 1 from ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ to ‘const std::bernoulli_distribution&’
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:3994:5: note: template<class _IntType> bool std::operator!=(const std::binomial_distribution<_IntType>&, const std::binomial_distribution<_IntType>&)
+     operator!=(const std::binomial_distribution<_IntType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:3994:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::binomial_distribution<_IntType>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:4163:5: note: template<class _IntType> bool std::operator!=(const std::geometric_distribution<_IntType>&, const std::geometric_distribution<_IntType>&)
+     operator!=(const std::geometric_distribution<_IntType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:4163:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::geometric_distribution<_IntType>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:4408:5: note: template<class _IntType> bool std::operator!=(const std::negative_binomial_distribution<_IntType>&, const std::negative_binomial_distribution<_IntType>&)
+     operator!=(const std::negative_binomial_distribution<_IntType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:4408:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::negative_binomial_distribution<_IntType>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:4624:5: note: template<class _IntType> bool std::operator!=(const std::poisson_distribution<_IntType>&, const std::poisson_distribution<_IntType>&)
+     operator!=(const std::poisson_distribution<_IntType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:4624:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::poisson_distribution<_IntType>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:4802:5: note: template<class _RealType> bool std::operator!=(const std::exponential_distribution<_RealType>&, const std::exponential_distribution<_RealType>&)
+     operator!=(const std::exponential_distribution<_RealType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:4802:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::exponential_distribution<_RealType>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:5005:5: note: template<class _RealType> bool std::operator!=(const std::weibull_distribution<_RealType>&, const std::weibull_distribution<_RealType>&)
+     operator!=(const std::weibull_distribution<_RealType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:5005:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::weibull_distribution<_RealType>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:5208:5: note: template<class _RealType> bool std::operator!=(const std::extreme_value_distribution<_RealType>&, const std::extreme_value_distribution<_RealType>&)
+     operator!=(const std::extreme_value_distribution<_RealType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:5208:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::extreme_value_distribution<_RealType>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:5468:5: note: template<class _IntType> bool std::operator!=(const std::discrete_distribution<_IntType>&, const std::discrete_distribution<_IntType>&)
+     operator!=(const std::discrete_distribution<_IntType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:5468:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::discrete_distribution<_IntType>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:5735:5: note: template<class _RealType> bool std::operator!=(const std::piecewise_constant_distribution<_RealType>&, const std::piecewise_constant_distribution<_RealType>&)
+     operator!=(const std::piecewise_constant_distribution<_RealType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:5735:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::piecewise_constant_distribution<_RealType>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/random:50:0,
+                 from votingModel.h:6,
+                 from votingModelCPI.cc:8:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:6005:5: note: template<class _RealType> bool std::operator!=(const std::piecewise_linear_distribution<_RealType>&, const std::piecewise_linear_distribution<_RealType>&)
+     operator!=(const std::piecewise_linear_distribution<_RealType>& __d1,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/random.h:6005:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const std::piecewise_linear_distribution<_RealType>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/x86_64-unknown-linux-gnu/bits/c++allocator.h:33:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/allocator.h:46,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/string:41,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/locale_classes.h:40,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/ios_base.h:41,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:42,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/ext/new_allocator.h:144:5: note: template<class _Tp> bool __gnu_cxx::operator!=(const __gnu_cxx::new_allocator<_Tp>&, const __gnu_cxx::new_allocator<_Tp>&)
+     operator!=(const new_allocator<_Tp>&, const new_allocator<_Tp>&)
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/ext/new_allocator.h:144:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   ‘std::vector<int>::const_iterator {aka __gnu_cxx::__normal_iterator<const int*, std::vector<int> >}’ is not derived from ‘const __gnu_cxx::new_allocator<_Tp>’
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_algobase.h:67:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/char_traits.h:39,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:40,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_iterator.h:823:5: note: template<class _Iterator, class _Container> bool __gnu_cxx::operator!=(const __gnu_cxx::__normal_iterator<_Iterator, _Container>&, const __gnu_cxx::__normal_iterator<_Iterator, _Container>&)
+     operator!=(const __normal_iterator<_Iterator, _Container>& __lhs,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_iterator.h:823:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   deduced conflicting types for parameter ‘_Iterator’ (‘const int*’ and ‘const double*’)
+       if(i != ((*v).end() - 1)) {
+                              ^
+In file included from /home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_algobase.h:67:0,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/bits/char_traits.h:39,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/ios:40,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/istream:38,
+                 from /home/oakridge/holiday/build/include/c++/4.8.1/fstream:38,
+                 from votingModelCPI.cc:4:
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_iterator.h:817:5: note: template<class _IteratorL, class _IteratorR, class _Container> bool __gnu_cxx::operator!=(const __gnu_cxx::__normal_iterator<_IteratorL, _Container>&, const __gnu_cxx::__normal_iterator<_IteratorR, _Container>&)
+     operator!=(const __normal_iterator<_IteratorL, _Container>& __lhs,
+     ^
+/home/oakridge/holiday/build/include/c++/4.8.1/bits/stl_iterator.h:817:5: note:   template argument deduction/substitution failed:
+votingModelCPI.cc:331:30: note:   deduced conflicting types for parameter ‘_Container’ (‘std::vector<int>’ and ‘std::vector<double>’)
+       if(i != ((*v).end() - 1)) {
+                              ^
+make: *** [votingModelCPI.o] Error 1

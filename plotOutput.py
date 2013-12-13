@@ -12,7 +12,7 @@ def get_data(filename, header_rows=1, **kwargs):
     data = np.genfromtxt(path_to_file, delimiter=",", skip_header=header_rows, **kwargs)
     return data, params
 
-def read_ids(filename, header_rows=1, **kwargs):
+def read_ids(filename, header_rows=1, conversion=int, **kwargs):
     path_to_file = os.path.realpath(filename)
     f = open(path_to_file, "r")
     params_str = ''
@@ -32,7 +32,7 @@ def read_ids(filename, header_rows=1, **kwargs):
         comma_loc = 0
         while comma_loc >= 0:
             comma_loc = myline.find(",")
-            ids[-1].append(int(myline[0:comma_loc]))
+            ids[-1].append(conversion(myline[0:comma_loc]))
             myline = myline[comma_loc+1:]
     return np.array(ids), params
 
@@ -190,6 +190,15 @@ def plot_single_conflicts(data, params, ax='', average=True):
         for j in range(nruns):
             ax.plot(data[j][0][:,0], data[j][0][:,2])
 
+def plot_phase_portrait(minorities, conflicts, params, avg=True, ax=''):
+    if not ax:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+    ax.set_xlabel('minorities')
+    ax.set_ylabel('conflicts')
+    ax.plot([np.average(minorities_slice) for minorities_slice in minorities], [np.average(conflict_slice) for conflict_slice in conflicts])
+    plt.show()
+
 if __name__=="__main__":
     import argparse
     parser = argparse.ArgumentParser()
@@ -198,6 +207,7 @@ if __name__=="__main__":
     parser.add_argument('-psc', '--plot-single-conflicts', action='store_true', default=False)
     parser.add_argument('-cpimf', '--plot-cpi-minority-fraction', action='store_true', default=False)
     parser.add_argument('-cpipp', '--plot-cpi-phase-portrait', action='store_true', default=False)
+    parser.add_argument('-ppp', '--plot-phase-portrait', action='store_true', default=False)
     parser.add_argument('-avg', '--average', action='store_true', default=False)
     args = parser.parse_args()
     #should have one of each file: CPIAdj_... and CPIOpns_...
@@ -255,17 +265,27 @@ if __name__=="__main__":
             elif 'ids' in filename:
                 ids_data, cpiparams = read_ids(filename)
         plot_timecourse(adj_data, opns_data, time_data, ids_data, cpiparams, folder, cvmp.get_minority_fraction, average=args.average)
-    if args.plot_cpi_phase_portrait:
+    if args.plot_phase_portrait:
         for filename in args.input_files:
             slash = filename.find('/')
             folder = filename[:slash+1]
-            if 'Adj' in filename:
-                adj_data, cpiparams = get_data(filename)
-            if 'Opns' in filename:
-                opns_data, cpiparams = get_data(filename)
-            elif 'Times' in filename:
-                time_data, params = get_data(filename)
-            elif 'ids' in filename:
-                ids_data, cpiparams = read_ids(filename)
-        plot_phase_portrait(adj_data, opns_data, time_data, ids_data, cpiparams, folder, cvmp.get_minority_fraction, cvmp.get_conflicts)
+            if 'Minorities' in filename:
+                minorities_data, cpiparams = read_ids(filename, conversion=float)
+            elif 'Conflicts' in filename:
+                conflicts_data, cpiparams = read_ids(filename, header_rows=0)
+        plot_phase_portrait(minorities_data, conflicts_data, cpiparams)
+        
+    # if args.plot_cpi_phase_portrait:
+    #     for filename in args.input_files:
+    #         slash = filename.find('/')
+    #         folder = filename[:slash+1]
+    #         if 'Adj' in filename:
+    #             adj_data, cpiparams = get_data(filename)
+    #         if 'Opns' in filename:
+    #             opns_data, cpiparams = get_data(filename)
+    #         elif 'Times' in filename:
+    #             time_data, params = get_data(filename)
+    #         elif 'ids' in filename:
+    #             ids_data, cpiparams = read_ids(filename)
+    #     plot_phase_portrait(adj_data, opns_data, time_data, ids_data, cpiparams, folder, cvmp.get_minority_fraction, cvmp.get_conflicts)
     plt.show()

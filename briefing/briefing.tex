@@ -1,6 +1,7 @@
 \documentclass[11pt]{article}
 \usepackage{graphicx, subfig}
 \usepackage[top=1in, bottom=1in, left=1in, right=1in]{geometry}
+\graphicspath{ {./figs/} }
 \pagestyle{plain}
 \begin{document}
 \title{\vspace{-5mm}Voting Model and Edge Reconnecting Model CPI}
@@ -30,7 +31,15 @@
 
 \begin{figure}
   \centering
-  \includegraphics[height=65mm]{vmCPISlow}
+  \subfloat[Evolved $1000$ steps, projected $200$.]{
+    \includegraphics[height=65mm]{vmCPISlow1}
+    \label{fig:vmSlow1}
+  }
+  \hspace{3mm}
+  \subfloat[Evolved $1000$ steps, projected $200$.]{
+    \includegraphics[height=65mm]{vmCPISlow2}
+    \label{fig:vmSlow2}
+  }
   \caption{First CPI method in which finished runs in the ensemble are entirely removed from the simulation. This causes slower convergence.}
   \label{fig:vmSlow}
 \end{figure}
@@ -53,22 +62,22 @@
 \begin{figure}
   \centering
   \includegraphics[height=65mm]{vmCPIPP}
-  \caption{Phase portrait calculated with CPI.
-  \label{fig:vmSlow}
+  \caption{Phase portrait calculated with CPI, evolved $15,000$ steps, projected $10,000$.}
+  \label{fig:vmPP}
 \end{figure}
 
 \section*{Edge reconnecting model}
 
 \begin{figure}
   \centering
-  \includegraphics[height=65mm]{erTimescaleFast}
+  \includegraphics[height=65mm]{erQuadraticTimescale}
   \caption{Attempt to visualize the fast, $n^{2}$, timescale, on which the degree distribution is expected to remain constant.}
   \label{fig:erFast}
 \end{figure}
 
 \begin{figure}
   \centering
-  \includegraphics[height=65mm]{erTimescalesSlow}
+  \includegraphics[height=65mm]{erCubicTimescale}
   \caption{Attempt to visualize the slower, $n^{3}$, timescale, on which the degree distribution should evolves to a steady state.}
   \label{fig:erSlow}
 \end{figure}
@@ -76,7 +85,7 @@
 \begin{figure}
   \centering
   \includegraphics[height=65mm]{erRecon}
-  \caption{Reconstructin of adjacency matrix using the leading eigenvector and eigenvalue.}
+  \caption{Reconstruction of adjacency matrix using the leading eigenvector and eigenvalue.}
   \label{fig:erRecon}
 \end{figure}
 
@@ -89,7 +98,7 @@
 
 \begin{figure}
   \centering
-  \includegraphics[height=65mm{erCoeffEvol}
+  \includegraphics[height=65mm]{erCoeffEvol}
   \caption{Evolution of projected coefficients.}
   \label{fig:erEvol}
 \end{figure}

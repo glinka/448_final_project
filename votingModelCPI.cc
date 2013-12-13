@@ -90,13 +90,20 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
   string idsFilename = ss.str();
   ofstream cpiIdsData;
   cpiIdsData.open(idsFilename);
+  ss.str("");
+  ss << dir << "CPIMinorities_" << file_name << ".csv";
+  string minsFilename = ss.str();
+  ofstream cpiMinsData;
+  cpiMinsData.open(minsFilename);
   cpiAdjData << file_header << endl;
   cpiOpnsData << file_header << endl;
   cpiTimesData << file_header << endl;
   cpiIdsData << file_header << endl;
+  cpiMinsData << file_header << endl;
   //initialize space for each vm's time-courses, all will share the same time vector
   vect times_to_save;
   vector< vect > ids_to_save;
+  vector< vector<double> > mins_to_save;
   vector<vmMatrices> adj_to_save;
   vector<vmVects> opns_to_save;
   vector< vect > conflicts_to_save;
@@ -126,11 +133,13 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
       adj_to_save.push_back(vector<matrix>());
       opns_to_save.push_back(vector<vect>());
       ids_to_save.push_back(vector<int>());
+      mins_to_save.push_back(vector<double>());
       conflicts_to_save.push_back(vector<int>());
       for(vmIt vm = vms.begin(); vm != vms.end(); vm++) {
 	adj_to_save.back().push_back(vm->getAdjMatrix());
 	opns_to_save.back().push_back(vm->getOpns());
 	ids_to_save.back().push_back(vm->get_id());
+	mins_to_save.back().push_back(vm->getMinorityFraction());
 	conflicts_to_save.back().push_back(vm->getConflicts());
       }
       times_to_save.push_back(step);
@@ -140,11 +149,13 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
 	this->saveData(opns_to_save, cpiOpnsData);
 	this->saveData(times_to_save, cpiTimesData);
 	this->saveData(ids_to_save, cpiIdsData);
+	this->saveData(mins_to_save, cpiMinsData);
 	this->saveData(conflicts_to_save, cpiConflictsData);
 	cpiAdjData.close();
 	cpiOpnsData.close();
 	cpiTimesData.close();
 	cpiIdsData.close();
+	cpiMinsData.close();
 	cpiConflictsData.close();
 	return 0;
       }
@@ -202,11 +213,13 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
 	this->saveData(opns_to_save, cpiOpnsData);
 	this->saveData(times_to_save, cpiTimesData);
 	this->saveData(ids_to_save, cpiIdsData);
+	this->saveData(mins_to_save, cpiMinsData);
 	this->saveData(conflicts_to_save, cpiConflictsData);
 	adj_to_save.clear();
 	opns_to_save.clear();
 	times_to_save.clear();
 	ids_to_save.clear();
+	mins_to_save.clear();
 	conflicts_to_save.clear();
 	adjMatrices.clear();
 	opns.clear();
@@ -220,12 +233,14 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
   this->saveData(opns_to_save, cpiOpnsData);
   this->saveData(times_to_save, cpiTimesData);
   this->saveData(ids_to_save, cpiIdsData);
+  this->saveData(mins_to_save, cpiMinsData);
   this->saveData(conflicts_to_save, cpiConflictsData);
   cpiAdjData.close();
   cpiOpnsData.close();
   cpiTimesData.close();
   cpiIdsData.close();
   cpiConflictsData.close();
+  cpiMinsData.close();
   return 0;
 }
 
@@ -295,6 +310,22 @@ void votingModelCPI::saveData(const vect &data, ofstream &fileHandle) {
 void votingModelCPI::saveData(const vector< vect > &data, ofstream &fileHandle) {
   for(vector< vect >::const_iterator v = data.begin(); v != data.end(); v++) {
     for(vect::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
+      fileHandle << *i;
+      //add comma if not last element
+      if(i != ((*v).end() - 1)) {
+	fileHandle << ",";
+      }
+    }
+    //don't add newline if content wasn't added
+    if(!(*v).empty()) {
+      fileHandle << endl;
+    }
+  }
+}
+
+void votingModelCPI::saveData(const vector< vector<double> > &data, ofstream &fileHandle) {
+  for(vector< vector<double> >::const_iterator v = data.begin(); v != data.end(); v++) {
+    for(vector< double >::const_iterator i = (*v).begin(); i != (*v).end(); i++) {
       fileHandle << *i;
       //add comma if not last element
       if(i != ((*v).end() - 1)) {
