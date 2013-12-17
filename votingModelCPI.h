@@ -15,13 +15,17 @@ class votingModelCPI {
   std::vector<votingModel> vms;
   const int waitingPeriod, collectionInterval, nMicroSteps;
   vect times;
-  std::vector<vmVects > opns;
+  std::vector<vmVects > cpi_opns;
   std::vector<vmMatrices > adjMatrices;
+  std::vector< vect > cpi_conflicts;
+  std::vector< std::vector< double > > cpi_minorities;
   std::string file_header, file_name;
   template <typename T>
     double project(const vect &times, const std::vector<T> &data, const int proj_step);
   template <typename T>
     double average(const std::vector<T> &data);
+  template <typename T>
+    std::vector< T > easy_average(const std::vector< std::vector< T > > &data);
   vect average(const std::vector<vect> &data);
   vmVects average(const std::vector<vmVects> &data);
   vmMatrices average(const std::vector<vmMatrices> &data);

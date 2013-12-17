@@ -13,7 +13,6 @@ int main(int argc, char *argv[]) {
   string rewireTo = "random";
   int n = 200;
   long int maxIter = 5*n*n;
-  int collectionInterval;
   double a = 0.5;
   int k = 2;
   double *initDist = new double[2];
@@ -21,6 +20,7 @@ int main(int argc, char *argv[]) {
   double projectionStep = n;
   int save_interval = 1000;
   int nMS = n;
+  int collectionInterval = nMS/10;
   initDist[0] = 0.5;
   initDist[1] = 0.5;
   int nruns = 64;
@@ -80,9 +80,11 @@ int main(int argc, char *argv[]) {
 	project = true;
 	waitingPeriod = atoi(currentArg);
       }
+      else {
+	cout << currentLabel << " -- flag not recognized" << endl;
+      }
     }
   }
-  collectionInterval = nMS/10;
   stringstream ss;
   ss << "n=" << n;
   ss << ",nVms=" << nVMS;
@@ -102,12 +104,11 @@ int main(int argc, char *argv[]) {
   **/
   string file_header = ss.str();
   ss.str("");
-  ss << "n_" << n;
   ss << "_nvms_" << nVMS;
-  ss << "_alpha_" << a;
+  ss << "n_" << n;
   ss << "_nsteps_" << maxIter;
+  ss << "_nms_" << nMS;
   ss << "_projstep_" << projectionStep;
-  ss << "_rewireto_" << rewireTo;
   string file_name = ss.str();
   if(project) {
     vector<votingModel> vmV;

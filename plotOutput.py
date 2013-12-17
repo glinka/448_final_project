@@ -105,7 +105,7 @@ def plot_timecourse(adj_data, opns_data, time_data, ids_data, params, folder, sc
             ax.plot(time_data[:npoints], final_ydata[i])
 #    plt.show()
 
-def plot_conflicts(conflicts_data, time_data, ids_data, params, folder, average=False, ax=''):
+def plot_conflicts(conflicts_data, time_data, ids_data, params, folder='', average=False, ax=''):
     starting_nvms = params['nVms']
     n = params['n']
     n_data = time_data.shape[0]
@@ -141,6 +141,28 @@ def plot_conflicts(conflicts_data, time_data, ids_data, params, folder, average=
             npoints = len(final_ydata[i])
             ax.plot(time_data[:npoints], final_ydata[i])
     ax.legend()
+#    plt.show()
+
+def plot_minorities(minorities_data, time_data, params, folder='', average=True, ax=''):
+    #we'll assume we can simply import the minorities data w/ genfromtext
+    starting_nvms = params['nVms']
+    n = params['n']
+    n_data = time_data.shape[0]
+    ydata = {}
+    final_ydata = []
+    if average:
+        final_ydata = np.average(minorities_data, 1)
+    else:
+        final_ydata = np.array(minorities_data)
+    if not ax:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+    if average:
+        ax.plot(time_data, final_ydata, label='cpi')
+    else:
+        ax.hold(True)
+        for i in range(starting_nvms):
+            ax.plot(time_data[:], final_ydata[:,i])
 #    plt.show()
 
 def plot_single_conflicts(data, params, ax='', average=True):
@@ -190,6 +212,53 @@ def plot_single_conflicts(data, params, ax='', average=True):
         for j in range(nruns):
             ax.plot(data[j][0][:,0], data[j][0][:,2])
 
+def plot_single_minorities(data, params, ax='', average=True):
+    # textsize = 22
+    # ax1 = fig.add_subplot(211)
+    # ax1.set_ylabel('Minority fraction', fontsize=textsize)
+    # plt.tick_params(axis='both', which='major', labelsize=18)
+    # ax1.set_ylim((0,0.5))
+    # ax1.set_yticks([(x+1)/10.0 for x in range(5)])
+    # ax2 = fig.add_subplot(212, sharex=ax1)
+    # ax2.set_ylabel('Conflicts', fontsize=textsize)
+    # ax2.set_ylim((0,400))
+    # ax2.set_yticks([(x+1)*100 for x in range(4)])
+    # ax2.set_xlabel('Simulation step', fontsize=textsize)
+    # plt.tick_params(axis='both', which='major', labelsize=18)
+    # n = 1.0*params['n']
+    # ax1.plot(data[:,0], data[:,1]/n)
+    # ax2.plot(data[:,0], data[:,2])
+    # plt.show()
+    toplot = []
+    nruns = len(data)
+    maxiter = np.max([data[j][0].shape[0] for j in range(nruns)])
+    maxstep = int(np.max([data[j][0][-1,0] for j in range(nruns)]))
+    runlengths = []
+    for i in range(nruns):
+        runlengths.append(data[i][0].shape[0])
+    if not ax:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+    textsize = 22
+    plt.tick_params(axis='both', which='major', labelsize=18)
+    plt.xticks(rotation=20)
+    ax.set_xlabel('simulation step', fontsize=textsize)
+    ax.set_ylabel('minorities', fontsize=textsize)
+    n = 1.0*params['n']
+    if average:
+        for i in range(maxiter):
+            to_average = []
+            for j in range(nruns):
+                if runlengths[j] > i:
+                    to_average.append(data[j][0][i,1]/n)
+                else:
+                    to_average.append(data[j][0][-1,1]/n)
+            toplot.append(np.average(to_average))
+        ax.plot(np.linspace(0, maxstep, maxiter), toplot, label='averaged direct simulations')
+    else:
+        for j in range(nruns):
+            ax.plot(data[j][0][:,0], data[j][0][:,1])
+
 def plot_phase_portrait(minorities, conflicts, params, avg=True, ax=''):
     if not ax:
         fig = plt.figure()
@@ -205,6 +274,8 @@ if __name__=="__main__":
     parser.add_argument('input_files', nargs='+')
     parser.add_argument('-cpic', '--plot-cpi-conflicts', action='store_true', default=False)
     parser.add_argument('-psc', '--plot-single-conflicts', action='store_true', default=False)
+    parser.add_argument('-cpim', '--cpi-minorities', action='store_true', default=False)
+    parser.add_argument('-sm', '---single-minorities', action='store_true', default=False)
     parser.add_argument('-cpimf', '--plot-cpi-minority-fraction', action='store_true', default=False)
     parser.add_argument('-cpipp', '--plot-cpi-phase-portrait', action='store_true', default=False)
     parser.add_argument('-ppp', '--plot-phase-portrait', action='store_true', default=False)
@@ -274,8 +345,23 @@ if __name__=="__main__":
             elif 'Conflicts' in filename:
                 conflicts_data, cpiparams = read_ids(filename, header_rows=0)
         plot_phase_portrait(minorities_data, conflicts_data, cpiparams)
+    if args.cpi_minorities:
+        for filename in args.input_files:
+            slash = filename.find('/')
+            folder = filename[:slash+1]
+            if 'Minorities' in filename:
+                minorities_data, cpiparams = get_data(filename)
+            elif 'Times' in filename:
+                times_data, cpiparams = get_data(filename)
+        plot_minorities(minorities_data, times_data, cpiparams, ax=myax)
+    if args.single_minorities:
+        for filename in args.input_files:
+            if "graphstats" in filename:
+                graphdata.append(get_data(filename))
+        params = graphdata[0][1]
+        plot_single_minorities(graphdata, params, ax=myax, average=args.average)
         
-    # if args.plot_cpi_phase_portrait:
+# if args.plot_cpi_phase_portrait:
     #     for filename in args.input_files:
     #         slash = filename.find('/')
     #         folder = filename[:slash+1]
@@ -288,4 +374,5 @@ if __name__=="__main__":
     #         elif 'ids' in filename:
     #             ids_data, cpiparams = read_ids(filename)
     #     plot_phase_portrait(adj_data, opns_data, time_data, ids_data, cpiparams, folder, cvmp.get_minority_fraction, cvmp.get_conflicts)
+    myax.legend()
     plt.show()

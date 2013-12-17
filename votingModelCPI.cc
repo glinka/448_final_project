@@ -50,7 +50,7 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
   //open all the files
   stringstream ss;
   int folder_counter = 0;
-  string dir_base = "./csv_data_slow";
+  string dir_base = "./csv_data_fast";
   string dir;
   bool isdir = true;
   struct stat stat_dir;
@@ -104,7 +104,8 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
   vect times_to_save;
   vector< vect > ids_to_save;
   vector< vector<double> > mins_to_save;
-  vector<vmMatrices> adj_to_save;
+  //far too large a file, don't save for now. would be nice to have a non-commented out way of adjusting what was saved
+  //  vector<vmMatrices> // adj_to_save;
   vector<vmVects> opns_to_save;
   vector< vect > conflicts_to_save;
   int nCompletedVMs = 0;
@@ -124,28 +125,28 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
 	finishedVMs++;
       }
     }
-    nCompletedVMs += finishedVMs;
+    //    nCompletedVMs += finishedVMs;
     step++;
     microStepCount++;
     //collect data to save every save_data_interval steps, and also at the 
     //beginning of each projection iteration and end of simulation
     if(microStepCount % save_data_interval == 0 || microStepCount == 1 || finishedVMs == nvms) {
-      adj_to_save.push_back(vector<matrix>());
+      // adj_to_save.push_back(vector<matrix>());
       opns_to_save.push_back(vector<vect>());
       ids_to_save.push_back(vector<int>());
       mins_to_save.push_back(vector<double>());
       conflicts_to_save.push_back(vector<int>());
       for(vmIt vm = vms.begin(); vm != vms.end(); vm++) {
-	adj_to_save.back().push_back(vm->getAdjMatrix());
+	// adj_to_save.back().push_back(vm->getAdjMatrix());
 	opns_to_save.back().push_back(vm->getOpns());
 	ids_to_save.back().push_back(vm->get_id());
 	mins_to_save.back().push_back(vm->getMinorityFraction());
 	conflicts_to_save.back().push_back(vm->getConflicts());
       }
       times_to_save.push_back(step);
-      if(nCompletedVMs == nvms) {
-      //      if(finishedVMs == nvms) {
-	this->saveData(adj_to_save, cpiAdjData);
+      //      if(nCompletedVMs == nvms) {
+      if(finishedVMs == nvms) {
+	//	this->saveData(// adj_to_save, cpiAdjData);
 	this->saveData(opns_to_save, cpiOpnsData);
 	this->saveData(times_to_save, cpiTimesData);
 	this->saveData(ids_to_save, cpiIdsData);
@@ -163,29 +164,35 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
     //******************************
     //faster to check if size > 0 ?
     //******************************
-
+    /**
     if(to_delete.size() > 0) {
       for(vector< vmIt >::const_iterator vm = to_delete.begin(); vm != to_delete.end(); vm++) {
 	vms.erase(*vm);
       }
       to_delete.clear();
     }
-
+    **/
     if(microStepCount > waitingPeriod) {
       int onManifoldStep = microStepCount - waitingPeriod;
       if(onManifoldStep % collectionInterval == 0) {
-	adjMatrices.push_back(vector<matrix>());
-	opns.push_back(vector<vect>());
+	//	adjMatrices.push_back(vector<matrix>());
+	//	cpi_opns.push_back(vector<vect>());
+	cpi_conflicts.push_back(vector<int>());
+	cpi_minorities.push_back(vector<double>());
 	for(vmIt vm = vms.begin(); vm != vms.end(); vm++) {
-	  adjMatrices.back().push_back(vm->getAdjMatrix());
-	  opns.back().push_back(vm->getOpns());
+	  //	  adjMatrices.back().push_back(vm->getAdjMatrix());
+	  //	  cpi_opns.back().push_back(vm->getOpns());
+	  cpi_conflicts.back().push_back(vm->getConflicts());
+	  cpi_minorities.back().push_back(vm->getMinorityFraction());
 	}
 	times.push_back(onManifoldStep);
       }
       if(microStepCount == nMicroSteps) {
 	//just project the minority fraction you fool
-	vector<double> minorityFracsTC = findAvgdMinorityFractions(opns);
-	vect conflictsTC = findAvgdConflicts(adjMatrices, opns);
+	//	vector<double> minorityFracsTC = findAvgdMinorityFractions(cpi_opns);
+	//	vect conflictsTC = findAvgdConflicts(adjMatrices, cpi_opns);
+	vector< double > minorityFracsTC = easy_average<double>(cpi_minorities);
+	vector< int > conflictsTC = easy_average<int>(cpi_conflicts);
 	double newMinorityFrac = project<double>(times, minorityFracsTC, proj_step);
 	//hard coded for two opinions
 	int newConflicts = (int) (project<int>(times, conflictsTC, proj_step) + 0.5);
@@ -193,8 +200,10 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
 	int nattempts = 0;
 	while((newConflicts <= 0 || newMinorityFrac <= 0) && (nattempts < MAX_PROJECTION_ATTEMPTS)) {
 	  temp_proj_step /= 2;
-	  minorityFracsTC = findAvgdMinorityFractions(opns);
-	  conflictsTC = findAvgdConflicts(adjMatrices, opns);
+	  minorityFracsTC = easy_average<double>(cpi_minorities);
+	  conflictsTC = easy_average<int>(cpi_conflicts);
+	  //	  minorityFracsTC = findAvgdMinorityFractions(cpi_opns);
+	  //	  conflictsTC = findAvgdConflicts(adjMatrices, cpi_opns);
 	  newMinorityFrac = project<double>(times, minorityFracsTC, temp_proj_step);
 	  newConflicts = (int) (project<int>(times, conflictsTC, temp_proj_step) + 0.5);
 	  nattempts++;
@@ -209,27 +218,27 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
 	    vm->initGraph(newDist, newConflicts);
 	  }
 	}
-	this->saveData(adj_to_save, cpiAdjData);
+//	this->saveData(// adj_to_save, cpiAdjData);
 	this->saveData(opns_to_save, cpiOpnsData);
 	this->saveData(times_to_save, cpiTimesData);
 	this->saveData(ids_to_save, cpiIdsData);
 	this->saveData(mins_to_save, cpiMinsData);
 	this->saveData(conflicts_to_save, cpiConflictsData);
-	adj_to_save.clear();
+	// adj_to_save.clear();
 	opns_to_save.clear();
 	times_to_save.clear();
 	ids_to_save.clear();
 	mins_to_save.clear();
 	conflicts_to_save.clear();
 	adjMatrices.clear();
-	opns.clear();
+	cpi_opns.clear();
 	times.clear();
 	microStepCount = 0;
 	step += proj_step;
       }
     }
   }
-  this->saveData(adj_to_save, cpiAdjData);
+    //  this->saveData(// adj_to_save, cpiAdjData);
   this->saveData(opns_to_save, cpiOpnsData);
   this->saveData(times_to_save, cpiTimesData);
   this->saveData(ids_to_save, cpiIdsData);
@@ -255,6 +264,18 @@ double votingModelCPI::average(const vector<T> &data) {
 }
 template double votingModelCPI::average<int>(const vector<int> &data);
 template double votingModelCPI::average<double>(const vector<double> &data);
+
+template <typename T>
+vector< T > votingModelCPI::easy_average(const vector< vector< T > > &data) {
+  vector < T > avgs;
+  typedef typename vector < vector< T > >::const_iterator it;
+  for(it v = data.begin(); v != data.end(); v++) {
+    avgs.push_back(average(*v));
+  }
+  return avgs;
+}
+template vector< int > votingModelCPI::easy_average<int>(const vector< vector< int > > &data);
+template vector< double > votingModelCPI::easy_average<double>(const vector< vector< double > > &data);
 
 vect votingModelCPI::average(const vector<vect> &data) {
   vect avgdData;
