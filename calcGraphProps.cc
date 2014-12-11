@@ -6,6 +6,36 @@
 using namespace std;
 using namespace Eigen;
 
+int calcGraphProps::getTriangles(int **A, int *opns, const int n) {
+  int i, j, deg;
+  Matrix<double, Dynamic, Dynamic> conflicts(n,n);
+  Matrix<double, Dynamic, Dynamic> agreements(n,n);
+  Matrix<double, Dynamic, Dynamic> tris(n,n);
+  for(i = 0; i < n; i++) {
+    for(j = 0; j < n; j++) {
+      if(opns[i] != opns[j]) {
+	conflicts(i,j) = A[i][j];
+	agreements(i,j) = 0;
+      }
+      else {
+	agreements(i,j) = A[i][j];
+	conflicts(i,j) = 0;
+      }
+    }
+  }
+  tris = conflicts*agreements*conflicts;
+  return tris.trace()/6;
+}
+
+int calcGraphProps::get_conflict_cherries(const int* conflicts, const int total_conflicts, const int n) {
+  int c_squared_sum = 0;
+  for(int i = 0; i < n; i++) {
+    c_squared_sum += conflicts[i]*conflicts[i];
+  }
+  return (c_squared_sum + 2*total_conflicts)/2;
+}
+
+
 int *calcGraphProps::getDegrees(int **A, const int n) {
   int i, j;
   int *degs = new int[n];

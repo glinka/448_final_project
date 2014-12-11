@@ -1,0 +1,76 @@
+\documentclass[11pt]{article}
+\renewcommand\thesubsection{\thesection.\alph{subsection}}
+\usepackage{graphicx, subcaption, amsfonts, amsmath, amsthm, empheq}
+%% some new commands I have no idea how they work
+\newcommand*\widefbox[1]{\fbox{\hspace{2em}#1\hspace{2em}}}
+\newlength\dlf
+\newcommand\alignedbox[2]{
+  % Argument #1 = before & if there were no box (lhs)
+  % Argument #2 = after & if there were no box (rhs)
+  &  % Alignment sign of the line
+  {
+    \settowidth\dlf{$\displaystyle #1$}  
+    % The width of \dlf is the width of the lhs, with a displaystyle font
+    \addtolength\dlf{\fboxsep+\fboxrule}  
+    % Add to it the distance to the box, and the width of the line of the box
+    \hspace{-\dlf}  
+    % Move everything dlf units to the left, so that & #1 #2 is aligned under #1 & #2
+    \boxed{#1 #2}
+    % Put a box around lhs and rhs
+  }
+}
+%% end new commands I have no idea how they work
+%% \captionsetup{labelformat=empty,labelsep=none}
+\usepackage[top=0.8in, bottom=0.8in, left=1in, right=1in]{geometry}
+\setlength\parindent{0pt}
+\graphicspath{ {./figs/} }
+\pagestyle{plain}
+\begin{document}
+\title{\vspace{-10mm}Voting model coarse-projective integration}
+\author{Alexander Holiday}
+\date{}
+\maketitle
+
+\section{CPI overview}
+
+Based on Prof. Mucha's PNAS paper and further numerical simulations, the minority fraction was determined to be a good coarse variable for describing the state of the voting model. CPI was then implemented as follows
+
+\begin{enumerate}
+\item Run the full voting model for $t_0$ steps, until the system has approached the slow manifold (parabola in Fig. (\ref{fig:pp})).
+\item Begin recording the minority fraction and number of conflicts every $t_c$ steps until a total of $k$ minority fractions have been collected. A total of $t_{micro} = t_0 + k t_c$ steps will have been taken at this time.
+\item Fit the evolution of these $k$ values to a polynomial, and extrapolate to some new time $t_{new} = t_{micro} + t_{project}$.
+\item Create a new voting model consistent with the new, projected values of conflicts and minority fractions (see Section (\ref{sec:lift}) below for further details).
+\item Repeat from (1) until the desired number of steps have been achieved.
+\end{enumerate}
+
+See Figs. (2) and (3) for results.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=.8\linewidth]{phase_plot}
+  \caption{Voting model phase plot}
+  \label{fig:pp}
+\end{figure}
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=.8\linewidth]{vm_cpi_minorities}
+  \caption{Evolution of minority fraction in simulation with CPI.}
+  \label{fig:graphA}
+\end{figure}
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=.8\linewidth]{vm_cpi_conflicts}
+  \caption{Evolution of conflicts in simulation with CPI.}
+\end{figure}
+
+\pagebreak
+
+\subsection{Lifting}
+\label{sec:lift}
+If we lifted solely with the minority fraction, we could simply assign the first $k$ vertices to be opinion one, and the rest opinion two, so that $\frac{k}{n}$ is our desired minority fraction. Then, as the number of edges, $m$, remains constant through the simulation, we would generate an Erd\H{o}s-R\'{e}nyi random graph with $m$ edges on our vertices as the new initial point.  \\
+
+However, while this works, the initial transients are reduced by also specifying the conflicts; thus we lifted with both minority fraction and conflicts. The lifting is similar in that we again assign the first $k$ vertices to be opinion one, and the rest opinion two. Now, however, since the probability of an edge being ``in conflict'' is $\frac{\textrm{number of conflicts}}{m}$, every time we place an edge we can simply draw a random number, and with probablity $\frac{\textrm{number of conflicts}}{m}$ randomly assign a conflicting edge (otherwise assign a non-conflicting edge). The resulting number of conflicts in the new initial state will vary only slightly from what we would like, and the number of edges is still conserved as required.
+
+\end{document}

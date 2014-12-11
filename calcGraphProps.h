@@ -6,6 +6,8 @@ class calcGraphProps {
   calcGraphProps() {};
   ~calcGraphProps() {};
  public:
+  static int getTriangles(int **A, int *opns, const int n);
+  static int get_conflict_cherries(const int *conflicts, const int total_conflicts, const int n);
   static int *getDegrees(int **A, const int n);
   static double *getAdjEigVals(int **A, const int n);
   static double **getAdjEigVects(int **A, const int n);

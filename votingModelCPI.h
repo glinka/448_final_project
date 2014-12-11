@@ -24,8 +24,7 @@ class votingModelCPI {
     double project(const vect &times, const std::vector<T> &data, const int proj_step);
   template <typename T>
     double average(const std::vector<T> &data);
-  template <typename T>
-    std::vector< T > easy_average(const std::vector< std::vector< T > > &data);
+  std::vector<double> average_mf(const std::vector< std::vector<double> > &data);
   vect average(const std::vector<vect> &data);
   vmVects average(const std::vector<vmVects> &data);
   vmMatrices average(const std::vector<vmMatrices> &data);
@@ -39,6 +38,9 @@ class votingModelCPI {
   double getMinorityFrac(const vect &opns);
   int getConflicts(const matrix &A, const vect &opns);
  public:
+  //MOVE EASY_AVERAGE TO PRIVATE
+  template <typename T>
+    std::vector< T > easy_average(const std::vector< std::vector< T > > &data);
   votingModelCPI(std::vector<votingModel> vms, int waitingPeriod, int collectionInterval, int nMicroSteps, std::string file_header, std::string file_name);
   ~votingModelCPI() {};
   int run(long int nSteps, int proj_step, int save_data_interval=100);

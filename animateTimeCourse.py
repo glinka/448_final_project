@@ -1,5 +1,5 @@
 import argparse
-#necessary to import os? argparse imports it itself
+# necessary to import os? argparse imports it itself
 import os
 import numpy as np
 import matplotlib

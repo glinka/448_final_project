@@ -109,6 +109,8 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
   vector<vmVects> opns_to_save;
   vector< vect > conflicts_to_save;
   int nCompletedVMs = 0;
+  int init_waiting_period = 25000;
+  bool first_projection = true;
   for(vmIt vm = vms.begin(); vm != vms.end(); vm++) {
     vm->initGraph();
   }
@@ -172,8 +174,16 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
       to_delete.clear();
     }
     **/
-    if(microStepCount > waitingPeriod) {
-      int onManifoldStep = microStepCount - waitingPeriod;
+    if((microStepCount > waitingPeriod) && (microStepCount > init_waiting_period)) {
+      int onManifoldStep = 1;
+      if(first_projection) {
+	microStepCount = 0;
+	init_waiting_period = 0;
+	first_projection = false;
+      }
+      else {
+	onManifoldStep = microStepCount - waitingPeriod;
+      }
       if(onManifoldStep % collectionInterval == 0) {
 	//	adjMatrices.push_back(vector<matrix>());
 	//	cpi_opns.push_back(vector<vect>());
@@ -185,38 +195,38 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
 	  cpi_conflicts.back().push_back(vm->getConflicts());
 	  cpi_minorities.back().push_back(vm->getMinorityFraction());
 	}
-	times.push_back(onManifoldStep);
+	times.push_back(step);
       }
       if(microStepCount == nMicroSteps) {
 	//just project the minority fraction you fool
 	//	vector<double> minorityFracsTC = findAvgdMinorityFractions(cpi_opns);
 	//	vect conflictsTC = findAvgdConflicts(adjMatrices, cpi_opns);
-	vector< double > minorityFracsTC = easy_average<double>(cpi_minorities);
+	vector<double> minorityFracsTC = average_mf(cpi_minorities);
 	vector< int > conflictsTC = easy_average<int>(cpi_conflicts);
 	double newMinorityFrac = project<double>(times, minorityFracsTC, proj_step);
 	//hard coded for two opinions
 	int newConflicts = (int) (project<int>(times, conflictsTC, proj_step) + 0.5);
+	//	int newConflicts = conflictsTC.back();
 	int temp_proj_step = proj_step;
 	int nattempts = 0;
 	while((newConflicts <= 0 || newMinorityFrac <= 0) && (nattempts < MAX_PROJECTION_ATTEMPTS)) {
 	  temp_proj_step /= 2;
-	  minorityFracsTC = easy_average<double>(cpi_minorities);
-	  conflictsTC = easy_average<int>(cpi_conflicts);
 	  //	  minorityFracsTC = findAvgdMinorityFractions(cpi_opns);
 	  //	  conflictsTC = findAvgdConflicts(adjMatrices, cpi_opns);
 	  newMinorityFrac = project<double>(times, minorityFracsTC, temp_proj_step);
 	  newConflicts = (int) (project<int>(times, conflictsTC, temp_proj_step) + 0.5);
 	  nattempts++;
 	}
+	cout << nattempts << endl;
 	if(nattempts == MAX_PROJECTION_ATTEMPTS) {
 	  cout << "failed projection" << endl;
 	  return -1;
 	}
 	double newDist[2] = {newMinorityFrac, 1 - newMinorityFrac};
 	for(vmIt vm = vms.begin(); vm != vms.end(); vm++) {
-	  if(vm->getConflicts() > 0) {
+	  //	  if(vm->getConflicts() > 0) {
 	    vm->initGraph(newDist, newConflicts);
-	  }
+	    //	  }
 	}
 //	this->saveData(// adj_to_save, cpiAdjData);
 	this->saveData(opns_to_save, cpiOpnsData);
@@ -232,6 +242,8 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
 	conflicts_to_save.clear();
 	adjMatrices.clear();
 	cpi_opns.clear();
+	cpi_minorities.clear();
+	cpi_conflicts.clear();
 	times.clear();
 	microStepCount = 0;
 	step += proj_step;
@@ -253,6 +265,21 @@ int votingModelCPI::run(long int nSteps, int proj_step, int save_data_interval) 
   return 0;
 }
 
+
+vector<double> votingModelCPI::average_mf(const vector< vector<double> > &data) {
+  vector<double> avgs;
+  for(vector< vector<double> >::const_iterator v = data.begin(); v != data.end(); v++) {
+    double n = 0.;
+    double sum = 0.;
+    for(vector<double>::const_iterator val = (*v).begin(); val != (*v).end(); val++) {
+      n++;
+      sum += (*val);
+    }
+    avgs.push_back(sum/n);
+  }
+  return avgs;
+}
+
 template <typename T>
 double votingModelCPI::average(const vector<T> &data) {
   T sum = 0;
@@ -262,15 +289,13 @@ double votingModelCPI::average(const vector<T> &data) {
   }
   return 1.0*sum/data.size();
 }
-template double votingModelCPI::average<int>(const vector<int> &data);
-template double votingModelCPI::average<double>(const vector<double> &data);
 
 template <typename T>
 vector< T > votingModelCPI::easy_average(const vector< vector< T > > &data) {
   vector < T > avgs;
   typedef typename vector < vector< T > >::const_iterator it;
   for(it v = data.begin(); v != data.end(); v++) {
-    avgs.push_back(average(*v));
+    avgs.push_back(average<T>(*v));
   }
   return avgs;
 }
@@ -462,17 +487,26 @@ int votingModelCPI::getConflicts(const matrix &A, const vect &opns) {
 template <typename T>
 double votingModelCPI::project(const vect &times, const vector<T> &data, const int proj_step) {
   fxs linearFit;
-  linearFit.push_back([] (double x) {return 1.0;});
   linearFit.push_back([] (double x) {return x;});
+  linearFit.push_back([] (double x) {return 1.0;});
   vector<double> doubleTimes(times.begin(), times.end());
+  //shift to 0
+  double max_time = doubleTimes.back();
+  /*
+  for(vector<double>::iterator t = doubleTimes.begin(); t != doubleTimes.end(); t++) {
+    (*t) -= max_time;
+  } 
+  */
   vector<double> doubleData(data.begin(), data.end());
   vector<double> coeffs = fitCurves::fitFx(doubleTimes, doubleData, linearFit);
   double newVal = 0;
   vector<double>::iterator coeff = coeffs.begin();
   for(fxs::iterator f = linearFit.begin(); f != linearFit.end(); f++) {
+    cout << (*coeff) << endl;
     newVal += (*coeff)*((*f)(times.back() + proj_step));
     coeff++;
   }
+  cout << newVal << endl;
   return newVal;
 }
 template double votingModelCPI::project<int>(const vect &times, const vector<int> &data, const int proj_step);

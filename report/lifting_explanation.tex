@@ -1,0 +1,38 @@
+\documentclass[11pt]{article}
+\renewcommand\thesubsection{\thesection.\alph{subsection}}
+\usepackage{graphicx, subcaption, amsfonts, amsmath, amsthm, empheq}
+%% some new commands I have no idea how they work
+\newcommand*\widefbox[1]{\fbox{\hspace{2em}#1\hspace{2em}}}
+\newlength\dlf
+\newcommand\alignedbox[2]{
+  % Argument #1 = before & if there were no box (lhs)
+  % Argument #2 = after & if there were no box (rhs)
+  &  % Alignment sign of the line
+  {
+    \settowidth\dlf{$\displaystyle #1$}  
+    % The width of \dlf is the width of the lhs, with a displaystyle font
+    \addtolength\dlf{\fboxsep+\fboxrule}  
+    % Add to it the distance to the box, and the width of the line of the box
+    \hspace{-\dlf}  
+    % Move everything dlf units to the left, so that & #1 #2 is aligned under #1 & #2
+    \boxed{#1 #2}
+    % Put a box around lhs and rhs
+  }
+}
+%% end new commands I have no idea how they work
+\captionsetup{labelformat=empty,labelsep=none}
+\usepackage[top=0.8in, bottom=0.8in, left=1in, right=1in]{geometry}
+\setlength\parindent{0pt}
+\graphicspath{ {./figs/} }
+\pagestyle{plain}
+\begin{document}
+\title{\vspace{-10mm}Lifting in the voting model}
+\author{}
+\date{}
+\maketitle
+
+If we lifted solely with the minority fraction, we could simply assign the first $k$ vertices to be opinion one, and the rest opinion two, so that $\frac{k}{n}$ is our desired minority fraction. Then, as the number of edges, $m$, remains constant through the simulation, we would generate an Erd\H{o}s-R\'{e}nyi random graph with $m$ edges on our vertices as the new initial point.  \\
+
+However, while this works, the initial transients are reduced by also specifying the conflicts. Thus in the figures in your presentation, we lifted with both minority fraction and conflicts. The lifting is similar in that we again assign the first $k$ vertices to be opinion one, and the rest opinion two. Now, however, since the probability of an edge being ``in conflict'' is $\frac{\textrm{number of conflicts}}{m}$, every time we place an edge we can simply draw a random number, and with probablity $\frac{\textrm{number of conflicts}}{m}$ randomly assign a conflicting edge (otherwise assign a non-conflicting edge). The resulting number of conflicts in the new initial state will vary only slightly from what we would like, and the number of edges is still conserved as required.
+
+\end{document}

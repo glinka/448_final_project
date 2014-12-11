@@ -15,7 +15,7 @@ class votingModel {
   const double a, avgDeg;
   int id;
   static int id_tracker;
-  double *initDist;
+  const double *initDist;
   int *degs, *Opns, *opnCounts, *nConflicts;
   int **A;
   double rnNormalization;
@@ -24,17 +24,21 @@ class votingModel {
   std::string rewireTo, fileName;
   std::mt19937 *mt;
   double genURN();
+  void alter_opinions();
  public:
   int consistencyCheck();
-  int vote();
+  int vote(bool alter);
+  std::vector< std::vector<int> > run_nsteps(const int nsteps, bool& converged);
   void step();
   void initGraph();
+  std::vector<int> get_opns();
   void initGraph(double *dist, int conflicts);
   template <typename dataType>
     void saveData(const std::vector<dataType> data, std::ofstream &fileHandle);
   template <typename dataType>
     void saveData(const std::vector<std::vector<dataType> > data, std::ofstream &fileHandle);
-  votingModel(int n, int k, long int maxIter, int collectionInterval, double a, double avgDeg, double *initDist, std::string rewireTo, std::string fileName);
+  votingModel(const int n, const double avgDeg, const int k, const double *initDist, const double a, const std::string rewireTo);
+  votingModel(int n, int k, long int maxIter, int collectionInterval, double a, double avgDeg, const double *initDist, std::string rewireTo, std::string fileName);
 
   int get_id() {
     return id;

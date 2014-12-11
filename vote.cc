@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
   long int maxIter = 5*n*n;
   double a = 0.5;
   int k = 2;
-  double *initDist = new double[2];
+  double *initDist = new double[k];
   int nVMS = 4;
   double projectionStep = n;
   int save_interval = 1000;
@@ -25,6 +25,9 @@ int main(int argc, char *argv[]) {
   initDist[1] = 0.5;
   int nruns = 64;
   int waitingPeriod = 100;
+  bool alpha_range = false;
+  bool init_range = false;
+  bool alter = false;
   //loop through all arguments, assign variables as needed
   for(i = 1; i < argc; i++) {
     if(argv[i][0] == '-') {
@@ -38,6 +41,7 @@ int main(int argc, char *argv[]) {
       }
       else if(currentLabel == "-collectionInterval" || currentLabel == "-ci" || currentLabel == "-colliter") {
 	collectionInterval = atoi(currentArg);
+	cout << "collection interval: " << collectionInterval << endl;
       }
       else if(currentLabel == "-a" || currentLabel == "-alpha") {
 	a = atof(currentArg);
@@ -80,6 +84,19 @@ int main(int argc, char *argv[]) {
 	project = true;
 	waitingPeriod = atoi(currentArg);
       }
+      else if(currentLabel == "-nruns") {
+	project = false;
+	nruns = atoi(currentArg);
+      }
+      else if(currentLabel == "-arange" || currentLabel == "-alpharange") {
+	alpha_range = true;
+      }
+      else if(currentLabel == "-irange" || currentLabel == "-initrange") {
+	init_range = true;
+      }
+      else if(currentLabel == "-alter") {
+	alter = true;
+      }
       else {
 	cout << currentLabel << " -- flag not recognized" << endl;
       }
@@ -116,20 +133,85 @@ int main(int argc, char *argv[]) {
       vmV.push_back(votingModel(n, k, maxIter, collectionInterval, a, avgDeg, initDist, rewireTo, ""));
     }
     votingModelCPI *cpi = new votingModelCPI(vmV, waitingPeriod, collectionInterval, nMS, file_header, file_name);
+    //TEST
+
+
+    vector< vector<double> > testdata(1);
+    cpi->easy_average<double>(testdata);
+
+
+    //ENDTEST
     cpi->run(maxIter, projectionStep, save_interval);
     delete cpi;
   }
   else {
     for(i = 0; i < nruns; i++) {
-      ss.str("");
-      ss << "single_runs/graphstats_n_" << n;
-      ss << "_alpha_" << a;
-      ss << "_nsteps_" << maxIter;
-      ss << "_rewireto_" << rewireTo;
-      ss << "_" << i;
-      file_name = ss.str();
-      votingModel vm(n, k, maxIter, collectionInterval, a, avgDeg, initDist, rewireTo, file_name);
-      vm.vote();
+      if(alpha_range) {
+	  if(init_range) {
+	    // range through both alpha and init fracs
+	    for(double alpha = 0.05; alpha < 1; alpha+=0.1) {
+	      for(double initfrac = 0.05; initfrac < 1; initfrac+=0.1) {
+		ss.str("");
+		ss << "single_runs/graphstats_n_" << n;
+		ss << "_alpha_" << alpha;
+		ss << "_nsteps_" << maxIter;
+		ss << "_initfrac_" << initfrac;
+		ss << "_rewireto_" << rewireTo;
+		ss << "_" << i;
+		file_name = ss.str();
+		double initdist[2] = {initfrac, 1-initfrac};
+		votingModel vm(n, k, maxIter, collectionInterval, alpha, avgDeg, initdist, rewireTo, file_name);
+		vm.vote(alter);
+	      }		
+	    }
+	  }
+	  else {
+	    // range through alpha
+	    for(double alpha = 0.05; alpha < 1; alpha+=0.1) {
+		ss.str("");
+		ss << "single_runs/graphstats_n_" << n;
+		ss << "_alpha_" << alpha;
+		ss << "_nsteps_" << maxIter;
+		ss << "_initfrac_" << initDist[0];
+		ss << "_rewireto_" << rewireTo;
+		ss << "_" << i;
+		file_name = ss.str();
+		votingModel vm(n, k, maxIter, collectionInterval, alpha, avgDeg, initDist, rewireTo, file_name);
+		vm.vote(alter);
+	    }
+	  }
+      }
+      else {
+	// range through init fracs
+	if(init_range) {
+	      for(double initfrac = 0.05; initfrac < 1; initfrac+=0.1) {
+		ss.str("");
+		ss << "single_runs/graphstats_n_" << n;
+		ss << "_alpha_" << a;
+		ss << "_nsteps_" << maxIter;
+		ss << "_initfrac_" << initfrac;
+		ss << "_rewireto_" << rewireTo;
+		ss << "_" << i;
+		file_name = ss.str();
+		double initdist[2] = {initfrac, 1-initfrac};
+		votingModel vm(n, k, maxIter, collectionInterval, a, avgDeg, initdist, rewireTo, file_name);
+		vm.vote(alter);
+	      }		
+	}
+	// don't range through any vars
+	else {
+	  ss.str("");
+	  ss << "single_runs/graphstats_n_" << n;
+	  ss << "_alpha_" << a;
+	  ss << "_nsteps_" << maxIter;
+	  ss << "_initfrac_" << initDist[0];
+	  ss << "_rewireto_" << rewireTo;
+	  ss << "_" << i;
+	  file_name = ss.str();
+	  votingModel vm(n, k, maxIter, collectionInterval, a, avgDeg, initDist, rewireTo, file_name);
+	  vm.vote(alter);
+	}
+      }
     }
   }
   delete[] initDist;
