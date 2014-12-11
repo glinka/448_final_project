@@ -90,10 +90,10 @@ int votingModel::vote(bool alter) {
 
   initGraph();
 
-  string cherry_fn = "single_runs/cherry_conflicts.csv";
+  string dir = "./single_runs/normal_opns/";
   if(alter) {
     alter_opinions();
-    cherry_fn = "single_runs/altered_opn/cherry_conflicts.csv";
+    dir = "./single_runs/altered_opns/";
   }
 
   while(iters < maxIter && conflicts > 0) {
@@ -123,11 +123,11 @@ int votingModel::vote(bool alter) {
   cherry_conflicts.resize(saveindex);
 
   //output data into csv files
-  ofstream cherry_conflicts_out(cherry_fn);
+  ofstream cherry_conflicts_out(dir + "cherry_conflicts.csv");
   saveData(cherry_conflicts, cherry_conflicts_out);
 
   ofstream graphStats;
-  graphStats.open(fileName);
+  graphStats.open(dir + "graphstats.csv");
   graphStats << setiosflags(ios::left) << setiosflags(ios::fixed);
   graphStats << "n=" << n << ",";
   graphStats << "avgDeg=" << avgDeg << ",";

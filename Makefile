@@ -5,7 +5,7 @@ GE_OBJECTS=$(GE_SRCS:.cc=.o)
 
 CXX = g++
 
-CXXFLAGS = -g -Wall -std=c++0x -O3
+CXXFLAGS = -g -Wall -std=c++0x -O3 -I/home/alexander/local/eigen/
 
 all: graph_embedding vote
 
