@@ -202,8 +202,8 @@ int main(int argc, char *argv[]) {
 	  vector<bool> alters(2);
 	  alters[0] = true;
 	  alters[1] = false;
-	  for(int ii = 1; ii < 5; ii++) {
-	    for(int j = 0; j < 2; j++) {
+	  for(int ii = 4; ii < 5; ii++) {
+	    for(int j = 0; j < 1; j++) {
 	      initDist[0] = 0.1*ii;
 	      initDist[1] = 1 - initDist[0];
 	      votingModel vm(n, k, maxIter, collectionInterval, a, avgDeg, initDist, rewireTo, file_name);

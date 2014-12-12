@@ -37,14 +37,17 @@ int calcGraphProps::get_conflict_squares(int** A, const int* opns, const int* op
     indexed_opns[i].first = opns[i];
     indexed_opns[i].second = i;
   }
+  sort(indexed_opns.begin(), indexed_opns.end(), pair_sort_increasing);
 
   int conflict_squares = 0;
   for(int i = 0; i < opnCounts[0]; i++) {
+    int current_squares = 0;
     for(int j = i+1; j < opnCounts[0]; j++) {
       for(int k = opnCounts[0]; k < n; k++) {
-	conflict_squares += A[indexed_opns[i].second][indexed_opns[k].second]*A[indexed_opns[j].second][indexed_opns[k].second];
+	current_squares += A[indexed_opns[i].second][indexed_opns[k].second]*A[indexed_opns[j].second][indexed_opns[k].second];
       }
     }
+    conflict_squares += (current_squares)*(current_squares - 1)/2;
   }
   return conflict_squares;
 }

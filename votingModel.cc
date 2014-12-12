@@ -128,6 +128,7 @@ int votingModel::vote(bool alter, const string run_id) {
   stepTimeCourse.resize(saveindex);
   // triangles.resize(saveindex);
   cherry_conflicts.resize(saveindex);
+  square_conflicts.resize(saveindex);
 
   //output data into csv files
   ofstream cherry_conflicts_out(dir + "cherry_conflicts.csv");

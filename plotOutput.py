@@ -125,7 +125,7 @@ def plot_timecourse(adj_data, opns_data, time_data, ids_data, params, folder, sc
             final_ydata.append(ydata[key])
     final_ydata = np.array(final_ydata)
     if not ax:
-        fig = plt.figure()
+        fig = plt.figure(facecolor='w')
         ax = fig.add_subplot(111)
     if average:
         ax.plot(time_data, final_ydata)
@@ -162,7 +162,7 @@ def plot_conflicts(conflicts_data, time_data, ids_data, params, folder='', avera
             final_ydata.append(ydata[key])
     final_ydata = np.array(final_ydata)
     if not ax:
-        fig = plt.figure()
+        fig = plt.figure(facecolor='w')
         ax = fig.add_subplot(111)
     if average:
         # colors jumps in red
@@ -198,7 +198,7 @@ def plot_minorities(minorities_data, time_data, params, folder='', average=True,
     else:
         final_ydata = np.array(minorities_data)
     if not ax:
-        fig = plt.figure()
+        fig = plt.figure(facecolor='w')
         ax = fig.add_subplot(111)
     if average:
         # specifically designed to color jumps differently
@@ -284,7 +284,7 @@ def plot_single_conflicts(data, params, ax='', average=True):
     for i in range(nruns):
         runlengths.append(data[i][0].shape[0])
     if not ax:
-        fig = plt.figure()
+        fig = plt.figure(facecolor='w')
         ax = fig.add_subplot(111)
         textsize = 22
         plt.tick_params(axis='both', which='major', labelsize=18)
@@ -333,7 +333,7 @@ def plot_single_minorities(data, params, ax='', average=True):
     for i in range(nruns):
         runlengths.append(data[i][0].shape[0])
     if not ax:
-        fig = plt.figure()
+        fig = plt.figure(facecolor='w')
         ax = fig.add_subplot(111)
     ax.set_ylabel('Minorities', fontsize=textsize)
     ax.set_xlabel('Iterations', fontsize=textsize)
@@ -358,7 +358,7 @@ def plot_phase_portrait(data, params):
     # make into fractions instead of counts
     for run in data:
         run[:,1] = (1.0*run[:,1])/n
-    fig = plt.figure()
+    fig = plt.figure(facecolor='w')
     ax = fig.add_subplot(111)
     textsize = 36
     labelsize = 30
@@ -372,7 +372,7 @@ def plot_phase_portrait(data, params):
 
 def plot_cpi_phase_portrait(minorities, conflicts, params, avg=True, ax=None):
     if ax is None:
-        fig = plt.figure()
+        fig = plt.figure(facecolor='w')
         ax = fig.add_subplot(111)
     ax.set_xlabel('Minorities')
     ax.set_ylabel('Conflicts')
@@ -383,7 +383,7 @@ def plot_triangles(data, params):
     n = 1.0*params['n']
     triangles = data[:,3]
     minorities = data[:,1]/n
-    fig = plt.figure()
+    fig = plt.figure(facecolor='w')
     ax = fig.add_subplot(111)
     ax.scatter(minorities, triangles, lw=0, alpha=0.7)
     plt.show(fig)
@@ -393,7 +393,7 @@ def plot_simple_conflicts(data, params):
     triangles = data[:,3]
     conflicts = data[:,2]
     minorities = data[:,1]/n
-    fig = plt.figure()
+    fig = plt.figure(facecolor='w')
     ax = fig.add_subplot(111)
     ax.scatter(minorities, conflicts, lw=0, alpha=0.7)
     plt.show(fig)
@@ -431,7 +431,7 @@ def plot_for_anim(data, params, npts=None, thinning=1, filemarker=''):
     for run in data:
         run[:,1] = run[:,1]/n
     # set up figure for plotting
-    fig = plt.figure()
+    fig = plt.figure(facecolor='w')
     ax = fig.add_subplot(111)
     textsize = 20
     lablesize = 4
@@ -535,23 +535,24 @@ def vm_dmaps_embedding(eigvals, eigvects, params, t=0, plot_2d=True, plot_3d=Fal
                     plt.show(fig)
                     # plt.savefig("./figs/embeddings/dmaps/3d/" + output_filename + "eigvects_" + str(i+1) + str(j+1) + str(k+1) + ".png")
 
-def cherry_conflicts_phaseplot(minority_fracs, cherry_conflicts, params):
+def conflicts_phaseplot(minority_fracs, conflicts, params):
     n = float(params['n'])
-    fig = plt.figure()
+    fig = plt.figure(facecolor='w')
     ax = fig.add_subplot(111)
     ax.hold(True)
     ndatasets = len(minority_fracs)
-    print ndatasets
     cs = ['b', 'g', 'r', 'c', 'b', 'g', 'r', 'c']
     for i in range(ndatasets):
-        ax.plot(minority_fracs[i]/n, cherry_conflicts[i], c=cs[i])
+        ax.plot(minority_fracs[i]/n, conflicts[i], c=cs[i])
+        ax.set_xlabel('fraction opinion "a"')
+        ax.set_ylabel('conflict squares')
     plt.show()
 
 def plot_timecourses(minority_fracs, conflicts, cherry_conflicts, times, params):
     import matplotlib.gridspec as gs
 
     n = float(params['n'])
-    fig = plt.figure()
+    fig = plt.figure(facecolor='w')
     gspec = gs.GridSpec(3,1)
     ax_top = fig.add_subplot(gspec[0])
     ax_mid = fig.add_subplot(gspec[1])
@@ -578,12 +579,13 @@ if __name__=="__main__":
     parser.add_argument('-avg', '--average', action='store_true', default=False)
     parser.add_argument('--dmaps-embeddings', action='store_true', default=False)
     parser.add_argument('--cherries', action='store_true', default=False)
+    parser.add_argument('--squares', action='store_true', default=False)
     parser.add_argument('--timecourses', action='store_true', default=False)
     args = parser.parse_args()
     #should have one of each file: CPIAdj_... and CPIOpns_...
     #which will have the same header (and thus same params)
     graphdata = []
-    # fig = plt.figure()
+    # fig = plt.figure(facecolor='w')
     # myax = fig.add_subplot(111)
     # myax.hold(True)
     # textsize = 34
@@ -705,7 +707,18 @@ if __name__=="__main__":
             elif 'graphstats' in f:
                 graphdata, params = get_data(f, header_rows=1)
                 gds.append(graphdata[:,1])
-        cherry_conflicts_phaseplot(gds, ccs, params)
+        conflicts_phaseplot(gds, ccs, params)
+    if args.squares:
+        ccs = []
+        gds = []
+        for f in args.input_files:
+            if 'square' in f:
+                cherry_conflicts, g = get_data(f, header_rows=0)
+                ccs.append(cherry_conflicts)
+            elif 'graphstats' in f:
+                graphdata, params = get_data(f, header_rows=1)
+                gds.append(graphdata[:,1])
+        conflicts_phaseplot(gds, ccs, params)
     if args.timecourses:
         for f in args.input_files:
             if 'cherry' in f:
