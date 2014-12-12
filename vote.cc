@@ -161,7 +161,7 @@ int main(int argc, char *argv[]) {
 		file_name = ss.str();
 		double initdist[2] = {initfrac, 1-initfrac};
 		votingModel vm(n, k, maxIter, collectionInterval, alpha, avgDeg, initdist, rewireTo, file_name);
-		vm.vote(alter);
+		vm.vote(alter, "");
 	      }		
 	    }
 	  }
@@ -177,7 +177,7 @@ int main(int argc, char *argv[]) {
 		ss << "_" << i;
 		file_name = ss.str();
 		votingModel vm(n, k, maxIter, collectionInterval, alpha, avgDeg, initDist, rewireTo, file_name);
-		vm.vote(alter);
+		vm.vote(alter, "");
 	    }
 	  }
       }
@@ -195,8 +195,24 @@ int main(int argc, char *argv[]) {
 		file_name = ss.str();
 		double initdist[2] = {initfrac, 1-initfrac};
 		votingModel vm(n, k, maxIter, collectionInterval, a, avgDeg, initdist, rewireTo, file_name);
-		vm.vote(alter);
+		vm.vote(alter, "");
 	      }		
+	}
+	else if(alter) {
+	  vector<bool> alters(2);
+	  alters[0] = true;
+	  alters[1] = false;
+	  for(int ii = 1; ii < 5; ii++) {
+	    for(int j = 0; j < 2; j++) {
+	      initDist[0] = 0.1*ii;
+	      initDist[1] = 1 - initDist[0];
+	      votingModel vm(n, k, maxIter, collectionInterval, a, avgDeg, initDist, rewireTo, file_name);
+	      ss.str("");
+	      ss << ii;
+	      // cout << id << endl;
+	      vm.vote(alters[j], ss.str());
+	    }
+	  }
 	}
 	// don't range through any vars
 	else {
@@ -209,7 +225,7 @@ int main(int argc, char *argv[]) {
 	  ss << "_" << i;
 	  file_name = ss.str();
 	  votingModel vm(n, k, maxIter, collectionInterval, a, avgDeg, initDist, rewireTo, file_name);
-	  vm.vote(alter);
+	  vm.vote(alter, "");
 	}
       }
     }

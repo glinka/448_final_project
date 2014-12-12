@@ -27,7 +27,7 @@ class votingModel {
   void alter_opinions();
  public:
   int consistencyCheck();
-  int vote(bool alter);
+  int vote(bool alter, const std::string run_id);
   std::vector< std::vector<int> > run_nsteps(const int nsteps, bool& converged);
   void step();
   void initGraph();

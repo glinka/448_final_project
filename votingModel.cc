@@ -18,7 +18,7 @@ int votingModel::id_tracker = 0;
 votingModel::votingModel(int n, int k, long int maxIter, int collectionInterval, double a, double avgDeg, const double *initDist, string rewireTo, string fileName):ROUND_CONST(0.01), n(n), k(k), collectionInterval(collectionInterval), maxIter(maxIter), a(a), avgDeg(avgDeg), id(id_tracker), initDist(initDist), degs(NULL), Opns(NULL), A(NULL), rewireTo(rewireTo), fileName(fileName) {
   unsigned seed = chrono::system_clock::now().time_since_epoch().count();
   mt = new mt19937(seed);
-  rnNormalization = (double) (mt->max()+1);
+  rnNormalization = 1.0*(mt->max()) + 1;
   degs = new int[n];
   Opns = new int[n];
   nConflicts = new int[n];
@@ -34,8 +34,7 @@ votingModel::votingModel(const int n, const double avgDeg, const int k, const do
 
   unsigned seed = chrono::system_clock::now().time_since_epoch().count();
   mt = new mt19937(seed);
-  rnNormalization = (double) (mt->max()+1);
-
+  rnNormalization = 1.0*(mt->max()) + 1;
   degs = new int[n];
   Opns = new int[n];
   nConflicts = new int[n];
@@ -54,7 +53,7 @@ double votingModel::genURN() {
   return (*mt)()/rnNormalization;
 }
 
-int votingModel::vote(bool alter) {
+int votingModel::vote(bool alter, const string run_id) {
   /* 
      n: number of vertices
      k: number of opinions
@@ -72,10 +71,23 @@ int votingModel::vote(bool alter) {
   for(i = 0; i < k; i++) {
     sum += initDist[i];
   }
-  if(sum != 1) {
-    cerr << "sum(u) != 1, improper initial distribution" << "\n";
-    return 1;
+  cout << "init dist sum is: " << sum << endl;
+  // if(sum != 1) {
+  //   cerr << "sum(u) != 1, improper initial distribution" << "\n";
+  //   return 1;
+  // }
+
+
+  
+
+  initGraph();
+
+  string dir = "./single_runs/normal_opns/" + run_id;
+  if(alter) {
+    alter_opinions();
+    dir = "./single_runs/altered_opns/" + run_id;
   }
+
   //init graph and uniform random number generator (mersenne twister)
   int nsaves = maxIter/collectionInterval+1;
   int saveindex = 0;
@@ -84,27 +96,22 @@ int votingModel::vote(bool alter) {
   vector<int> stepTimeCourse(nsaves);
   vector<int> triangles(nsaves);
   vector<int> cherry_conflicts(nsaves);
+  vector<int> square_conflicts(nsaves);
   
   long int iters = 0;
 
 
-  initGraph();
-
-  string dir = "./single_runs/normal_opns/";
-  if(alter) {
-    alter_opinions();
-    dir = "./single_runs/altered_opns/";
-  }
-
   while(iters < maxIter && conflicts > 0) {
     step();
     if((iters % collectionInterval == 0) || (conflicts==0)) {
+      cout << iters << endl;
       int minorityOpn = opnCounts[0];//<opnCounts[1]?opnCounts[0]:opnCounts[1];
       minorityOpnTimeCourse[saveindex] = minorityOpn;
       n10TimeCourse[saveindex] = conflicts;
       stepTimeCourse[saveindex] = iters+1;
       // triangles[saveindex] = calcGraphProps::getTriangles(A, Opns, n);
       cherry_conflicts[saveindex] = calcGraphProps::get_conflict_cherries(nConflicts, conflicts, n);
+      square_conflicts[saveindex] = calcGraphProps::get_conflict_squares(A, Opns, opnCounts, n);
       saveindex++;
       // minorityOpnTimeCourse.push_back(minorityOpn);
       // n10TimeCourse.push_back(conflicts);
@@ -126,6 +133,9 @@ int votingModel::vote(bool alter) {
   ofstream cherry_conflicts_out(dir + "cherry_conflicts.csv");
   saveData(cherry_conflicts, cherry_conflicts_out);
 
+  ofstream square_conflicts_out(dir + "square_conflicts.csv");
+  saveData(square_conflicts, square_conflicts_out);
+
   ofstream graphStats;
   graphStats.open(dir + "graphstats.csv");
   graphStats << setiosflags(ios::left) << setiosflags(ios::fixed);
@@ -141,43 +151,44 @@ int votingModel::vote(bool alter) {
   saveData(data, graphStats);
   graphStats.close();
 
-  stringstream ss;
-  ss << "single_runs/bifData_" << rewireTo << "_" << n << "_" << avgDeg << ".csv";
-  string bifTitle = ss.str();
-  ofstream bifData;
-  bifData.open(bifTitle, ios::app);
-  vector<double> rowData;
-  rowData.push_back(a);
-  rowData.push_back(opnCounts[0]<opnCounts[1]?(1.0*opnCounts[0]/n):(1.0*opnCounts[1]/n));
-  if(conflicts != 0) {
-    rowData.push_back(1);
-  }
-  else {
-    rowData.push_back(0);
-  }
-  rowData.push_back(initDist[0]);
-  data.clear();
-  for(i = 0; i < rowData.size(); i++) {
-    data.push_back(v);
-    data[i].push_back(rowData[i]);
-  }
-  saveData(data, bifData);
-  bifData.close();
+  // this
+  // stringstream ss;
+  // ss << "single_runs/bifData_" << rewireTo << "_" << n << "_" << avgDeg << ".csv";
+  // string bifTitle = ss.str();
+  // ofstream bifData;
+  // bifData.open(bifTitle, ios::app);
+  // vector<double> rowData;
+  // rowData.push_back(a);
+  // rowData.push_back(opnCounts[0]<opnCounts[1]?(1.0*opnCounts[0]/n):(1.0*opnCounts[1]/n));
+  // if(conflicts != 0) {
+  //   rowData.push_back(1);
+  // }
+  // else {
+  //   rowData.push_back(0);
+  // }
+  // rowData.push_back(initDist[0]);
+  // data.clear();
+  // for(i = 0; i < rowData.size(); i++) {
+  //   data.push_back(v);
+  //   data[i].push_back(rowData[i]);
+  // }
+  // saveData(data, bifData);
+  // bifData.close();
 
-  ss.str("");
-  ss << "single_runs/convergenceData_" << a << "_" << n << "_" << initDist[0] << ".csv";
-  string cnvTitle = ss.str();
-  ofstream convData;
-  convData.open(cnvTitle, ios::app);
-  rowData.clear();
-  rowData.push_back(iters);
-  data.clear();
-  for(i = 0; i < rowData.size(); i++) {
-    data.push_back(v);
-    data[i].push_back(rowData[i]);
-  }
-  saveData(data, convData);
-  convData.close();
+  // ss.str("");
+  // ss << "single_runs/convergenceData_" << a << "_" << n << "_" << initDist[0] << ".csv";
+  // string cnvTitle = ss.str();
+  // ofstream convData;
+  // convData.open(cnvTitle, ios::app);
+  // rowData.clear();
+  // rowData.push_back(iters);
+  // data.clear();
+  // for(i = 0; i < rowData.size(); i++) {
+  //   data.push_back(v);
+  //   data[i].push_back(rowData[i]);
+  // }
+  // saveData(data, convData);
+  // convData.close();
   return 0;
 }
 
@@ -231,7 +242,7 @@ void votingModel::step() {
       /******************** FROM CONFLICTS ********************/
       //chose edge at random, then select a chosenVertex and a neighbor at random
       //desire chosenEdge in [1, conflicts] instead of [0, conflicts - 1] so add one
-      int chosenEdge = ((int) floor(2*conflicts*(genURN()))) + 1;
+    int chosenEdge = ((int) floor(2*conflicts*(genURN()))) + 1;
       int i = 0;
       int edgeCount = 0;
       while(edgeCount < chosenEdge) {
@@ -597,7 +608,7 @@ Rewire-to-same continues to choose vertex at random instead of edge
 **/
 //only to be used at the very start with defined initDist
 
-bool pair_sort_increasing(const pair<int, int>& p1, const pair<int, int>& p2) {
+bool pair_sort_decreasing(const pair<int, int>& p1, const pair<int, int>& p2) {
   return (p1.first > p2.first);
 }
 
@@ -607,8 +618,8 @@ void votingModel::alter_opinions() {
     indexed_degs[i].first = degs[i];
     indexed_degs[i].second = i;
   }
-  // sort in increasing order, assign largest degrees opinion (1)
-  sort(indexed_degs.begin(), indexed_degs.end(), pair_sort_increasing);
+  // sort in decreasing order, assign largest degrees opinion (1)
+  sort(indexed_degs.begin(), indexed_degs.end(), pair_sort_decreasing);
   for(int i = 0; i < opnCounts[0]; i++) {
     Opns[indexed_degs[i].second] = 1;
   }

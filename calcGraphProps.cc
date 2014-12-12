@@ -27,6 +27,29 @@ int calcGraphProps::getTriangles(int **A, int *opns, const int n) {
   return tris.trace()/6;
 }
 
+bool pair_sort_increasing(const pair<int, int>& p1, const pair<int, int>& p2) {
+  return (p1.first < p2.first);
+}
+
+int calcGraphProps::get_conflict_squares(int** A, const int* opns, const int* opnCounts, const int n) {
+  vector< pair<int, int> > indexed_opns(n);
+  for(int i = 0; i < n; i++) {
+    indexed_opns[i].first = opns[i];
+    indexed_opns[i].second = i;
+  }
+
+  int conflict_squares = 0;
+  for(int i = 0; i < opnCounts[0]; i++) {
+    for(int j = i+1; j < opnCounts[0]; j++) {
+      for(int k = opnCounts[0]; k < n; k++) {
+	conflict_squares += A[indexed_opns[i].second][indexed_opns[k].second]*A[indexed_opns[j].second][indexed_opns[k].second];
+      }
+    }
+  }
+  return conflict_squares;
+}
+
+
 int calcGraphProps::get_conflict_cherries(const int* conflicts, const int total_conflicts, const int n) {
   int c_squared_sum = 0;
   for(int i = 0; i < n; i++) {

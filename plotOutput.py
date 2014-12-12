@@ -542,7 +542,7 @@ def cherry_conflicts_phaseplot(minority_fracs, cherry_conflicts, params):
     ax.hold(True)
     ndatasets = len(minority_fracs)
     print ndatasets
-    cs = ['b', 'g', 'r', 'c']
+    cs = ['b', 'g', 'r', 'c', 'b', 'g', 'r', 'c']
     for i in range(ndatasets):
         ax.plot(minority_fracs[i]/n, cherry_conflicts[i], c=cs[i])
     plt.show()
